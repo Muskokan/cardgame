@@ -607,6 +607,32 @@
                 transform: translateX(0);
             }
         }
+        
+        /* TOP LEFT CONTROLS */
+        #top-controls {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 200;
+        }
+
+        .btn-quit {
+            background: rgba(13, 17, 23, 0.8);
+            color: #8b949e;
+            border: 1px solid #30363d;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-quit:hover {
+            background: #4a1c1f;
+            color: #ff7b72;
+            border-color: #7a2b30;
+        }
+
         /* DIVERSIFY PICK overlay */
         #snatch-overlay {
             position: fixed;
@@ -782,102 +808,152 @@
         /* Responsive Layout - Mobile */
         @media screen and (max-width: 768px) {
             #opponents-row {
-                padding: 10px 5px 0;
+                padding: 40px 5px 0; /* Add top padding so it doesn't overlap the quit button */
                 gap: 8px;
                 min-height: auto;
                 flex-wrap: wrap; /* Wrap opponents if space is tight */
+                justify-content: center;
             }
 
             .opp-zone {
-                padding: 6px 8px;
-                gap: 4px;
+                padding: 4px 6px;
+                gap: 2px;
+                width: 45vw; /* Fixed relative width to fit 2 across usually */
+                max-width: 140px;
             }
 
             .card-back {
-                width: 48px;
-                height: 68px;
+                width: 10vw;
+                height: 14vw;
+                max-width: 48px;
+                max-height: 68px;
             }
 
             .mini-card {
-                height: 24px;
+                height: 20px;
                 padding: 0 4px;
                 font-size: 0.5rem;
             }
 
             #center-zone {
-                gap: 16px;
-                padding: 4px;
+                gap: 8px;
+                padding: 2px;
                 flex-wrap: wrap; /* Allow pot to break onto new line */
             }
 
             #deck-pile, #graveyard-pile, .gy-top {
-                width: 54px;
-                height: 76px;
+                width: 13vw;
+                height: 18vw;
+                max-width: 54px;
+                max-height: 76px;
+                font-size: 0.55rem;
             }
 
             #pot-zone {
-                min-width: 120px;
+                min-width: 50vw;
                 min-height: 80px;
                 padding: 4px;
             }
 
             .pot-card {
-                width: 60px;
-                height: 84px;
-                padding: 4px;
+                width: 14vw;
+                height: 19vw;
+                max-width: 60px;
+                max-height: 84px;
+                padding: 3px;
             }
 
             .pot-card-name {
                 font-size: 0.5rem;
-                margin-top: 10px;
+                margin-top: 6px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .pot-ability-name {
                 font-size: 0.45rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             #my-zone {
-                padding: 0 8px 8px;
+                padding: 0 4px 4px;
+            }
+
+            #hand-row {
+                gap: 4px;
+                padding: 8px 2px 2px;
+                overflow-x: auto; /* Let hand scroll if too many cards */
+                width: 100vw;
+                justify-content: flex-start;
             }
 
             .hand-card {
-                width: 70px;
-                height: 100px;
+                width: 18vw;
+                height: 25vw;
+                min-width: 65px;
+                min-height: 90px;
+                max-width: 88px;
+                max-height: 122px;
                 padding: 4px;
             }
 
             .card-name-top {
-                font-size: 0.5rem;
+                font-size: 0.55rem;
             }
 
             .ability-label {
                 font-size: 0.45rem;
+                padding: 1px 2px;
             }
 
             .ability-desc {
                 font-size: 0.45rem;
+                line-height: 1.1;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            
+            .ability-meta {
+                display: none; /* Hide targeting metadata on mobile to save space */
             }
 
             #action-bar {
                 padding: 4px 6px;
                 gap: 6px;
                 flex-wrap: wrap;
+                width: 95vw;
             }
 
             .btn {
-                padding: 5px 12px;
+                padding: 6px 10px;
                 font-size: 0.7rem;
+                flex: 1; /* Stretch buttons to fill bar */
             }
 
             #event-log {
-                width: 260px;
-                bottom: 80px;
+                width: 60vw;
+                bottom: 120px; /* Push above action bar */
                 left: 10px;
             }
 
             .log-item {
-                font-size: 0.75rem;
-                padding: 8px 10px;
+                font-size: 0.65rem;
+                padding: 6px 8px;
+            }
+            
+            #top-controls {
+                top: 8px;
+                left: 8px;
+            }
+            
+            #phase-banner {
+                font-size: 0.6rem;
+                padding: 2px 10px;
             }
         }
     </style>
@@ -887,6 +963,11 @@
 
     <!-- Phase banner -->
     <div id="phase-banner">LOADING...</div>
+
+    <!-- Top Left Controls -->
+    <div id="top-controls">
+        <button class="btn-quit" onclick="quitToMenu()">◀ Quit to Menu</button>
+    </div>
 
     <!-- SVG targeting arrows -->
     <svg id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
@@ -1562,6 +1643,15 @@
             t.textContent = msg;
             c.appendChild(t);
             setTimeout(() => t.remove(), dur);
+        }
+
+        function quitToMenu() {
+            if (confirm("Are you sure you want to quit the game? Your AI will automatically pass your turns.")) {
+                try {
+                    ws.close();
+                } catch (e) {}
+                window.location.href = '/static/index.html';
+            }
         }
     </script>
 </body>
