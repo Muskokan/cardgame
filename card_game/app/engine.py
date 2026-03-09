@@ -247,8 +247,8 @@ class GameState:
         if not msg:
             if event_type == "CARD_DRAWN":
                 msg = f"{data['player']} drew a card."
-            elif event_type == "CARD_CAUSEED":
-                msg = f"{data['player']} causeed {data['card']}."
+            elif event_type == "CARD_SEQUENCED":
+                msg = f"{data['player']} sequenced {data['card']}."
             elif event_type == "CARD_REACTED":
                 msg = f"{data['player']} reacted with {data['card']}."
             elif event_type == "REACTION_PASS":

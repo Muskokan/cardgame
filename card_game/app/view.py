@@ -49,7 +49,7 @@ class ConsoleView(GameView):
             self.log(data.get("message", "Game Started."))
         elif event_type == "CARD_DRAWN":
             self.log(f"  · {data['player']} drew a card.")
-        elif event_type == "CARD_CAUSEED":
+        elif event_type == "CARD_SEQUENCED":
             target = f" ⟶ {data['target']}" if data.get('target') else ""
             self.log(f"  ✦ {Colors.BOLD}{data['player']}{Colors.RESET} » {Colors.SKY_BLUE}{data['card']}{Colors.RESET}{target}")
         elif event_type == "CARD_REACTED":
@@ -427,8 +427,8 @@ class ConsoleView(GameView):
                 # Only log for the player if they are active? 
                 # For console simplicity, just log it.
                 print(f"{data['player']} drew a card. ({data['cards_left']} left)")
-            elif etype == "CARD_CAUSEED":
-                print(f"\n==> {data['player']} is causeing {data['card']} into their Sequence.")
+            elif etype == "CARD_SEQUENCED":
+                print(f"\n==> {data['player']} is sequencing {data['card']} into their Sequence.")
                 print(f"    Activating '{data['ability']}'!")
                 print(f"    Effect: {data['description']}")
             elif etype == "REACTION_PASS":
