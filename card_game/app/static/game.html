@@ -398,6 +398,11 @@
         }
 
         /* CARDS — back (opponents + deck) */
+        .card-back-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
         .card-back {
             width: 68px;
             height: 94px;
@@ -405,6 +410,26 @@
             border: 2px solid #30363d;
             background: url('/static/dog.png') center/cover #0d1f3a;
             flex-shrink: 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .hand-count-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #58a6ff;
+            color: #000;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            border: 2px solid #0d1117;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 5;
         }
 
         /* MINI CARDS — sequence */
@@ -1228,7 +1253,15 @@
                 }
 
                 const handCount = Array.isArray(p.hand) ? p.hand.length : (p.hand || 0);
-                const backs = Array.from({ length: handCount }, () => `<div class="card-back"></div>`).join('');
+                let backs = '';
+                if (handCount > 0) {
+                    backs = `
+                        <div class="card-back-container">
+                            <div class="card-back"></div>
+                            <div class="hand-count-badge">${handCount}</div>
+                        </div>
+                    `;
+                }
 
                 let causeHtml = '<div class="opp-sequence-row">';
                 p.sequence.forEach((card, sIdx) => {
@@ -1381,7 +1414,7 @@
             handRow.innerHTML = '';
             if (!Array.isArray(me.hand)) return;
 
-            const isCauseing = isMyTurn && phase === 'CAUSE_CARD_SELECTION';
+            const isSequencing = isMyTurn && phase === 'CAUSE_CARD_SELECTION';
             const isReacting = hasPriority && phase === 'REACTION_SELECTION';
             // Backend sends 'Entropy', 'Sever', 'Choice', or 'ENTROPY', 'SEVER'. Make it case-insensitive or check all.
             const reqs = pending?.requirements?.map(r => r.toUpperCase()) || [];
@@ -1393,7 +1426,7 @@
                 const el = document.createElement('div');
                 el.className = 'hand-card';
                 if (idx === selectedCardIdx) el.classList.add('selected');
-                if (isCauseing) el.classList.add('selectable-cause');
+                if (isSequencing) el.classList.add('selectable-cause');
                 if (isReacting) el.classList.add('selectable-react');
                 if (isEntropyCost || isEntropyResolving) el.classList.add('selectable-pitch');
 
