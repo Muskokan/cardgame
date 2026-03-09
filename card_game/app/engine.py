@@ -264,7 +264,7 @@ class GameState:
             self.event_history.append(msg)
             if event_type in ["EFFECT_RESULT", "CARD_COUNTERED", "ACTION_FIZZLED", "WIN_EMPTY_DECK"]:
                 self.turn_history.append(msg)
-            elif event_type in ["CARD_CAUSEED", "CARD_REACTED"]:
+            elif event_type in ["CARD_SEQUENCED", "CARD_REACTED"]:
                  # Also add card plays to recap
                  self.turn_history.append(f"{data['player']} played {data['card']}")
 

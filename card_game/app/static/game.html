@@ -1005,6 +1005,7 @@
     <!-- Top Left Controls -->
     <div id="top-controls">
         <button class="btn-quit" onclick="quitToMenu()">◀ Quit to Menu</button>
+        <span style="color: #8b949e; font-size: 0.7rem; margin-left: 10px;">v1.2.1</span>
     </div>
 
     <!-- SVG targeting arrows -->
@@ -1083,6 +1084,7 @@
     <div id="toast-container"></div>
 
     <script>
+        console.log("Cause & Effect UI v1.2.1 Loaded");
         const code = new URLSearchParams(location.search).get('code');
         const token = localStorage.getItem('cause_effect_token');
         if (!token) { location.href = '/'; }
