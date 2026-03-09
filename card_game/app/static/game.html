@@ -147,14 +147,9 @@
 
         /* PHASE BANNER */
         #phase-banner {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
             background: rgba(13, 17, 23, 0.92);
             border: 1px solid #30363d;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
+            border-radius: 6px;
             padding: 4px 20px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -162,6 +157,9 @@
             text-align: center;
             z-index: 20;
             white-space: nowrap;
+            margin: 0 auto 10px;
+            width: fit-content;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         #phase-banner.phase-stock {
@@ -527,14 +525,13 @@
             transform: translateY(-2px);
         }
 
-        .btn-stock {
-            background: #f0883e;
+        .btn-play {
+            background: #58a6ff;
             color: #000;
         }
 
-        .btn-react {
-            background: #58a6ff;
-            color: #000;
+        .btn-play.stocking {
+            background: #f0883e;
         }
 
         .btn-pass {
@@ -953,9 +950,9 @@
                 left: 8px;
             }
             
-            #phase-banner {
-                font-size: 0.6rem;
-                padding: 2px 10px;
+            #top-controls {
+                top: 8px;
+                left: 8px;
             }
         }
     </style>
@@ -963,15 +960,13 @@
 
 <body>
 
-    <!-- Phase banner -->
-    <div id="phase-banner">LOADING...</div>
-
     <!-- Top Left Controls -->
     <div id="top-controls">
         <button class="btn-quit" onclick="quitToMenu()">◀ Quit to Menu</button>
     </div>
 
     <!-- SVG targeting arrows -->
+    <!-- ... stays same ... -->
     <svg id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -986,7 +981,10 @@
         <div id="opponents-row"></div>
 
         <!-- Center zone -->
-        <div id="center-zone">
+        <div>
+            <!-- Phase banner moved here -->
+            <div id="phase-banner">LOADING...</div>
+            <div id="center-zone">
             <div id="deck-pile">
                 <div class="deck-count" id="deck-count">0</div>
             </div>
@@ -994,6 +992,7 @@
             <div id="graveyard-pile" title="Graveyard">
                 <div id="gy-top-card"></div>
                 <div class="gy-count" id="gy-count">0</div>
+            </div>
             </div>
         </div>
 
@@ -1007,8 +1006,7 @@
             <!-- Action buttons above hand -->
             <div id="action-bar">
                 <span id="action-label"></span>
-                <button class="btn btn-stock" id="stock-btn" disabled>STOCK</button>
-                <button class="btn btn-react" id="react-btn" disabled>REACT</button>
+                <button class="btn btn-play" id="play-btn" disabled>PLAY</button>
                 <button class="btn btn-pass" id="pass-btn" disabled>PASS</button>
                 <button class="btn btn-end" id="end-btn" disabled style="display:none;">START NEXT TURN</button>
             </div>
@@ -1412,8 +1410,7 @@
         /* ─── ACTION BAR ─── */
         function renderActionBar(phase, isMyTurn, hasPriority, me) {
             const label = document.getElementById('action-label');
-            const stockBtn = document.getElementById('stock-btn');
-            const reactBtn = document.getElementById('react-btn');
+            const playBtn = document.getElementById('play-btn');
             const passBtn = document.getElementById('pass-btn');
             const endBtn = document.getElementById('end-btn');
 
@@ -1446,25 +1443,37 @@
                 }
             }
 
-            stockBtn.disabled = !canStock;
-            reactBtn.disabled = !canReact;
+            }
+
+            playBtn.disabled = !(canStock || canReact);
             passBtn.disabled = !canPass;
-            stockBtn.style.display = '';
-            reactBtn.style.display = '';
+            
+            if (canStock) {
+                playBtn.classList.add('stocking');
+                playBtn.textContent = 'INVEST CARD';
+            } else {
+                playBtn.classList.remove('stocking');
+                playBtn.textContent = 'HEDGE CARD';
+            }
+            
+            playBtn.style.display = '';
             passBtn.style.display = '';
             endBtn.style.display = phase === 'REVIEW' && isMyTurn ? '' : 'none';
             endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
 
             if (phase === 'STOCK_CARD_SELECTION' && isMyTurn)
-                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'Select INVEST ↓' : 'Pick a card to invest');
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'INVEST ↓' : 'Pick a card to invest');
             else if (phase === 'REACTION_SELECTION' && hasPriority)
                 label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'HEDGE or PASS ↓' : 'Select a card to hedge, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
                 label.textContent = 'Turn complete —';
             else label.textContent = '';
 
-            stockBtn.onclick = () => { sendAction('STOCK', { card_index: selectedCardIdx }); selectedCardIdx = -1; };
-            reactBtn.onclick = () => { sendAction('REACT', { card_index: selectedCardIdx }); selectedCardIdx = -1; };
+            playBtn.onclick = () => {
+                if (canStock) sendAction('STOCK', { card_index: selectedCardIdx });
+                else if (canReact) sendAction('REACT', { card_index: selectedCardIdx });
+                selectedCardIdx = -1;
+            };
             passBtn.onclick = () => sendAction('PASS', {});
             endBtn.onclick = () => sendAction('END_TURN', {});
         }
