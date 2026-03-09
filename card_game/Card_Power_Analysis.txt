@@ -1,17 +1,120 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                    CAUSE & EFFECT — CARD POWER ANALYSIS                      ║
-║                        Generated: 2026-03-09 15:20:57                        ║
+║                        Generated: 2026-03-09 15:28:52                        ║
 ║                     Data Source: 1,000 Simulated Games                      ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-  Win Conditions — 4 Identical: 0 (0.0%), 1 of Each 5: 0 (0.0%)
+  Win Conditions — 4 Identical: 263 (26.3%), 1 of Each 5: 737 (73.7%)
 
 ── CARD POWER RANKINGS ───────────────────────────────────────────────────────────
 
   CARD                 TIER   WIN RATE     RESOLVES     RESOLVE SHARE
   ───────────────────────────────────────────────────────────────────
+  Stasis/Echo          S       74.3%      7,970    ██████░░░░ 14.0%
+  Assimilation/Erosion A       66.6%     13,331    ██████████ 23.4%
+  Vacuum/Pressure      A       61.5%     12,509    ██████████ 22.0%
+  Stagnation/Momentum  A       59.7%     12,055    ██████████ 21.2%
+  Reflection/Resonance A       57.7%     11,109    █████████░ 19.5%
+
+  TABLE NOTES
+  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─
+  Tier S (≥70% win rate): These cards appear in the winning player's sequence in 70%+ of games.
+  Tier A (50-69%): Strong contributors that are frequently part of winning strategies.
+  Tier B (30-49%): Situational or reactive cards that support but rarely carry a win alone.
+  Tier C (<30%): Either undertuned, highly reactive, or penalized by their own costs.
+
+── TARGETING META ────────────────────────────────────────────────────────────────
+
+  SOURCE               #1 TARGET          COUNT      %        FULL BREAKDOWN
+  ────────────────────────────────────────────────────────────────────────
 
 ── AI PLAYSTYLE PERFORMANCE ──────────────────────────────────────────────────────
 
   PLAYSTYLE        WINS       WIN RATE     VS FIELD
   ────────────────────────────────────────────────────
+  Aggressive          258       25.8%    ███████
+  Combo               256       25.6%    ███████
+  Defensive           246       24.6%    ███████
+  Ruthless            240       24.0%    ███████
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           INDIVIDUAL CARD REPORTS                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 STASIS/ECHO                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Echo | Effect: Stasis                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│───◆──────]   +2 / ±5   [OVERTUNED]
+  Win Rate: 74.3%  (avg: 48.7%  |  delta: +25.6%)
+  Resolves: 7970 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Statistically dominant in the current simulation meta.
+  ✔ Appears in 74.3% of winning sequences.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                             ASSIMILATION/EROSION                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Erosion | Effect: Assimilation                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 66.6%  (avg: 48.7%  |  delta: +17.9%)
+  Resolves: 13331 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Statistically dominant in the current simulation meta.
+  ✔ Appears in 66.6% of winning sequences.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                               VACUUM/PRESSURE                                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Pressure | Effect: Vacuum                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 61.5%  (avg: 48.7%  |  delta: +12.8%)
+  Resolves: 12509 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Statistically dominant in the current simulation meta.
+  ✔ Appears in 61.5% of winning sequences.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                             STAGNATION/MOMENTUM                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Momentum | Effect: Stagnation                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 59.7%  (avg: 48.7%  |  delta: +11.0%)
+  Resolves: 12055 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Consistently balanced performance across varied game states.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                             REFLECTION/RESONANCE                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Resonance | Effect: Reflection                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 57.7%  (avg: 48.7%  |  delta: +9.0%)
+  Resolves: 11109 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Consistently balanced performance across varied game states.
