@@ -343,6 +343,14 @@ class GameState:
                     self._set_phase(Phase.CAUSE_CARD_SELECTION)
                 return
 
+            if action_type == "SKIP_REACTIONS" and self.current_phase == Phase.REACTION_SELECTION:
+                self.log_event("NARRATIVE", {"message": f"{player.name} moved to Resolution Phase."})
+                self.reaction_passes = len(self.players)
+                self._set_phase(Phase.RESOLUTION)
+                self.resolve_stack()
+                self.check_win_condition(self.get_active_player())
+                return
+
             if action_type in ["SET_TARGETS", "PAY_COST", "SET_COST", "CHOOSE_COST_OPTION"]:
                 self.submit_pending_input(kwargs)
             return

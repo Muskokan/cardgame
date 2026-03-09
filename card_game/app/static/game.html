@@ -1060,6 +1060,7 @@
                 <button class="btn btn-play" id="play-btn" disabled>PLAY</button>
                 <button class="btn btn-pass" id="pass-btn" disabled>PASS</button>
                 <button class="btn btn-pass" id="cancel-btn" style="display:none;background:#442d2d;color:#ff7b72;border-color:#6e3636;">CANCEL</button>
+                <button class="btn btn-pass" id="skip-btn" style="display:none;background:#2d443e;color:#72ffcc;border-color:#366e5a;">MOVE TO RESOLUTION</button>
                 <button class="btn btn-end" id="end-btn" disabled style="display:none;">START NEXT TURN</button>
             </div>
             <div id="hand-row"></div>
@@ -1528,6 +1529,7 @@
             const playBtn = document.getElementById('play-btn');
             const passBtn = document.getElementById('pass-btn');
             const cancelBtn = document.getElementById('cancel-btn');
+            const skipBtn = document.getElementById('skip-btn');
             const endBtn = document.getElementById('end-btn');
 
             let canCause = isMyTurn && phase === 'CAUSE_CARD_SELECTION' && selectedCardIdx >= 0;
@@ -1581,6 +1583,11 @@
             cancelBtn.style.display = canCancel ? '' : 'none';
             cancelBtn.disabled = !canCancel;
             cancelBtn.onclick = () => sendAction('CANCEL', {});
+
+            const canSkip = phase === 'REACTION_SELECTION';
+            skipBtn.style.display = canSkip ? '' : 'none';
+            skipBtn.disabled = !canSkip;
+            skipBtn.onclick = () => sendAction('SKIP_REACTIONS', {});
             
             if (canCause) {
                 playBtn.classList.add('causing');
