@@ -114,6 +114,11 @@
           "type": "MOVE_CARD",
           "target": "chosen_target_card",
           "destination": "deck_top"
+        },
+        {
+          "type": "DRAW_CARDS",
+          "target": "SELF",
+          "count": 1
         }
       ]
     },

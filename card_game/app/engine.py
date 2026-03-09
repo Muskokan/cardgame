@@ -326,18 +326,21 @@ class GameState:
         active_p = self.get_active_player()
         if self.current_phase == Phase.TARGETING or self.current_phase == Phase.PAYING_COSTS:
             if action_type == "CANCEL":
-                self.log_event("ACTION_FIZZLED", {
-                    "player": player.name,
-                    "card": self.stack[-1].source_card.name if self.stack else "Action",
-                    "reason": "Cancelled by player"
-                })
-                if self.stack:
-                    action = self.stack.pop()
-                    if action.source_card in self.nexus:
-                        self.nexus.remove(action.source_card)
-                        self.graveyard.append(action.source_card)
+                pending = self.pending_action
+                if pending:
+                    card = pending.get("card")
+                    p_idx = pending.get("player_idx")
+                    if card and p_idx is not None:
+                        self.players[p_idx].hand.append(card)
+                        self.log_event("NARRATIVE", {"message": f"{player.name} cancelled playing {card.name}."})
+                
                 self.pending_action = None
-                self._set_phase(Phase.REVIEW)
+                self._set_phase(Phase.REVIEW if self.current_phase == Phase.TARGETING and not self.stack else Phase.REACTION_SELECTION)
+                # Actually, back to REACTION_SELECTION or CAUSE_CARD_SELECTION depending on who was active
+                if self.stack:
+                    self._set_phase(Phase.REACTION_SELECTION)
+                else:
+                    self._set_phase(Phase.CAUSE_CARD_SELECTION)
                 return
 
             if action_type in ["SET_TARGETS", "PAY_COST", "SET_COST", "CHOOSE_COST_OPTION"]:
@@ -386,33 +389,7 @@ class GameState:
                     self._commit_card_play(player, react_card, 'react')
                     
     def _commit_card_play(self, player: Player, card: Card, action_type: str):
-        # Put the card physically on the "Field/Nexus" while resolving
-        self.nexus.append(card)
-        
         action = Action(player, card, action_type)
-        
-        # Log to event history and store index
-        if action_type == 'sequence':
-            idx = self.log_event("CARD_SEQUENCED", {
-                "player": player.name, 
-                "card": card.name,
-                "ability": card.sequence_ability.name,
-                "description": card.sequence_ability.description
-            })
-        else:
-            idx = self.log_event("CARD_REACTED", {
-                "player": player.name, 
-                "card": card.name,
-                "ability": card.react_ability.name,
-                "description": card.react_ability.description
-            })
-        
-        action.history_idx = idx
-        action.recap_idx = len(self.turn_history) - 1
-        # Mark as in the Nexus ⚱
-        self.update_action_status(action, '⚡' if action_type == 'react' else '✦', '⚱')
-        self.stack.append(action)
-        
         ability = card.react_ability if action_type == 'react' else card.sequence_ability
         
         needs_cost = False
@@ -427,7 +404,7 @@ class GameState:
         needs_target = bool(ability.target_requirements)
         
         if needs_cost:
-            # CHECK AFFORDABILITY
+            # CHECK AFFORDABILITY (Immediate check, return to hand if impossible)
             can_pay = False
             if cost_tag.name == "Entropy":
                 can_pay = len(player.hand) >= 1
@@ -439,22 +416,15 @@ class GameState:
                 elif "Sever" in options and len(player.sequence) >= 1: can_pay = True
             
             if not can_pay:
-                print(f"DEBUG: Action fizzled - cannot afford {cost_tag.name}")
-                self.log_event("ACTION_FIZZLED", {
-                    "player": player.name,
-                    "card": card.name,
-                    "reason": f"Cannot afford cost ({cost_tag.name})"
-                })
-                self.nexus.remove(card)
-                self.graveyard.append(card)
-                self.stack.pop()
-                self._set_phase(Phase.REVIEW)
+                player.hand.append(card) # Return to hand
+                self.log_event("NARRATIVE", {"message": f"{player.name} cannot afford {card.name} ({cost_tag.name})."})
                 return
 
             self.pending_action = {
                 "type": "COST_SELECTION",
                 "player_idx": self.players.index(player),
-                "card_name": card.name,
+                "card": card,
+                "action": action,
                 "tag": cost_tag,
                 "needs_target_after": needs_target
             }
@@ -463,19 +433,22 @@ class GameState:
             self.pending_action = {
                 "type": "TARGET_SELECTION",
                 "player_idx": self.players.index(player),
-                "card_name": card.name,
+                "card": card,
+                "action": action,
                 "requirements": ability.target_requirements
             }
             self._set_phase(Phase.TARGETING)
         else:
-            self._finalize_action_placement(action_type == 'react')
+            self._finalize_action_placement(action)
 
     def submit_pending_input(self, data: Dict[str, Any]):
         """Dispatches pending input to the appropriate handler based on the current pending type."""
         pending = self.pending_action
         if not pending:
             return
-        action = self.stack[-1] if self.stack else None
+        
+        # Play-time actions are in pending; Resolution-time actions are on stack
+        action = pending.get("action") or (self.stack[-1] if self.stack else None)
         p_idx = pending.get("player_idx")
         if p_idx is None:
             p_idx = pending.get("source_player_idx")
@@ -540,13 +513,14 @@ class GameState:
             self.pending_action = {
                 "type": "TARGET_SELECTION",
                 "player_idx": self.players.index(player),
-                "card_name": action.source_card.name,
+                "card": action.source_card,
+                "action": action,
                 "requirements": ability.target_requirements,
             }
             self._set_phase(Phase.TARGETING)
         else:
             self.pending_action = None
-            self._finalize_action_placement(action.ability_type == 'react')
+            self._finalize_action_placement(action)
 
 
     def _handle_target_selection(self, data: Dict[str, Any], action):
@@ -605,9 +579,36 @@ class GameState:
             self.append_to_action_history(action, target_str)
 
         self.pending_action = None
-        self._finalize_action_placement(action.ability_type == 'react')
+        self._finalize_action_placement(action)
 
-    def _finalize_action_placement(self, is_react: bool):
+    def _finalize_action_placement(self, action: Action):
+        card = action.source_card
+        player = action.source_player
+        is_react = action.ability_type == 'react'
+        
+        self.nexus.append(card)
+        self.stack.append(action)
+        
+        # Log to event history and store index
+        if not is_react:
+            idx = self.log_event("CARD_SEQUENCED", {
+                "player": player.name, 
+                "card": card.name,
+                "ability": card.sequence_ability.name,
+                "description": card.sequence_ability.description
+            })
+        else:
+            idx = self.log_event("CARD_REACTED", {
+                "player": player.name, 
+                "card": card.name,
+                "ability": card.react_ability.name,
+                "description": card.react_ability.description
+            })
+        
+        action.history_idx = idx
+        action.recap_idx = len(self.turn_history) - 1
+        self.update_action_status(action, '⚡' if is_react else '✦', '⚱')
+
         if not is_react:
             self._set_phase(Phase.REACTION_SELECTION)
             self.reaction_passes = 0
