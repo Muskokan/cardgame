@@ -315,7 +315,8 @@ class GameState:
         if hasattr(action, 'recap_idx') and action.recap_idx is not None and 0 <= action.recap_idx < len(self.turn_history):
             self.turn_history[action.recap_idx] += formatted_suffix
 
-    def process_input(self, player: Player, action_type: str, **kwargs):
+    def process_input(self, player, action_type: str, **kwargs):
+        print(f"DEBUG RECV {player.name}: {action_type} phase={self.current_phase.name}")
         """
         The core State Machine router.
         """
