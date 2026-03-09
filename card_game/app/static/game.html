@@ -203,9 +203,17 @@
             flex-direction: column;
             padding: 6px;
             cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, opacity 0.3s;
             position: relative;
             flex-shrink: 0;
+            user-select: none;
+        }
+
+        .hand-card.unplayable {
+            opacity: 0.3;
+            filter: grayscale(80%);
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
         .hand-card:hover {
@@ -1378,6 +1386,31 @@
             }
         }
 
+        function checkAffordability(card, mode, me) {
+            const def = cardData;
+            if (!card || !def) return true;
+            
+            const reactDef = def[card.react_name] || {};
+            const causeDef = def[card.cause_name] || {};
+            const currentDef = mode === 'REACT' ? reactDef : causeDef;
+            const tags = currentDef.tags || [];
+            
+            const hasTag = (name) => tags.some(t => t === name || (t && t.name === name));
+            
+            const isSever = hasTag('Sever');
+            const isEntropy = hasTag('Entropy');
+            const isChoice = hasTag('Choice');
+            
+            if (isSever && me.sequence.length === 0) return false;
+            if (isEntropy && me.hand.length < 2) return false;
+            if (isChoice) {
+                const canSever = me.sequence.length > 0;
+                const canEntropy = me.hand.length >= 2;
+                if (!canSever && !canEntropy) return false;
+            }
+            return true;
+        }
+
         /* ─── MY ZONE ─── */
         function renderMyZone(gameState, me, myIdx, hasPriority, isMyTurn) {
             if (!me) { document.getElementById('my-zone').innerHTML = ''; return; }
@@ -1429,10 +1462,18 @@
             me.hand.forEach((card, idx) => {
                 const el = document.createElement('div');
                 el.className = 'hand-card';
+                const isSequencing = isMyTurn && phase === 'CAUSE_CARD_SELECTION';
+                const isReacting = hasPriority && phase === 'REACTION_SELECTION';
+                
+                let isUnplayable = false;
+                if (isSequencing) isUnplayable = !checkAffordability(card, 'CAUSE', me);
+                if (isReacting) isUnplayable = !checkAffordability(card, 'REACT', me);
+
                 if (idx === selectedCardIdx) el.classList.add('selected');
                 if (isSequencing) el.classList.add('selectable-cause');
                 if (isReacting) el.classList.add('selectable-react');
                 if (isEntropyCost || isEntropyResolving) el.classList.add('selectable-pitch');
+                if (isUnplayable) el.classList.add('unplayable');
 
                 const showCause = phase !== 'REACTION_SELECTION';
                 const showReact = phase !== 'CAUSE_CARD_SELECTION';
@@ -1469,7 +1510,9 @@
       </div>
     `;
 
-                if (isEntropyCost) {
+                if (isUnplayable) {
+                    el.onclick = null;
+                } else if (isEntropyCost) {
                     el.onclick = () => sendAction('SET_COST', { cost_type: 'Entropy', card_index: idx });
                 } else if (isEntropyResolving) {
                     el.onclick = () => sendAction('RESOLUTION_ENTROPY', { card_id: card.id });
