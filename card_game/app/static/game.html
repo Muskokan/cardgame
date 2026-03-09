@@ -1192,7 +1192,7 @@
             const me = myIdx >= 0 ? gameState.players[myIdx] : null;
             const isMyTurn = me && gameState.players[gameState.active_player_idx]?.external_id === token;
             const hasPriority = me && gameState.players[gameState.priority_player_idx]?.external_id === token;
-            if (state.current_phase !== 'RESOLUTION') console.log(`Rendering Phase: ${state.current_phase}, MyTurn: ${isMyTurn}, Priority: ${hasPriority}, Selected: ${selectedCardIdx}`);
+            if (gameState.current_phase !== 'RESOLUTION') console.log(`Rendering Phase: ${gameState.current_phase}, MyTurn: ${isMyTurn}, Priority: ${hasPriority}, Selected: ${selectedCardIdx}`);
             const phase = gameState.current_phase;
 
             renderPhaseBanner(phase, isMyTurn, hasPriority, gameState);
