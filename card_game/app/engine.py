@@ -608,19 +608,20 @@ class GameState:
         self._finalize_action_placement(action.ability_type == 'react')
 
     def _finalize_action_placement(self, is_react: bool):
-        """Called after an action is successfully placed (and costs/targets are handled)."""
-        self._set_phase(Phase.REACTION_SELECTION)
-        self.reaction_passes = 0
-        
         if not is_react:
-            # First card in a chain: priority goes to the player AFTER the active player.
+            self._set_phase(Phase.REACTION_SELECTION)
+            self.reaction_passes = 0
             self.priority_player_idx = (self.active_player_idx + 1) % len(self.players)
         else:
-            # Reacting to a card: priority shifts to the NEXT player relative to who just reacted.
+            self.reaction_passes += 1
             self.priority_player_idx = (self.priority_player_idx + 1) % len(self.players)
-        
-        # Win condition check (early bail-out if someone wins during resolution/placement?)
-        # Standard rules check win conditions after resolution, but we check here for sequence fills.
+            if self.reaction_passes >= len(self.players):
+                self._set_phase(Phase.RESOLUTION)
+                self.resolve_stack()
+                self.check_win_condition(self.get_active_player())
+            else:
+                self._set_phase(Phase.REACTION_SELECTION)
+                
         for i in range(len(self.players)):
             p_idx = (self.active_player_idx + i) % len(self.players)
             if self.check_win_condition(self.players[p_idx]):

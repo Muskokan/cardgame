@@ -316,7 +316,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                     stolen_action.target_card = tp_action.target_card
                     stolen_action.target_player = tp_action.target_player
                     stolen_action.copied_card_name = tp_action.copied_card_name
-                state.stack.append(stolen_action)
+                state.stack.insert(-1, stolen_action)
             elif tp.sequence:
                 target_to_steal = c if c in tp.sequence else random.choice(tp.sequence)
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stealing {target_to_steal.name} from {tp.name}."})
@@ -325,7 +325,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 action.source_player.sequence.append(target_to_steal)
                 state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {target_to_steal.name} now activates for {action.source_player.name}!"})
                 from models import Action as _ActCls
-                state.stack.append(_ActCls(action.source_player, target_to_steal, "sequence", triggered=True))
+                state.stack.insert(-1, _ActCls(action.source_player, target_to_steal, "sequence", triggered=True))
             else:
                 state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name}: {tp.name} has no cards to steal."})
 
