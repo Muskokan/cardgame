@@ -63,7 +63,7 @@ Abilities on the Stack resolve in **Last-In, First-Out (LIFO)** order. The *last
 ## 6. Card Index
 
 ### 1. Stagnation/Momentum
-- **Stagnation (React):** **[Entropy]** Counter target Sequence placement or Reaction on the Stack, then draw 1 card.
+- **Stagnation (React):** **[Sever]** Counter target Sequence placement or Reaction on the Stack, then draw 1 card.
 - **Momentum (Sequence):** Draw 1 card.
 
 ### 2. Vacuum/Pressure
@@ -79,5 +79,5 @@ Abilities on the Stack resolve in **Last-In, First-Out (LIFO)** order. The *last
 - **Echo (Sequence):** Put target Graveyard card into your hand.
 
 ### 5. Assimilation/Erosion
-- **Assimilation (React):** **[Sever]** Steal target opponent's Sequence card. Its Sequence ability triggers for you.
+- **Assimilation (React):** **[Entropy]** Steal target opponent's Sequence card. Its Sequence ability triggers for you.
 - **Erosion (Sequence):** Destroy target opponent's Sequence card.

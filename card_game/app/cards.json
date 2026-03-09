@@ -5,7 +5,7 @@
       "console_description": "Counter target Stack/Cause.",
       "tags": [
         "React",
-        "Entropy"
+        "Sever"
       ],
       "target_requirements": [
         "NEXUS_CARD"
@@ -138,7 +138,7 @@
       "console_description": "Steal & Trigger enemy card.",
       "tags": [
         "React",
-        "Sever"
+        "Entropy"
       ],
       "target_requirements": [
         "OPPONENT_CAUSE",
