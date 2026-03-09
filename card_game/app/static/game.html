@@ -1005,7 +1005,7 @@
     <!-- Top Left Controls -->
     <div id="top-controls">
         <button class="btn-quit" onclick="quitToMenu()">◀ Quit to Menu</button>
-        <span style="color: #8b949e; font-size: 0.7rem; margin-left: 10px;">v1.2.1</span>
+        <span style="color: #8b949e; font-size: 0.7rem; margin-left: 10px;">v1.2.2</span>
     </div>
 
     <!-- SVG targeting arrows -->
@@ -1084,7 +1084,7 @@
     <div id="toast-container"></div>
 
     <script>
-        console.log("Cause & Effect UI v1.2.1 Loaded");
+        console.log("Cause & Effect UI v1.2.2 Loading...");
         const code = new URLSearchParams(location.search).get('code');
         const token = localStorage.getItem('cause_effect_token');
         if (!token) { location.href = '/'; }
@@ -1109,6 +1109,7 @@
             if (data.type === 'STATE_UPDATE') {
                 const prev = gameState;
                 gameState = data.state;
+                console.log("STATE UPDATE:", gameState.current_phase, "MyTurn:", (gameState.active_player_idx === gameState.players.findIndex(p => p.external_id === token)));
                 handleStateUpdate(prev, gameState);
             } else if (data.type === 'PLAYER_DISCONNECTED') {
                 showToast(`⚠ ${data.player_name} disconnected`, 'toast-disconnect');
@@ -1191,6 +1192,7 @@
             const me = myIdx >= 0 ? gameState.players[myIdx] : null;
             const isMyTurn = me && gameState.players[gameState.active_player_idx]?.external_id === token;
             const hasPriority = me && gameState.players[gameState.priority_player_idx]?.external_id === token;
+            if (state.current_phase !== 'RESOLUTION') console.log(`Rendering Phase: ${state.current_phase}, MyTurn: ${isMyTurn}, Priority: ${hasPriority}, Selected: ${selectedCardIdx}`);
             const phase = gameState.current_phase;
 
             renderPhaseBanner(phase, isMyTurn, hasPriority, gameState);
@@ -1498,19 +1500,33 @@
                 if (selCard && def) {
                     const reactDef = def[selCard.react_name] || {};
                     const causeDef = def[selCard.cause_name] || {};
-                    const tags = canReact ? (reactDef.tags || []) : (causeDef.tags || []);
+                    const currentDef = canReact ? reactDef : causeDef;
+                    const tags = currentDef.tags || [];
+                    
                     const isSever = tags.includes('Sever');
                     const isEntropy = tags.includes('Entropy');
+                    const isChoice = tags.includes('Choice');
                     
                     if (isSever && me.sequence.length === 0) {
                         if (canReact) canReact = false;
                         if (canCause) canCause = false;
-                        cannotAffordReason = "Requires a Sequence card to Sever.";
+                        cannotAffordReason = "REQUIRES CARD IN SEQUENCE";
                     }
-                    if (isEntropy && me.hand.length < 2) { // Need 1 to play, 1 to discard
+                    if (isEntropy && me.hand.length < 2) { 
                         if (canReact) canReact = false;
                         if (canCause) canCause = false;
-                        cannotAffordReason = "Requires another card in hand to Entropy.";
+                        cannotAffordReason = "REQUIRES DISCARD (NEED 2+ CARDS)";
+                    }
+                    if (isChoice) {
+                        // Check if at least one option is payable
+                        // This is a simplification; ideally we'd parse the params
+                        const canSever = me.sequence.length > 0;
+                        const canEntropy = me.hand.length >= 2;
+                        if (!canSever && !canEntropy) {
+                            if (canReact) canReact = false;
+                            if (canCause) canCause = false;
+                            cannotAffordReason = "CANNOT AFFORD EITHER COST CHOICE";
+                        }
                     }
                 }
             }

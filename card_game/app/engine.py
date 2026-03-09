@@ -438,6 +438,7 @@ class GameState:
                 elif "Sever" in options and len(player.sequence) >= 1: can_pay = True
             
             if not can_pay:
+                print(f"DEBUG: Action fizzled - cannot afford {cost_tag.name}")
                 self.log_event("ACTION_FIZZLED", {
                     "player": player.name,
                     "card": card.name,
