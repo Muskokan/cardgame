@@ -1353,8 +1353,10 @@
 
             const isStocking = isMyTurn && phase === 'STOCK_CARD_SELECTION';
             const isReacting = hasPriority && phase === 'REACTION_SELECTION';
-            const isPitchCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
-                (pending.requirements?.includes('Pitch') || pending.requirements?.includes('EXTRA_PITCH'));
+            // Backend sends 'Pitch', 'Burn', 'Choice', or 'PITCH', 'BURN'. Make it case-insensitive or check all.
+            const reqs = pending?.requirements?.map(r => r.toUpperCase()) || [];
+            const isPitchCost = phase === 'PAYING_COSTS' && isMyTargetTurn && 
+                                (reqs.includes('PITCH') || reqs.includes('EXTRA_PITCH'));
             const isPitchResolving = pending?.type === 'RESOLUTION_PITCH' && isMyTargetTurn;
 
             me.hand.forEach((card, idx) => {
@@ -1413,9 +1415,34 @@
             const passBtn = document.getElementById('pass-btn');
             const endBtn = document.getElementById('end-btn');
 
-            const canStock = isMyTurn && phase === 'STOCK_CARD_SELECTION' && selectedCardIdx >= 0;
-            const canReact = hasPriority && phase === 'REACTION_SELECTION' && selectedCardIdx >= 0;
+            let canStock = isMyTurn && phase === 'STOCK_CARD_SELECTION' && selectedCardIdx >= 0;
+            let canReact = hasPriority && phase === 'REACTION_SELECTION' && selectedCardIdx >= 0;
             const canPass = hasPriority && phase === 'REACTION_SELECTION';
+            
+            // Check affordability
+            let cannotAffordReason = null;
+            if (canStock || canReact) {
+                const selCard = me.hand[selectedCardIdx];
+                const def = cardData;
+                if (selCard && def) {
+                    const reactDef = def[selCard.react_name] || {};
+                    const stockDef = def[selCard.stock_name] || {};
+                    const tags = canReact ? (reactDef.tags || []) : (stockDef.tags || []);
+                    const isBurn = tags.includes('Burn');
+                    const isPitch = tags.includes('Pitch');
+                    
+                    if (isBurn && me.stockpile.length === 0) {
+                        if (canReact) canReact = false;
+                        if (canStock) canStock = false;
+                        cannotAffordReason = "Requires a Stockpile card to Burn.";
+                    }
+                    if (isPitch && me.hand.length < 2) { // Need 1 to play, 1 to discard
+                        if (canReact) canReact = false;
+                        if (canStock) canStock = false;
+                        cannotAffordReason = "Requires another card in hand to Pitch.";
+                    }
+                }
+            }
 
             stockBtn.disabled = !canStock;
             reactBtn.disabled = !canReact;
@@ -1427,9 +1454,9 @@
             endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
 
             if (phase === 'STOCK_CARD_SELECTION' && isMyTurn)
-                label.textContent = selectedCardIdx >= 0 ? 'Select INVEST ↓' : 'Pick a card to invest';
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'Select INVEST ↓' : 'Pick a card to invest');
             else if (phase === 'REACTION_SELECTION' && hasPriority)
-                label.textContent = selectedCardIdx >= 0 ? 'HEDGE or PASS ↓' : 'Select a card to hedge, or pass';
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'HEDGE or PASS ↓' : 'Select a card to hedge, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
                 label.textContent = 'Turn complete —';
             else label.textContent = '';
