@@ -459,9 +459,13 @@ def bot_choose_targets(bot: Player, state: 'GameState') -> dict:
                 targets["target_card_index"] = 0
 
     if TargetRequirement.NEXUS_CARD in reqs:
-        # Target the last card in the nexus (often the one to counter)
-        if state.nexus:
-            targets["target_card_index"] = len(state.nexus) - 1
+        # Find the most recent card in the nexus that doesn't belong to us
+        for i in range(len(state.nexus) - 1, -1, -1):
+            cand_card = state.nexus[i]
+            owner_action = next((a for a in state.stack if a.source_card == cand_card), None)
+            if owner_action and owner_action.source_player != bot:
+                targets["target_card_index"] = i
+                break
 
     if TargetRequirement.GRAVEYARD in reqs:
         if state.graveyard:

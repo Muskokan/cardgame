@@ -514,7 +514,7 @@ class GameState:
             if 0 <= p_idx < len(player.hand):
                 pitched = player.hand.pop(p_idx)
                 self.graveyard.append(pitched)
-                self.log_event("NARRATIVE", {"message": f"  -> {player.name} pitched {pitched.name} as a cost."})
+                self.log_event("NARRATIVE", {"message": f"  -> {player.name} utilized {pitched.name} for Entropy."})
             else:
                 self.log_event("NARRATIVE", {"message": f"  -> {player.name} failed to find a card to pitch (Entropy)."})
 
@@ -529,11 +529,11 @@ class GameState:
             if cost_card:
                 player.sequence.remove(cost_card)
                 self.graveyard.append(cost_card)
-                self.log_event("NARRATIVE", {"message": f"  -> {player.name} burned {cost_card.name} as a cost."})
+                self.log_event("NARRATIVE", {"message": f"  -> {player.name} utilized {cost_card.name} for Sever."})
             elif player.sequence:  # Fallback: burn first card
                 cost_card = player.sequence.pop(0)
                 self.graveyard.append(cost_card)
-                self.log_event("NARRATIVE", {"message": f"  -> {player.name} burned {cost_card.name} as a cost."})
+                self.log_event("NARRATIVE", {"message": f"  -> {player.name} utilized {cost_card.name} for Sever."})
 
         if pending.get("needs_target_after"):
             ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.sequence_ability

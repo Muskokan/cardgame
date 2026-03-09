@@ -304,6 +304,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name}: no valid target found."})
                 continue
             if c in state.nexus:
+                tp_action = next((a for a in state.stack if a.source_card == c), None)
                 state.nexus.remove(c)
                 state.stack = [a for a in state.stack if a.source_card != c]
                 c.owner = action.source_player
@@ -311,7 +312,12 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stole {c.name} from {tp.name}'s Nexus!"})
                 state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {c.name} now activates for {action.source_player.name}!"})
                 from models import Action as _ActCls
-                state.stack.append(_ActCls(action.source_player, c, "sequence", triggered=True))
+                stolen_action = _ActCls(action.source_player, c, "sequence", triggered=True)
+                if tp_action:
+                    stolen_action.target_card = tp_action.target_card
+                    stolen_action.target_player = tp_action.target_player
+                    stolen_action.copied_card_name = tp_action.copied_card_name
+                state.stack.append(stolen_action)
             elif tp.sequence:
                 target_to_steal = c if c in tp.sequence else random.choice(tp.sequence)
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stealing {target_to_steal.name} from {tp.name}."})
