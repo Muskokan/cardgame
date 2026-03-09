@@ -162,7 +162,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
-        #phase-banner.phase-stock {
+        #phase-banner.phase-cause {
             color: #f0883e;
             border-color: #f0883e44;
         }
@@ -219,7 +219,7 @@
             transform: translateY(-10px);
         }
 
-        .hand-card.selectable-stock {
+        .hand-card.selectable-cause {
             border-color: #f0883e;
             box-shadow: 0 0 8px #f0883e55;
         }
@@ -242,7 +242,7 @@
             margin-bottom: 4px;
         }
 
-        .name-react, .name-stock {
+        .name-react, .name-cause {
             font-size: 0.55rem;
             font-weight: 700;
             padding: 1px 4px;
@@ -259,7 +259,7 @@
             border: 1px solid rgba(88, 166, 255, 0.3);
         }
 
-        .name-stock {
+        .name-cause {
             background: rgba(240, 136, 62, 0.15);
             color: #f0883e;
             border: 1px solid rgba(240, 136, 62, 0.3);
@@ -288,7 +288,7 @@
             color: #58a6ff;
         }
 
-        .ability-label.stock {
+        .ability-label.cause {
             background: #3a2800;
             color: #f0883e;
         }
@@ -329,7 +329,7 @@
             box-shadow: 0 0 12px #58a6ff66;
         }
 
-        .nexus-card.nexus-stock {
+        .nexus-card.nexus-cause {
             border-color: #f0883e;
             box-shadow: 0 0 12px #f0883e66;
         }
@@ -422,7 +422,7 @@
             transition: border-color 0.15s, box-shadow 0.15s;
         }
 
-        .mini-card.stock-mine {
+        .mini-card.cause-mine {
             border-color: #f0883e55;
         }
 
@@ -550,7 +550,7 @@
             color: #000;
         }
 
-        .btn-play.stocking {
+        .btn-play.causeing {
             background: #f0883e;
         }
 
@@ -915,7 +915,7 @@
                 padding: 4px;
             }
 
-            .name-react, .name-stock {
+            .name-react, .name-cause {
                 font-size: 0.5rem;
                 padding: 1px 2px;
             }
@@ -1017,7 +1017,7 @@
         <div id="my-zone">
             <div id="my-info">
                 <span id="my-name" style="font-weight:700;font-size:0.9rem;"></span>
-                <span id="my-stock-label" style="font-size:0.7rem;color:#8b949e;"></span>
+                <span id="my-cause-label" style="font-size:0.7rem;color:#8b949e;"></span>
             </div>
             <div id="my-sequence-row"></div>
             <!-- Action buttons above hand -->
@@ -1183,12 +1183,12 @@
         function renderPhaseBanner(phase, isMyTurn, hasPriority, state) {
             const b = document.getElementById('phase-banner');
             const labels = {
-                DRAW: '🃏 DRAW PHASE', STOCK_CARD_SELECTION: '✦ STOCK PHASE',
+                DRAW: '🃏 DRAW PHASE', CAUSE_CARD_SELECTION: '✦ CAUSE PHASE',
                 REACTION_SELECTION: '⚡ REACTION PHASE', TARGETING: '🎯 SELECT TARGET',
                 PAYING_COSTS: '💰 PAY COST', RESOLUTION: '⚙ RESOLVING', REVIEW: '✔ REVIEW', SETUP: '⏳ SETUP'
             };
             let cls = '';
-            if (phase === 'STOCK_CARD_SELECTION') cls = 'phase-stock';
+            if (phase === 'CAUSE_CARD_SELECTION') cls = 'phase-cause';
             else if (phase === 'REACTION_SELECTION') cls = 'phase-react';
             else if (phase === 'RESOLUTION') cls = 'phase-resolve';
             else if (phase === 'REVIEW') cls = 'phase-review';
@@ -1196,7 +1196,7 @@
             else if (phase === 'PAYING_COSTS') cls = 'phase-cost';
             b.className = cls;
             let txt = labels[phase] || phase;
-            if (phase === 'STOCK_CARD_SELECTION') txt += isMyTurn ? ' — YOUR TURN' : ` — ${state.players[state.active_player_idx]?.name}'s TURN`;
+            if (phase === 'CAUSE_CARD_SELECTION') txt += isMyTurn ? ' — YOUR TURN' : ` — ${state.players[state.active_player_idx]?.name}'s TURN`;
             if (phase === 'REACTION_SELECTION') txt += hasPriority ? ' — YOUR PRIORITY' : ` — ${state.players[state.priority_player_idx]?.name}'s PRIORITY`;
             b.textContent = txt;
         }
@@ -1229,23 +1229,24 @@
                 const handCount = Array.isArray(p.hand) ? p.hand.length : (p.hand || 0);
                 const backs = Array.from({ length: handCount }, () => `<div class="card-back"></div>`).join('');
 
-                let stockHtml = '<div class="opp-sequence-row">';
+                let causeHtml = '<div class="opp-sequence-row">';
                 p.sequence.forEach((card, sIdx) => {
-                    const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
-                        (pending.requirements?.includes('ANY_STOCK') ||
-                            (pending.requirements?.includes('OPPONENT_STOCK') && p.external_id !== token));
-                    stockHtml += `<div class="mini-card ${isStockTarget ? 'selectable-target' : ''}"
-        id="stock-${idx}-${sIdx}"
-        title="${card.name}"
-        onclick="event.stopPropagation();handleStockTarget(${idx},${sIdx},'${card.id}')"
+                    const isCauseTarget = phase === 'TARGETING' && isMyTargetTurn &&
+                        (pending.requirements?.includes('ANY_CAUSE') ||
+                            (pending.requirements?.includes('OPPONENT_CAUSE') && p.external_id !== token));
+                    const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
+                    causeHtml += `<div class="mini-card ${isCauseTarget ? 'selectable-target' : ''}"
+        id="cause-${idx}-${sIdx}"
+        title="${tooltipText}"
+        onclick="event.stopPropagation();handleCauseTarget(${idx},${sIdx},'${card.id}')"
       >${card.name.split('/')[1] || card.name}</div>`;
                 });
-                stockHtml += '</div>';
+                causeHtml += '</div>';
 
                 zone.innerHTML = `
       <div class="opp-name">${isPriority ? '⚡ ' : ''}${isActive ? '➡ ' : ''}${p.name}</div>
       <div class="opp-backs">${backs}</div>
-      ${stockHtml}
+      ${causeHtml}
     `;
                 row.appendChild(zone);
             });
@@ -1304,30 +1305,33 @@
                 state.nexus.forEach((card, idx) => {
                     const sa = state.stack?.find(a => a.source_card_name === card.name);
                     const isReact = sa?.ability_type === 'react';
-                    const isStock = sa?.ability_type === 'sequence';
+                    const isCause = sa?.ability_type === 'sequence';
                     const resolving = phase === 'RESOLUTION';
                     const nexusTargetable = phase === 'TARGETING' && isMyTargetTurn &&
                         pending.requirements?.includes('NEXUS_CARD');
 
+                    const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
+
                     const el = document.createElement('div');
                     el.className = 'nexus-card' +
-                        (isReact ? ' nexus-react' : isStock ? ' nexus-stock' : '') +
+                        (isReact ? ' nexus-react' : isCause ? ' nexus-cause' : '') +
                         (resolving ? ' resolving' : '') +
                         (nexusTargetable ? ' selectable-target' : '');
                     el.id = `nexus-card-${card.id}`;
+                    el.title = tooltipText;
                     if (nexusTargetable) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: idx, target_zone: 'nexus' });
 
-                    const abilityName = isReact ? card.react_name : (isStock ? card.stock_name : '');
+                    const abilityName = isReact ? card.react_name : (isCause ? card.cause_name : '');
                     
                     let pReactName = card.react_name || card.name.split('/')[0] || '';
-                    let pStockName = card.stock_name || card.name.split('/')[1] || '';
+                    let pCauseName = card.cause_name || card.name.split('/')[1] || '';
                     
                     el.innerHTML = `
         <span class="nexus-owner">${sa?.source_player_name || ''}</span>
-        <span class="nexus-type-icon">${isReact ? '⚡' : isStock ? '✦' : ''}</span>
+        <span class="nexus-type-icon">${isReact ? '⚡' : isCause ? '✦' : ''}</span>
         <div class="nexus-card-name">
             <div class="name-react">${pReactName}</div>
-            <div class="name-stock">${pStockName}</div>
+            <div class="name-cause">${pCauseName}</div>
         </div>
         ${abilityName ? `<div class="nexus-ability-name">${abilityName}</div>` : ''}
       `;
@@ -1346,8 +1350,8 @@
 
             document.getElementById('my-name').textContent =
                 (isMyTurn ? '➡ ' : '') + (hasPriority && phase === 'REACTION_SELECTION' ? '⚡ ' : '') + me.name;
-            document.getElementById('my-stock-label').textContent =
-                `Portfolio: ${me.sequence.length} | Capital: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
+            document.getElementById('my-cause-label').textContent =
+                `Momentum: ${me.sequence.length} | Nexus: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
 
             // My sequence
             const spRow = document.getElementById('my-sequence-row');
@@ -1357,16 +1361,17 @@
             me.sequence.forEach((card, sIdx) => {
                 const isSeverCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
                     (pending.requirements?.includes('Sever') || pending.requirements?.includes('REDACT_COST'));
-                const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
-                    (pending.requirements?.includes('ANY_STOCK') || pending.requirements?.includes('OWN_STOCK'));
+                const isCauseTarget = phase === 'TARGETING' && isMyTargetTurn &&
+                    (pending.requirements?.includes('ANY_CAUSE') || pending.requirements?.includes('OWN_CAUSE'));
+                const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
                 const el = document.createElement('div');
-                el.id = `stock-${card.id}`;
-                el.className = 'mini-card stock-mine' +
-                    (isSeverCost || isStockTarget ? ' selectable-target' : '');
+                el.id = `cause-${card.id}`;
+                el.className = 'mini-card cause-mine' +
+                    (isSeverCost || isCauseTarget ? ' selectable-target' : '');
                 el.textContent = card.name.split('/')[1] || card.name;
-                el.title = card.name;
+                el.title = tooltipText;
                 if (isSeverCost) el.onclick = () => sendAction('SET_COST', { cost_type: 'Sever', card_index: sIdx });
-                else if (isStockTarget) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: sIdx, target_zone: 'sequence', target_player_index: myIdx });
+                else if (isCauseTarget) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: sIdx, target_zone: 'sequence', target_player_index: myIdx });
                 spRow.appendChild(el);
             });
 
@@ -1375,7 +1380,7 @@
             handRow.innerHTML = '';
             if (!Array.isArray(me.hand)) return;
 
-            const isStocking = isMyTurn && phase === 'STOCK_CARD_SELECTION';
+            const isCauseing = isMyTurn && phase === 'CAUSE_CARD_SELECTION';
             const isReacting = hasPriority && phase === 'REACTION_SELECTION';
             // Backend sends 'Entropy', 'Sever', 'Choice', or 'ENTROPY', 'SEVER'. Make it case-insensitive or check all.
             const reqs = pending?.requirements?.map(r => r.toUpperCase()) || [];
@@ -1387,27 +1392,27 @@
                 const el = document.createElement('div');
                 el.className = 'hand-card';
                 if (idx === selectedCardIdx) el.classList.add('selected');
-                if (isStocking) el.classList.add('selectable-stock');
+                if (isCauseing) el.classList.add('selectable-cause');
                 if (isReacting) el.classList.add('selectable-react');
                 if (isEntropyCost || isEntropyResolving) el.classList.add('selectable-pitch');
 
-                const showStock = phase !== 'REACTION_SELECTION';
-                const showReact = phase !== 'STOCK_CARD_SELECTION';
+                const showCause = phase !== 'REACTION_SELECTION';
+                const showReact = phase !== 'CAUSE_CARD_SELECTION';
                 const def = cardData;
                 const reactDef = def[card.react_name] || {};
-                const stockDef = def[card.stock_name] || {};
+                const causeDef = def[card.cause_name] || {};
                 const reactCost = (reactDef.tags || []).filter(t => ['Entropy', 'Sever', 'Choice'].includes(t)).join(', ');
-                const stockCost = (stockDef.tags || []).filter(t => ['Entropy', 'Sever', 'Choice'].includes(t)).join(', ');
+                const causeCost = (causeDef.tags || []).filter(t => ['Entropy', 'Sever', 'Choice'].includes(t)).join(', ');
                 const reactTargets = (reactDef.target_requirements || []).join(', ');
-                const stockTargets = (stockDef.target_requirements || []).join(', ');
+                const causeTargets = (causeDef.target_requirements || []).join(', ');
 
                 let cReactName = card.react_name || card.name.split('/')[0] || '';
-                let cStockName = card.stock_name || card.name.split('/')[1] || '';
+                let cCauseName = card.cause_name || card.name.split('/')[1] || '';
 
                 el.innerHTML = `
       <div class="card-name-split">
         <div class="name-react">${cReactName}</div>
-        <div class="name-stock">${cStockName}</div>
+        <div class="name-cause">${cCauseName}</div>
       </div>
       <div class="card-ability-block">
         ${showReact ? `
@@ -1416,12 +1421,12 @@
           ${reactTargets ? `<div class="ability-meta">🎯 ${reactTargets}</div>` : ''}
           ${reactCost ? `<div class="ability-meta">💰 ${reactCost}</div>` : ''}
         `: ''}
-        ${showReact && showStock ? '<div class="card-divider"></div>' : ''}
-        ${showStock ? `
-          <span class="ability-label stock">CAUSE</span>
-          <div class="ability-desc">${card.stock_desc || ''}</div>
-          ${stockTargets ? `<div class="ability-meta">🎯 ${stockTargets}</div>` : ''}
-          ${stockCost ? `<div class="ability-meta">💰 ${stockCost}</div>` : ''}
+        ${showReact && showCause ? '<div class="card-divider"></div>' : ''}
+        ${showCause ? `
+          <span class="ability-label cause">CAUSE</span>
+          <div class="ability-desc">${card.cause_desc || ''}</div>
+          ${causeTargets ? `<div class="ability-meta">🎯 ${causeTargets}</div>` : ''}
+          ${causeCost ? `<div class="ability-meta">💰 ${causeCost}</div>` : ''}
         `: ''}
       </div>
     `;
@@ -1444,43 +1449,43 @@
             const passBtn = document.getElementById('pass-btn');
             const endBtn = document.getElementById('end-btn');
 
-            let canStock = isMyTurn && phase === 'STOCK_CARD_SELECTION' && selectedCardIdx >= 0;
+            let canCause = isMyTurn && phase === 'CAUSE_CARD_SELECTION' && selectedCardIdx >= 0;
             let canReact = hasPriority && phase === 'REACTION_SELECTION' && selectedCardIdx >= 0;
             const canPass = hasPriority && phase === 'REACTION_SELECTION';
             
             // Check affordability
             let cannotAffordReason = null;
-            if (canStock || canReact) {
+            if (canCause || canReact) {
                 const selCard = me.hand[selectedCardIdx];
                 const def = cardData;
                 if (selCard && def) {
                     const reactDef = def[selCard.react_name] || {};
-                    const stockDef = def[selCard.stock_name] || {};
-                    const tags = canReact ? (reactDef.tags || []) : (stockDef.tags || []);
+                    const causeDef = def[selCard.cause_name] || {};
+                    const tags = canReact ? (reactDef.tags || []) : (causeDef.tags || []);
                     const isSever = tags.includes('Sever');
                     const isEntropy = tags.includes('Entropy');
                     
                     if (isSever && me.sequence.length === 0) {
                         if (canReact) canReact = false;
-                        if (canStock) canStock = false;
+                        if (canCause) canCause = false;
                         cannotAffordReason = "Requires a Sequence card to Sever.";
                     }
                     if (isEntropy && me.hand.length < 2) { // Need 1 to play, 1 to discard
                         if (canReact) canReact = false;
-                        if (canStock) canStock = false;
+                        if (canCause) canCause = false;
                         cannotAffordReason = "Requires another card in hand to Entropy.";
                     }
                 }
             }
 
-            playBtn.disabled = !(canStock || canReact);
+            playBtn.disabled = !(canCause || canReact);
             passBtn.disabled = !canPass;
             
-            if (canStock) {
-                playBtn.classList.add('stocking');
+            if (canCause) {
+                playBtn.classList.add('causeing');
                 playBtn.textContent = 'CAUSE CARD';
             } else {
-                playBtn.classList.remove('stocking');
+                playBtn.classList.remove('causeing');
                 playBtn.textContent = 'EFFECT CARD';
             }
             
@@ -1489,16 +1494,16 @@
             endBtn.style.display = phase === 'REVIEW' && isMyTurn ? '' : 'none';
             endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
 
-            if (phase === 'STOCK_CARD_SELECTION' && isMyTurn)
+            if (phase === 'CAUSE_CARD_SELECTION' && isMyTurn)
                 label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'CAUSE ↓' : 'Pick a card to invest');
             else if (phase === 'REACTION_SELECTION' && hasPriority)
-                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'EFFECT or PASS ↓' : 'Select a card to hedge, or pass');
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'EFFECT or PASS ↓' : 'Select a card to effect, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
                 label.textContent = 'Turn complete —';
             else label.textContent = '';
 
             playBtn.onclick = () => {
-                if (canStock) sendAction('STOCK', { card_index: selectedCardIdx });
+                if (canCause) sendAction('CAUSE', { card_index: selectedCardIdx });
                 else if (canReact) sendAction('REACT', { card_index: selectedCardIdx });
                 selectedCardIdx = -1;
             };
@@ -1553,8 +1558,8 @@
         <span class="ability-label react">EFFECT</span>
         <div class="ability-desc">${card.react_desc || ''}</div>
         <div class="card-divider"></div>
-        <span class="ability-label stock">CAUSE</span>
-        <div class="ability-desc">${card.stock_desc || ''}</div>
+        <span class="ability-label cause">CAUSE</span>
+        <div class="ability-desc">${card.cause_desc || ''}</div>
       </div>
     `;
                 el.onclick = () => sendAction('SNATCH_PICK', { card_id: card.id });
@@ -1612,7 +1617,7 @@
             ws.send(JSON.stringify({ action: type, ...data }));
         }
 
-        function handleStockTarget(playerIdx, cardIdx, cardId) {
+        function handleCauseTarget(playerIdx, cardIdx, cardId) {
             if (!gameState) return;
             const phase = gameState.current_phase;
             const pending = gameState.pending_action;
@@ -1648,7 +1653,7 @@
                     targetEl = document.getElementById(`nexus-card-${action.target_card_id}`);
                     if (!targetEl) {
                         // Could be in a sequence
-                        targetEl = document.getElementById(`stock-${action.target_card_id}`);
+                        targetEl = document.getElementById(`cause-${action.target_card_id}`);
                     }
                     if (!targetEl) {
                         // Could be in graveyard
