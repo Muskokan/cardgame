@@ -1005,7 +1005,7 @@
     <!-- Top Left Controls -->
     <div id="top-controls">
         <button class="btn-quit" onclick="quitToMenu()">◀ Quit to Menu</button>
-        <span style="color: #8b949e; font-size: 0.7rem; margin-left: 10px;">v1.2.2</span>
+        <span style="color: #8b949e; font-size: 0.7rem; margin-left: 10px;">v1.2.3</span>
     </div>
 
     <!-- SVG targeting arrows -->
@@ -1109,7 +1109,7 @@
             if (data.type === 'STATE_UPDATE') {
                 const prev = gameState;
                 gameState = data.state;
-                console.log("STATE UPDATE:", gameState.current_phase, "MyTurn:", (gameState.active_player_idx === gameState.players.findIndex(p => p.external_id === token)));
+                console.log("STATE UPDATE [v1.2.3]:", gameState.current_phase, "MyTurn:", (gameState.active_player_idx === gameState.players.findIndex(p => p.external_id === token)));
                 handleStateUpdate(prev, gameState);
             } else if (data.type === 'PLAYER_DISCONNECTED') {
                 showToast(`⚠ ${data.player_name} disconnected`, 'toast-disconnect');
@@ -1120,10 +1120,10 @@
 
         function handleStateUpdate(prev, state) {
             // Queue resolution animations for new effect events
-            if (state.event_history) {
-                const newLen = state.event_history.length;
+            if (gameState.event_history) {
+                const newLen = gameState.event_history.length;
                 if (newLen > prevEventHistoryLen) {
-                    const newLines = state.event_history.slice(prevEventHistoryLen);
+                    const newLines = gameState.event_history.slice(prevEventHistoryLen);
                     newLines.forEach(line => {
                         const cleanLine = line.replace(/\u001b\[[0-9;]*m/g, '').trim();
                         if (cleanLine.startsWith('[SUCCESS]')) {
@@ -1210,7 +1210,7 @@
         }
 
         /* ─── PHASE BANNER ─── */
-        function renderPhaseBanner(phase, isMyTurn, hasPriority, state) {
+        function renderPhaseBanner(phase, isMyTurn, hasPriority, gameState) {
             const b = document.getElementById('phase-banner');
             const labels = {
                 DRAW: '🃏 DRAW PHASE', CAUSE_CARD_SELECTION: '✦ CAUSE PHASE',
@@ -1226,26 +1226,26 @@
             else if (phase === 'PAYING_COSTS') cls = 'phase-cost';
             b.className = cls;
             let txt = labels[phase] || phase;
-            if (phase === 'CAUSE_CARD_SELECTION') txt += isMyTurn ? ' — YOUR TURN' : ` — ${state.players[state.active_player_idx]?.name}'s TURN`;
-            if (phase === 'REACTION_SELECTION') txt += hasPriority ? ' — YOUR PRIORITY' : ` — ${state.players[state.priority_player_idx]?.name}'s PRIORITY`;
+            if (phase === 'CAUSE_CARD_SELECTION') txt += isMyTurn ? ' — YOUR TURN' : ` — ${gameState.players[gameState.active_player_idx]?.name}'s TURN`;
+            if (phase === 'REACTION_SELECTION') txt += hasPriority ? ' — YOUR PRIORITY' : ` — ${gameState.players[gameState.priority_player_idx]?.name}'s PRIORITY`;
             b.textContent = txt;
         }
 
         /* ─── OPPONENTS ─── */
-        function renderOpponents(state, myIdx, me) {
+        function renderOpponents(gameState, myIdx, me) {
             const row = document.getElementById('opponents-row');
             row.innerHTML = '';
-            const phase = state.current_phase;
-            const pending = state.pending_action;
-            const isMyTargetTurn = pending && me && state.players[pending.source_player_idx]?.external_id === token;
+            const phase = gameState.current_phase;
+            const pending = gameState.pending_action;
+            const isMyTargetTurn = pending && me && gameState.players[pending.source_player_idx]?.external_id === token;
 
-            state.players.forEach((p, idx) => {
+            gameState.players.forEach((p, idx) => {
                 if (idx === myIdx) return;
                 const zone = document.createElement('div');
                 zone.className = 'opp-zone';
                 zone.id = `opp-zone-${idx}`;
-                const isPriority = state.priority_player_idx === idx && phase === 'REACTION_SELECTION';
-                const isActive = state.active_player_idx === idx;
+                const isPriority = gameState.priority_player_idx === idx && phase === 'REACTION_SELECTION';
+                const isActive = gameState.active_player_idx === idx;
                 if (isPriority) zone.classList.add('priority');
                 else if (isActive) zone.classList.add('active-turn');
 
@@ -1291,34 +1291,34 @@
         }
 
         /* ─── CENTER: NEXUS / DECK / GRAVEYARD ─── */
-        function renderCenter(state, me, myIdx) {
+        function renderCenter(gameState, me, myIdx) {
             // Deck count
-            document.getElementById('deck-count').textContent = `${state.deck_count} cards`;
+            document.getElementById('deck-count').textContent = `${gameState.deck_count} cards`;
 
             // Graveyard top
             const gyEl = document.getElementById('gy-top-card');
             const gyCountEl = document.getElementById('gy-count');
-            gyCountEl.textContent = state.graveyard ? state.graveyard.length : 0;
+            gyCountEl.textContent = gameState.graveyard ? gameState.graveyard.length : 0;
 
-            if (state.graveyard && state.graveyard.length > 0) {
-                const top = state.graveyard[state.graveyard.length - 1];
-                const snatchPickIds = state.pending_action?.type === 'SNATCH_PICK'
-                    ? (state.pending_action.pitched_card_ids || []) : [];
-                const isMySP = state.pending_action?.type === 'SNATCH_PICK' &&
-                    state.players[state.pending_action.source_player_idx]?.external_id === token;
+            if (gameState.graveyard && gameState.graveyard.length > 0) {
+                const top = gameState.graveyard[gameState.graveyard.length - 1];
+                const snatchPickIds = gameState.pending_action?.type === 'SNATCH_PICK'
+                    ? (gameState.pending_action.pitched_card_ids || []) : [];
+                const isMySP = gameState.pending_action?.type === 'SNATCH_PICK' &&
+                    gameState.players[gameState.pending_action.source_player_idx]?.external_id === token;
                 // GY target?
-                const isMyTargetTurn = state.pending_action && me &&
-                    state.players[state.pending_action.player_idx ?? state.pending_action.source_player_idx]?.external_id === token;
-                const gyTargetable = state.current_phase === 'TARGETING' && isMyTargetTurn &&
-                    state.pending_action.requirements?.includes('GRAVEYARD');
+                const isMyTargetTurn = gameState.pending_action && me &&
+                    gameState.players[gameState.pending_action.player_idx ?? gameState.pending_action.source_player_idx]?.external_id === token;
+                const gyTargetable = gameState.current_phase === 'TARGETING' && isMyTargetTurn &&
+                    gameState.pending_action.requirements?.includes('GRAVEYARD');
                 const el = document.createElement('div');
                 el.className = 'gy-top' + (gyTargetable ? ' selectable-target' : '');
                 el.id = `gy-${top.id}`;
-                el.title = `Liquidated (${state.graveyard.length})`;
+                el.title = `Liquidated (${gameState.graveyard.length})`;
                 el.textContent = top.name;
                 if (gyTargetable) {
                     el.onclick = () => {
-                        populateGyOverlay(state);
+                        populateGyOverlay(gameState);
                         showGyOverlay();
                     };
                 }
@@ -1331,17 +1331,17 @@
             // Nexus
             const nexus = document.getElementById('nexus-zone');
             nexus.innerHTML = '';
-            const phase = state.current_phase;
-            const pending = state.pending_action;
+            const phase = gameState.current_phase;
+            const pending = gameState.pending_action;
             const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
             const isMyTargetTurn = pending && me &&
-                state.players[pendingIdx]?.external_id === token;
+                gameState.players[pendingIdx]?.external_id === token;
 
-            if (!state.nexus || state.nexus.length === 0) {
+            if (!gameState.nexus || gameState.nexus.length === 0) {
                 nexus.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">THE NEXUS</span>';
             } else {
-                state.nexus.forEach((card, idx) => {
-                    const sa = state.stack?.find(a => a.source_card_name === card.name);
+                gameState.nexus.forEach((card, idx) => {
+                    const sa = gameState.stack?.find(a => a.source_card_name === card.name);
                     const isReact = sa?.ability_type === 'react';
                     const isCause = sa?.ability_type === 'sequence';
                     const resolving = phase === 'RESOLUTION';
@@ -1379,10 +1379,10 @@
         }
 
         /* ─── MY ZONE ─── */
-        function renderMyZone(state, me, myIdx, hasPriority, isMyTurn) {
+        function renderMyZone(gameState, me, myIdx, hasPriority, isMyTurn) {
             if (!me) { document.getElementById('my-zone').innerHTML = ''; return; }
-            const phase = state.current_phase;
-            const pending = state.pending_action;
+            const phase = gameState.current_phase;
+            const pending = gameState.pending_action;
             const myZone = document.getElementById('my-zone');
             myZone.className = hasPriority && phase === 'REACTION_SELECTION' ? 'priority' : '';
 
@@ -1395,7 +1395,7 @@
             const spRow = document.getElementById('my-sequence-row');
             spRow.innerHTML = '';
             const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
-            const isMyTargetTurn = pending && state.players[pendingIdx]?.external_id === token;
+            const isMyTargetTurn = pending && gameState.players[pendingIdx]?.external_id === token;
             me.sequence.forEach((card, sIdx) => {
                 const isSeverCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
                     (pending.requirements?.includes('Sever') || pending.requirements?.includes('REDACT_COST'));
@@ -1534,7 +1534,7 @@
             playBtn.disabled = !(canCause || canReact);
             passBtn.disabled = !canPass;
             
-            const isMyPending = state.pending_action && state.players[state.pending_action.player_idx ?? state.pending_action.source_player_idx]?.external_id === token;
+            const isMyPending = gameState.pending_action && gameState.players[gameState.pending_action.player_idx ?? gameState.pending_action.source_player_idx]?.external_id === token;
             const canCancel = (phase === 'TARGETING' || phase === 'PAYING_COSTS') && isMyPending;
             cancelBtn.style.display = canCancel ? '' : 'none';
             cancelBtn.disabled = !canCancel;
@@ -1571,14 +1571,14 @@
         }
 
         /* ─── COST BAR ─── */
-        function renderCostBar(state, me, myIdx) {
+        function renderCostBar(gameState, me, myIdx) {
             const bar = document.getElementById('cost-bar');
-            const pending = state.pending_action;
+            const pending = gameState.pending_action;
 
             const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
-            const isMyPending = pending && state.players[pendingIdx]?.external_id === token;
+            const isMyPending = pending && gameState.players[pendingIdx]?.external_id === token;
 
-            if (state.current_phase === 'PAYING_COSTS' && isMyPending) {
+            if (gameState.current_phase === 'PAYING_COSTS' && isMyPending) {
                 bar.classList.add('visible');
                 const reqs = pending.requirements || [];
                 document.getElementById('cost-label').textContent = `Pay cost: ${reqs.join(' or ')}`;
@@ -1594,11 +1594,11 @@
         }
 
         /* ─── DIVERSIFY OVERLAY ─── */
-        function renderSnatchOverlay(state, me, myIdx) {
+        function renderSnatchOverlay(gameState, me, myIdx) {
             const ov = document.getElementById('snatch-overlay');
-            const pending = state.pending_action;
+            const pending = gameState.pending_action;
             if (!pending || pending.type !== 'SNATCH_PICK' ||
-                state.players[pending.source_player_idx]?.external_id !== token) {
+                gameState.players[pending.source_player_idx]?.external_id !== token) {
                 ov.classList.remove('visible');
                 return;
             }
@@ -1606,7 +1606,7 @@
             const container = document.getElementById('snatch-cards');
             container.innerHTML = '';
             const ids = pending.pitched_card_ids || [];
-            const pitched = state.graveyard.filter(c => ids.includes(c.id));
+            const pitched = gameState.graveyard.filter(c => ids.includes(c.id));
             pitched.forEach(card => {
                 const el = document.createElement('div');
                 el.className = 'hand-card selectable-react';
@@ -1627,16 +1627,16 @@
         }
 
         /* ─── GRAVEYARD TARGET OVERLAY ─── */
-        function populateGyOverlay(state) {
+        function populateGyOverlay(gameState) {
             const container = document.getElementById('gy-cards');
             container.innerHTML = '';
             
-            if (!state.graveyard || state.graveyard.length === 0) return;
+            if (!gameState.graveyard || gameState.graveyard.length === 0) return;
 
             // Group cards by name
             const grouped = {};
             // Iterate forwards so we keep the index of the most recent one
-            state.graveyard.forEach((card, idx) => {
+            gameState.graveyard.forEach((card, idx) => {
                 if (!grouped[card.name]) {
                     grouped[card.name] = { count: 0, latestIndex: -1, name: card.name };
                 }
@@ -1692,13 +1692,13 @@
             Array.from(svg.querySelectorAll('path')).forEach(p => p.remove());
         }
 
-        function drawTargetingArrows(state, myIdx) {
+        function drawTargetingArrows(gameState, myIdx) {
             clearArrows();
-            if (!state || !state.stack || state.stack.length === 0) return;
+            if (!gameState || !gameState.stack || gameState.stack.length === 0) return;
 
             const svg = document.getElementById('arrow-svg');
 
-            state.stack.forEach(action => {
+            gameState.stack.forEach(action => {
                 if (!action.target_card_id && !action.target_player_id) return;
 
                 // Find source
@@ -1717,13 +1717,13 @@
                     if (!targetEl) {
                         // Could be in graveyard
                         const gy = document.getElementById('gy-top');
-                        if (gy && state.graveyard && state.graveyard.length > 0 &&
-                            state.graveyard[state.graveyard.length - 1].id === action.target_card_id) {
+                        if (gy && gameState.graveyard && gameState.graveyard.length > 0 &&
+                            gameState.graveyard[gameState.graveyard.length - 1].id === action.target_card_id) {
                             targetEl = gy;
                         }
                     }
                 } else if (action.target_player_id) {
-                    const idx = state.players.findIndex(p => p.external_id === action.target_player_id);
+                    const idx = gameState.players.findIndex(p => p.external_id === action.target_player_id);
                     if (idx >= 0 && idx !== myIdx) {
                         targetEl = document.getElementById(`opp-zone-${idx}`);
                     } else if (idx === myIdx) {
