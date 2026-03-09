@@ -235,14 +235,34 @@
             cursor: pointer;
         }
 
-        .card-name-top {
-            font-size: 0.62rem;
+        .card-name-split {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+
+        .name-react, .name-stock {
+            font-size: 0.55rem;
             font-weight: 700;
-            color: #8b949e;
-            margin-bottom: 3px;
+            padding: 1px 4px;
+            border-radius: 3px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        .name-react {
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .name-stock {
+            background: rgba(240, 136, 62, 0.15);
+            color: #f0883e;
+            border: 1px solid rgba(240, 136, 62, 0.3);
         }
 
         .card-ability-block {
@@ -365,10 +385,10 @@
         }
 
         .pot-card-name {
-            font-size: 0.62rem;
-            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
             margin-top: 14px;
-            color: #e6edf3;
         }
 
         .pot-ability-name {
@@ -863,11 +883,7 @@
             }
 
             .pot-card-name {
-                font-size: 0.5rem;
                 margin-top: 6px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
 
             .pot-ability-name {
@@ -899,8 +915,9 @@
                 padding: 4px;
             }
 
-            .card-name-top {
-                font-size: 0.55rem;
+            .name-react, .name-stock {
+                font-size: 0.5rem;
+                padding: 1px 2px;
             }
 
             .ability-label {
@@ -1301,10 +1318,17 @@
                     if (potTargetable) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: idx, target_zone: 'pot' });
 
                     const abilityName = isReact ? card.react_name : (isStock ? card.stock_name : '');
+                    
+                    let pReactName = card.react_name || card.name.split('/')[0] || '';
+                    let pStockName = card.stock_name || card.name.split('/')[1] || '';
+                    
                     el.innerHTML = `
         <span class="pot-owner">${sa?.source_player_name || ''}</span>
         <span class="pot-type-icon">${isReact ? '⚡' : isStock ? '✦' : ''}</span>
-        <div class="pot-card-name">${card.name}</div>
+        <div class="pot-card-name">
+            <div class="name-react">${pReactName}</div>
+            <div class="name-stock">${pStockName}</div>
+        </div>
         ${abilityName ? `<div class="pot-ability-name">${abilityName}</div>` : ''}
       `;
                     pot.appendChild(el);
@@ -1377,8 +1401,14 @@
                 const reactTargets = (reactDef.target_requirements || []).join(', ');
                 const stockTargets = (stockDef.target_requirements || []).join(', ');
 
+                let cReactName = card.react_name || card.name.split('/')[0] || '';
+                let cStockName = card.stock_name || card.name.split('/')[1] || '';
+
                 el.innerHTML = `
-      <div class="card-name-top">${card.name}</div>
+      <div class="card-name-split">
+        <div class="name-react">${cReactName}</div>
+        <div class="name-stock">${cStockName}</div>
+      </div>
       <div class="card-ability-block">
         ${showReact ? `
           <span class="ability-label react">HEDGE</span>
