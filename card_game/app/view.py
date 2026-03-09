@@ -90,9 +90,9 @@ class ConsoleView(GameView):
         print(f" Deck: {dy_color}{len(state.deck)} cards{Colors.RESET} | Graveyard: {len(state.graveyard)} cards")
         print("=" * 78)
 
-        # Build Stockpile Strings (Left Column)
+        # Build Sequence Strings (Left Column)
         stock_lines = []
-        stock_lines.append(f"{Colors.BOLD}[ PLAYER STOCKPILES ]{Colors.RESET}")
+        stock_lines.append(f"{Colors.BOLD}[ PLAYER SEQUENCES ]{Colors.RESET}")
         stock_lines.append("")
         
         for p in state.players:
@@ -110,9 +110,9 @@ class ConsoleView(GameView):
             if p.is_bot:
                 stock_lines.append(f"    Hand: {Colors.CYAN}{len(p.hand)} cards{Colors.RESET}")
 
-            if p.stockpile:
+            if p.sequence:
                 stock_lines.append("    +----------------------+")
-                names = [c.name for c in p.stockpile]
+                names = [c.name for c in p.sequence]
                 unique_names = list(set(names))
                 for name in sorted(unique_names):
                     count = names.count(name)
@@ -128,10 +128,10 @@ class ConsoleView(GameView):
         # Build Stack Strings (Right Column)
         stack_lines = []
         
-        if state.pot:
-            stack_lines.append(f"{Colors.BOLD}[ THE POT (FIELD) ]{Colors.RESET}")
+        if state.nexus:
+            stack_lines.append(f"{Colors.BOLD}[ THE NEXUS (FIELD) ]{Colors.RESET}")
             stack_lines.append("  +-----------------------------------+")
-            for card in state.pot:
+            for card in state.nexus:
                 owner_action = next((a for a in state.stack if a.source_card == card), None)
                 if owner_action:
                     color = Colors.BLUE if not owner_action.source_player.is_bot else Colors.RED
@@ -153,7 +153,7 @@ class ConsoleView(GameView):
             stack_lines.append("  +-----------------------------------+")
             for i, action in enumerate(reversed(state.stack)):
                 p_color = Colors.BLUE if not action.source_player.is_bot else Colors.RED
-                ability = action.source_card.react_ability.name if action.ability_type == 'react' else action.source_card.stockpile_ability.name
+                ability = action.source_card.react_ability.name if action.ability_type == 'react' else action.source_card.sequence_ability.name
                 owner = action.source_player.name[:10]
                 line = f"| {p_color}{owner:<10}{Colors.RESET}: {ability:<21} |"
                 stack_lines.append(f"  {line}")
@@ -224,25 +224,25 @@ class ConsoleView(GameView):
                 break
 
     def _can_afford_ability(self, player, card, ability, state) -> bool:
-        """Checks if a player can afford the costs (Pitch/Burn) of an ability."""
-        # Pitch: Need at least one other card in hand to discard
-        if ability.has_tag("Pitch"):
+        """Checks if a player can afford the costs (Entropy/Sever) of an ability."""
+        # Entropy: Need at least one other card in hand to discard
+        if ability.has_tag("Entropy"):
             if len(player.hand) <= 1:
                 return False
         
-        # Burn: Need at least one card in stockpile to destroy
-        if ability.has_tag("Burn"):
-            if len(player.stockpile) == 0:
+        # Sever: Need at least one card in sequence to destroy
+        if ability.has_tag("Sever"):
+            if len(player.sequence) == 0:
                 return False
                 
-        # Special case for Redact Choice: Burn OR Pitch
+        # Special case for Redact Choice: Sever OR Entropy
         choice_tag = ability.get_tag("Choice")
         if choice_tag and choice_tag.params.get("type") == "Choice":
             options = choice_tag.params.get("options", [])
-            has_burn = "Burn" in options
-            has_pitch = "Pitch" in options
+            has_burn = "Sever" in options
+            has_pitch = "Entropy" in options
             
-            can_burn = len(player.stockpile) > 0 if has_burn else False
+            can_burn = len(player.sequence) > 0 if has_burn else False
             can_pitch = len(player.hand) > 1 if has_pitch else False
             
             if has_burn and has_pitch:
@@ -278,7 +278,7 @@ class ConsoleView(GameView):
             names = ""
             for c in chunk:
                 if is_stock_phase and is_active_player:
-                    focused_ability = c.stockpile_ability
+                    focused_ability = c.sequence_ability
                     color = Colors.SKY_BLUE
                 else:
                     focused_ability = c.react_ability
@@ -294,10 +294,10 @@ class ConsoleView(GameView):
                 else:
                     style = ""
                     
-                tags = [t.name for t in focused_ability.tags if t.name in ["Pitch", "Burn"]]
+                tags = [t.name for t in focused_ability.tags if t.name in ["Entropy", "Sever"]]
                 short_tags = []
-                if "Pitch" in tags: short_tags.append("P")
-                if "Burn" in tags: short_tags.append("B")
+                if "Entropy" in tags: short_tags.append("P")
+                if "Sever" in tags: short_tags.append("B")
                 tag_str = f"[{','.join(short_tags)}]" if short_tags else ""
                 
                 display_str = f"{c.name}{tag_str}"
@@ -310,7 +310,7 @@ class ConsoleView(GameView):
             
             for c in chunk:
                 if is_stock_phase and is_active_player:
-                    desc = c.stockpile_ability.get_dynamic_description()
+                    desc = c.sequence_ability.get_dynamic_description()
                 else:
                     desc = c.react_ability.get_dynamic_description()
                 
@@ -428,7 +428,7 @@ class ConsoleView(GameView):
                 # For console simplicity, just log it.
                 print(f"{data['player']} drew a card. ({data['cards_left']} left)")
             elif etype == "CARD_STOCKED":
-                print(f"\n==> {data['player']} is stocking {data['card']} into their Stockpile.")
+                print(f"\n==> {data['player']} is stocking {data['card']} into their Sequence.")
                 print(f"    Activating '{data['ability']}'!")
                 print(f"    Effect: {data['description']}")
             elif etype == "REACTION_PASS":

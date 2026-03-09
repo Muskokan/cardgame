@@ -109,9 +109,9 @@ class HistoryAnalyzer:
         return False
 
 def _is_already_handled(target_card, state: 'GameState') -> bool:
-    """Checks if a card in the pot is already being handled on the stack."""
+    """Checks if a card in the nexus is already being handled on the stack."""
     for action in state.stack:
-        ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.stockpile_ability
+        ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.sequence_ability
         if any(e.type in ["COUNTER_SPELL", "BOUNCE_CARD", "DESTROY_CARD", "STEAL_CARD"] for e in ability.effects):
             if action.target_card == target_card:
                 return True
@@ -120,9 +120,9 @@ def _is_already_handled(target_card, state: 'GameState') -> bool:
 def evaluate_advantage(player: Player, state: 'GameState') -> float:
     """Calculates a holistic score representing a player's standing in the game."""
     score = 0.0
-    if player.stockpile:
+    if player.sequence:
         counts = {}
-        for c in player.stockpile:
+        for c in player.sequence:
             counts[c.name] = counts.get(c.name, 0) + 1
         max_of_kind = max(counts.values())
         unique_types = len(counts)
@@ -135,7 +135,7 @@ def evaluate_advantage(player: Player, state: 'GameState') -> float:
 
 def is_near_win(player: Player) -> bool:
     """Returns True if the player is one card away from winning."""
-    sp = player.stockpile
+    sp = player.sequence
     if not sp: return False
     
     # 4 of a kind check
@@ -150,14 +150,14 @@ def is_near_win(player: Player) -> bool:
     
     return False
 
-def predict_pot_outcome(player: Player, state: 'GameState') -> float:
+def predict_nexus_outcome(player: Player, state: 'GameState') -> float:
     """Simulates player advantage after the current stack resolves."""
     predicted_score = evaluate_advantage(player, state)
     for action in state.stack:
-        if action.source_card not in state.pot or _is_already_handled(action.source_card, state): continue
-        ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.stockpile_ability
+        if action.source_card not in state.nexus or _is_already_handled(action.source_card, state): continue
+        ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.sequence_ability
         if not ability: continue
-        targets_us = (action.target_player == player) or (action.target_card and action.target_card in player.stockpile)
+        targets_us = (action.target_player == player) or (action.target_card and action.target_card in player.sequence)
         for eff in ability.effects:
             if targets_us:
                 if eff.type == "FORCE_DISCARD": predicted_score -= 10.0
@@ -175,25 +175,25 @@ def bot_choose_stock(bot: Player, state: 'GameState') -> int:
     time.sleep(1)
 
     def is_valuable_stock(card) -> bool:
-        ability = card.stockpile_ability
+        ability = card.sequence_ability
         if not ability: return False
         reqs = ability.target_requirements
         opponents = [p for p in state.players if p != bot]
         if TargetRequirement.GRAVEYARD in reqs and not state.graveyard: return False
-        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.stockpile for op in opponents): return False
-        if TargetRequirement.ANY_STOCK in reqs and not any(op.stockpile for op in opponents): return False
+        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.ANY_STOCK in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.PLAYER in reqs and not any(op.hand for op in opponents): return False
         return True
 
-    stockpile_names = [c.name for c in bot.stockpile]
-    unique_names = set(stockpile_names)
+    sequence_names = [c.name for c in bot.sequence]
+    unique_names = set(sequence_names)
     
     # Win Condition Priority
     if len(unique_names) >= 4:
         for idx, card in enumerate(bot.hand):
             if card.name not in unique_names and is_valuable_stock(card): return idx
     for idx, card in enumerate(bot.hand):
-        if card.name in stockpile_names and stockpile_names.count(card.name) < 4 and is_valuable_stock(card): return idx
+        if card.name in sequence_names and sequence_names.count(card.name) < 4 and is_valuable_stock(card): return idx
             
     # Scoring-based choice
     valuable_indices = [i for i, c in enumerate(bot.hand) if is_valuable_stock(c)]
@@ -204,7 +204,7 @@ def bot_choose_stock(bot: Player, state: 'GameState') -> int:
     for idx in valuable_indices:
         card = bot.hand[idx]
         score = 10.0
-        ability = card.stockpile_ability
+        ability = card.sequence_ability
         is_aggressive = any(e.type in ["DESTROY_CARD", "STEAL_CARD", "FORCE_DISCARD"] for e in ability.effects)
         if is_aggressive or TargetRequirement.PLAYER in ability.target_requirements or TargetRequirement.OPPONENT_STOCK in ability.target_requirements:
             score += 20.0 * profile.aggression_weight
@@ -221,20 +221,20 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
     def is_usable_reaction(card) -> bool:
         ability = card.react_ability
         if not ability: return False
-        if ability.has_tag("Pitch") and len(bot.hand) <= 1: return False
-        if ability.has_tag("Burn") and len(bot.stockpile) == 0: return False
+        if ability.has_tag("Entropy") and len(bot.hand) <= 1: return False
+        if ability.has_tag("Sever") and len(bot.sequence) == 0: return False
         reqs = ability.target_requirements
         opponents = [p for p in state.players if p != bot]
-        if TargetRequirement.POT_CARD in reqs and not state.pot: return False
+        if TargetRequirement.NEXUS_CARD in reqs and not state.nexus: return False
         if TargetRequirement.GRAVEYARD in reqs and not state.graveyard: return False
-        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.stockpile for op in opponents): return False
-        if TargetRequirement.ANY_STOCK in reqs and not any(op.stockpile for op in opponents): return False
+        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.ANY_STOCK in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.PLAYER in reqs and not any(op.hand for op in opponents): return False
         return True
 
     # 1. CRITICAL DEFENSE
     current_adv = evaluate_advantage(bot, state)
-    predicted_adv = predict_pot_outcome(bot, state)
+    predicted_adv = predict_nexus_outcome(bot, state)
     opponents = [p for p in state.players if p != bot]
     biggest_threat_adv = max([evaluate_advantage(op, state) for op in opponents]) if opponents else 0
     is_desperate = (predicted_adv <= current_adv - 20) or (biggest_threat_adv >= 150)
@@ -246,18 +246,18 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
         # Check if an opponent is about to win
         threats = [op for op in opponents if is_near_win(op)]
         
-        # 1a. COUNTER imminent win from pot
+        # 1a. COUNTER imminent win from nexus
         if any(e.type == "COUNTER_SPELL" for e in effects):
             for a in state.stack:
-                if a.source_player in threats and a.ability_type == 'stockpile' and not _is_already_handled(a.source_card, state):
+                if a.source_player in threats and a.ability_type == 'sequence' and not _is_already_handled(a.source_card, state):
                     return idx # STOP THE WINNING CARD
-                if a.source_player != bot and a.source_card in state.pot and not _is_already_handled(a.source_card, state):
+                if a.source_player != bot and a.source_card in state.nexus and not _is_already_handled(a.source_card, state):
                     if is_desperate or random.random() < 0.2: return idx
 
         # 1b. DISRUPT imminent win from stock (Bounce/Destroy/Steal)
         if any(e.type in ["BOUNCE_CARD", "DESTROY_CARD", "STEAL_CARD"] for e in effects):
             if threats: return idx # Use any disruption to stop a winner
-            if any(a.target_card and a.target_card in bot.stockpile and a.source_player != bot for a in state.stack): return idx
+            if any(a.target_card and a.target_card in bot.sequence and a.source_player != bot for a in state.stack): return idx
 
     # 2. STRATEGIC OPPORTUNITY
     for idx, c in enumerate(bot.hand):
@@ -278,16 +278,16 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
                 snatch_chance = min(0.9, 0.3 + profile.combo_snatch_chance * 0.3)
                 if random.random() < snatch_chance: return idx
 
-        # Reprise: use to deny a key graveyard target or soft-counter a powerful Pot card
+        # Reprise: use to deny a key graveyard target or soft-counter a powerful Nexus card
         if any(e == "MOVE_CARD" for e in effect_types):
             # Deny graveyard if opponents could Return a high-value card
             high_value = {"Crash", "Call", "Earnings", "Recoup"}
             gy_targets = [c for c in state.graveyard if c.name in high_value]
-            pot_high_value = [a for a in state.stack if a.source_player != bot
-                              and a.source_card in state.pot
-                              and a.source_card.stockpile_ability.name in high_value
+            nexus_high_value = [a for a in state.stack if a.source_player != bot
+                              and a.source_card in state.nexus
+                              and a.source_card.sequence_ability.name in high_value
                               and not _is_already_handled(a.source_card, state)]
-            if gy_targets or pot_high_value:
+            if gy_targets or nexus_high_value:
                 reprise_chance = 0.3 + profile.aggression_weight * 0.1
                 if random.random() < reprise_chance: return idx
 
@@ -307,7 +307,7 @@ def bot_choose_void_pick(bot: Player, void_pool: List[Card]) -> int:
     if not void_pool: return 0
     
     # Priority 1: Cards that help complete a win condition
-    sp_names = [c.name for c in bot.stockpile]
+    sp_names = [c.name for c in bot.sequence]
     for idx, card in enumerate(void_pool):
         if card.name not in sp_names and len(set(sp_names)) >= 4:
             return idx # Completes 5 unique set (roughly)
@@ -326,24 +326,24 @@ def bot_choose_void_pick(bot: Player, void_pool: List[Card]) -> int:
             
     return 0
 
-def bot_choose_target_stockpile_card(bot: Player, state: 'GameState', target_player: Player) -> Optional[Card]:
-    """Choose a card from a player's stockpile."""
-    if not target_player or not target_player.stockpile: return None
+def bot_choose_target_sequence_card(bot: Player, state: 'GameState', target_player: Player) -> Optional[Card]:
+    """Choose a card from a player's sequence."""
+    if not target_player or not target_player.sequence: return None
     
     # Heuristic: Snipe cards that contribute to a 4-of-a-kind or 5-unique win
     counts = {}
-    for c in target_player.stockpile:
+    for c in target_player.sequence:
         counts[c.name] = counts.get(c.name, 0) + 1
         
-    for card in target_player.stockpile:
+    for card in target_player.sequence:
         if counts[card.name] >= 3: return card
         if len(counts) >= 4: return card
         
     # Otherwise, pick a high value card if it exists
-    for card in target_player.stockpile:
+    for card in target_player.sequence:
         if card.name in ["Earnings", "Call", "Crash"]: return card
         
-    return random.choice(target_player.stockpile)
+    return random.choice(target_player.sequence)
 
 def bot_choose_target_from_list(bot: Player, state: 'GameState', valid_targets: List[tuple], reqs: List[int]) -> tuple:
     """
@@ -352,13 +352,13 @@ def bot_choose_target_from_list(bot: Player, state: 'GameState', valid_targets: 
     from models import TargetRequirement
 
     # --- ANY_STOCK / COPY_ABILITY logic ---
-    # copied_name is the 3rd element and is set for ANY_STOCK targets (e.g., "Liquidate/Invest")
+    # copied_name is the 3rd element and is set for ANY_STOCK targets (e.g., "Liquidate/Cause")
     # We parse the stock-side ability name and apply priority tiers to avoid dumb loops
-    # like Invest copying Invest.
+    # like Cause copying Cause.
     copy_targets = [(tp, tc, cn, desc) for tp, tc, cn, desc in valid_targets if cn]
     if copy_targets:
         HIGH_VALUE = ["Earnings", "Recoup", "Crash", "Call"]
-        AVOID = ["Invest"]  # copying Invest is usually a waste — it will just copy something else
+        AVOID = ["Cause"]  # copying Cause is usually a waste — it will just copy something else
 
         def _stock_name(cn: str) -> str:
             """Extract the stock ability name from a card name like 'Redact/Repeat'."""
@@ -390,7 +390,7 @@ def bot_choose_target_from_list(bot: Player, state: 'GameState', valid_targets: 
         return (tp, tc, cn)
 
     # --- Non-copy targeting ---
-    if TargetRequirement.POT_CARD in reqs:
+    if TargetRequirement.NEXUS_CARD in reqs:
         for t_player, t_card, c_name, desc in valid_targets:
             owner_action = next((a for a in state.stack if a.source_card == t_card), None)
             if owner_action and is_near_win(owner_action.source_player):
@@ -427,26 +427,26 @@ def bot_choose_targets(bot: Player, state: 'GameState') -> dict:
     
     if TargetRequirement.OPPONENT_STOCK in reqs or TargetRequirement.ANY_STOCK in reqs:
         # If the preferred target has a stock, attack it
-        if target_player.stockpile:
+        if target_player.sequence:
             targets["target_player_index"] = state.players.index(target_player)
             targets["target_card_index"] = 0 
         else:
             # Fallback: check ANY opponent's stock
-            any_opp_with_stock = next((p for p in opponents if p.stockpile), None)
+            any_opp_with_stock = next((p for p in opponents if p.sequence), None)
             if any_opp_with_stock:
                 targets["target_player_index"] = state.players.index(any_opp_with_stock)
                 targets["target_card_index"] = 0
-            elif TargetRequirement.ANY_STOCK in reqs and bot.stockpile:
+            elif TargetRequirement.ANY_STOCK in reqs and bot.sequence:
                 # Absolute last resort: target self only if strictly ANY_STOCK required
                 # Wait, this fixes Crash targeting self. 
                 # If they have no valid opponents, and they MUST pick something...
                 targets["target_player_index"] = state.players.index(bot)
                 targets["target_card_index"] = 0
 
-    if TargetRequirement.POT_CARD in reqs:
-        # Target the last card in the pot (often the one to counter)
-        if state.pot:
-            targets["target_card_index"] = len(state.pot) - 1
+    if TargetRequirement.NEXUS_CARD in reqs:
+        # Target the last card in the nexus (often the one to counter)
+        if state.nexus:
+            targets["target_card_index"] = len(state.nexus) - 1
 
     if TargetRequirement.GRAVEYARD in reqs:
         if state.graveyard:
@@ -463,29 +463,29 @@ def bot_choose_cost(bot: Player, state: 'GameState') -> dict:
     requirements = pending.get("requirements", [])
 
     # If a modal Choice was already narrowed to a concrete type, pay it directly
-    if "Pitch" in requirements:
-        return {"cost_type": "Pitch", "card_index": 0}
-    if "Burn" in requirements:
-        return {"cost_type": "Burn", "card_index": 0}
+    if "Entropy" in requirements:
+        return {"cost_type": "Entropy", "card_index": 0}
+    if "Sever" in requirements:
+        return {"cost_type": "Sever", "card_index": 0}
 
-    # For simple direct tags (Pitch or Burn), use tag.name directly
+    # For simple direct tags (Entropy or Sever), use tag.name directly
     if tag:
-        if tag.name == "Pitch":
-            return {"cost_type": "Pitch", "card_index": 0}
-        if tag.name == "Burn":
-            # Burn requires destroying a stockpile card
-            if bot.stockpile:
-                return {"cost_type": "Burn", "card_index": 0}
+        if tag.name == "Entropy":
+            return {"cost_type": "Entropy", "card_index": 0}
+        if tag.name == "Sever":
+            # Sever requires destroying a sequence card
+            if bot.sequence:
+                return {"cost_type": "Sever", "card_index": 0}
             else:
-                # No stockpile to burn — can't pay cost, pitch instead as fallback
-                return {"cost_type": "Pitch", "card_index": 0}
+                # No sequence to burn — can't pay cost, pitch instead as fallback
+                return {"cost_type": "Entropy", "card_index": 0}
         if tag.name == "Choice":
             # Modal: pick the best option
             options = tag.params.get("options", [])
-            if "Burn" in options and bot.stockpile:
-                return {"choice": "Burn", "card_index": 0}
+            if "Sever" in options and bot.sequence:
+                return {"choice": "Sever", "card_index": 0}
             else:
-                return {"choice": "Pitch", "card_index": 0}
+                return {"choice": "Entropy", "card_index": 0}
 
-    return {"cost_type": "Pitch", "card_index": 0}
+    return {"cost_type": "Entropy", "card_index": 0}
 

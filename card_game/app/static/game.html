@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windfall</title>
+    <title>Cause & Effect</title>
     <style>
         * {
             box-sizing: border-box;
@@ -51,7 +51,7 @@
             min-height: 180px;
         }
 
-        /* CENTER: deck/pot/graveyard */
+        /* CENTER: deck/nexus/graveyard */
         #center-zone {
             display: flex;
             align-items: center;
@@ -97,7 +97,7 @@
             position: relative;
         }
 
-        #pot-zone {
+        #nexus-zone {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
@@ -128,7 +128,7 @@
             font-size: 0.85rem;
         }
 
-        #my-stockpile-row {
+        #my-sequence-row {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
@@ -310,8 +310,8 @@
             margin: 3px 0;
         }
 
-        /* CARDS — pot */
-        .pot-card {
+        /* CARDS — nexus */
+        .nexus-card {
             width: 80px;
             height: 110px;
             border-radius: 10px;
@@ -324,21 +324,21 @@
             transition: box-shadow 0.3s;
         }
 
-        .pot-card.pot-react {
+        .nexus-card.nexus-react {
             border-color: #58a6ff;
             box-shadow: 0 0 12px #58a6ff66;
         }
 
-        .pot-card.pot-stock {
+        .nexus-card.nexus-stock {
             border-color: #f0883e;
             box-shadow: 0 0 12px #f0883e66;
         }
 
-        .pot-card.resolving {
+        .nexus-card.resolving {
             animation: resolveFlash 0.6s ease-in-out 2;
         }
 
-        .pot-card.selectable-target {
+        .nexus-card.selectable-target {
             border-color: #ff7b72 !important;
             box-shadow: 0 0 14px #ff7b7299;
             cursor: pointer;
@@ -369,7 +369,7 @@
             }
         }
 
-        .pot-owner {
+        .nexus-owner {
             font-size: 0.5rem;
             color: #8b949e;
             position: absolute;
@@ -377,21 +377,21 @@
             left: 5px;
         }
 
-        .pot-type-icon {
+        .nexus-type-icon {
             position: absolute;
             top: 3px;
             right: 5px;
             font-size: 0.9rem;
         }
 
-        .pot-card-name {
+        .nexus-card-name {
             display: flex;
             flex-direction: column;
             gap: 2px;
             margin-top: 14px;
         }
 
-        .pot-ability-name {
+        .nexus-ability-name {
             font-size: 0.55rem;
             color: #8b949e;
             margin-top: 2px;
@@ -407,7 +407,7 @@
             flex-shrink: 0;
         }
 
-        /* MINI CARDS — stockpile */
+        /* MINI CARDS — sequence */
         .mini-card {
             height: 28px;
             padding: 0 8px;
@@ -495,7 +495,7 @@
             justify-content: center;
         }
 
-        .opp-stockpile-row {
+        .opp-sequence-row {
             display: flex;
             gap: 4px;
             flex-wrap: wrap;
@@ -857,7 +857,7 @@
             #center-zone {
                 gap: 8px;
                 padding: 2px;
-                flex-wrap: wrap; /* Allow pot to break onto new line */
+                flex-wrap: wrap; /* Allow nexus to break onto new line */
             }
 
             #deck-pile, #graveyard-pile, .gy-top {
@@ -868,13 +868,13 @@
                 font-size: 0.55rem;
             }
 
-            #pot-zone {
+            #nexus-zone {
                 min-width: 50vw;
                 min-height: 80px;
                 padding: 4px;
             }
 
-            .pot-card {
+            .nexus-card {
                 width: 14vw;
                 height: 19vw;
                 max-width: 60px;
@@ -882,11 +882,11 @@
                 padding: 3px;
             }
 
-            .pot-card-name {
+            .nexus-card-name {
                 margin-top: 6px;
             }
 
-            .pot-ability-name {
+            .nexus-ability-name {
                 font-size: 0.45rem;
                 white-space: nowrap;
                 overflow: hidden;
@@ -1005,7 +1005,7 @@
             <div id="deck-pile">
                 <div class="deck-count" id="deck-count">0</div>
             </div>
-            <div id="pot-zone"></div>
+            <div id="nexus-zone"></div>
             <div id="graveyard-pile" title="Graveyard">
                 <div id="gy-top-card"></div>
                 <div class="gy-count" id="gy-count">0</div>
@@ -1019,7 +1019,7 @@
                 <span id="my-name" style="font-weight:700;font-size:0.9rem;"></span>
                 <span id="my-stock-label" style="font-size:0.7rem;color:#8b949e;"></span>
             </div>
-            <div id="my-stockpile-row"></div>
+            <div id="my-sequence-row"></div>
             <!-- Action buttons above hand -->
             <div id="action-bar">
                 <span id="action-label"></span>
@@ -1058,7 +1058,7 @@
 
     <script>
         const code = new URLSearchParams(location.search).get('code');
-        const token = localStorage.getItem('windfall_token');
+        const token = localStorage.getItem('cause_effect_token');
         if (!token) { location.href = '/'; }
 
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -1229,8 +1229,8 @@
                 const handCount = Array.isArray(p.hand) ? p.hand.length : (p.hand || 0);
                 const backs = Array.from({ length: handCount }, () => `<div class="card-back"></div>`).join('');
 
-                let stockHtml = '<div class="opp-stockpile-row">';
-                p.stockpile.forEach((card, sIdx) => {
+                let stockHtml = '<div class="opp-sequence-row">';
+                p.sequence.forEach((card, sIdx) => {
                     const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
                         (pending.requirements?.includes('ANY_STOCK') ||
                             (pending.requirements?.includes('OPPONENT_STOCK') && p.external_id !== token));
@@ -1251,7 +1251,7 @@
             });
         }
 
-        /* ─── CENTER: POT / DECK / GRAVEYARD ─── */
+        /* ─── CENTER: NEXUS / DECK / GRAVEYARD ─── */
         function renderCenter(state, me, myIdx) {
             // Deck count
             document.getElementById('deck-count').textContent = `${state.deck_count} cards`;
@@ -1289,33 +1289,33 @@
                 gyEl.innerHTML = '<div class="gy-top">Empty</div>';
             }
 
-            // Pot
-            const pot = document.getElementById('pot-zone');
-            pot.innerHTML = '';
+            // Nexus
+            const nexus = document.getElementById('nexus-zone');
+            nexus.innerHTML = '';
             const phase = state.current_phase;
             const pending = state.pending_action;
             const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
             const isMyTargetTurn = pending && me &&
                 state.players[pendingIdx]?.external_id === token;
 
-            if (!state.pot || state.pot.length === 0) {
-                pot.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">ORDER BOOK</span>';
+            if (!state.nexus || state.nexus.length === 0) {
+                nexus.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">ORDER BOOK</span>';
             } else {
-                state.pot.forEach((card, idx) => {
+                state.nexus.forEach((card, idx) => {
                     const sa = state.stack?.find(a => a.source_card_name === card.name);
                     const isReact = sa?.ability_type === 'react';
-                    const isStock = sa?.ability_type === 'stockpile';
+                    const isStock = sa?.ability_type === 'sequence';
                     const resolving = phase === 'RESOLUTION';
-                    const potTargetable = phase === 'TARGETING' && isMyTargetTurn &&
-                        pending.requirements?.includes('POT_CARD');
+                    const nexusTargetable = phase === 'TARGETING' && isMyTargetTurn &&
+                        pending.requirements?.includes('NEXUS_CARD');
 
                     const el = document.createElement('div');
-                    el.className = 'pot-card' +
-                        (isReact ? ' pot-react' : isStock ? ' pot-stock' : '') +
+                    el.className = 'nexus-card' +
+                        (isReact ? ' nexus-react' : isStock ? ' nexus-stock' : '') +
                         (resolving ? ' resolving' : '') +
-                        (potTargetable ? ' selectable-target' : '');
-                    el.id = `pot-card-${card.id}`;
-                    if (potTargetable) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: idx, target_zone: 'pot' });
+                        (nexusTargetable ? ' selectable-target' : '');
+                    el.id = `nexus-card-${card.id}`;
+                    if (nexusTargetable) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: idx, target_zone: 'nexus' });
 
                     const abilityName = isReact ? card.react_name : (isStock ? card.stock_name : '');
                     
@@ -1323,15 +1323,15 @@
                     let pStockName = card.stock_name || card.name.split('/')[1] || '';
                     
                     el.innerHTML = `
-        <span class="pot-owner">${sa?.source_player_name || ''}</span>
-        <span class="pot-type-icon">${isReact ? '⚡' : isStock ? '✦' : ''}</span>
-        <div class="pot-card-name">
+        <span class="nexus-owner">${sa?.source_player_name || ''}</span>
+        <span class="nexus-type-icon">${isReact ? '⚡' : isStock ? '✦' : ''}</span>
+        <div class="nexus-card-name">
             <div class="name-react">${pReactName}</div>
             <div class="name-stock">${pStockName}</div>
         </div>
-        ${abilityName ? `<div class="pot-ability-name">${abilityName}</div>` : ''}
+        ${abilityName ? `<div class="nexus-ability-name">${abilityName}</div>` : ''}
       `;
-                    pot.appendChild(el);
+                    nexus.appendChild(el);
                 });
             }
         }
@@ -1347,26 +1347,26 @@
             document.getElementById('my-name').textContent =
                 (isMyTurn ? '➡ ' : '') + (hasPriority && phase === 'REACTION_SELECTION' ? '⚡ ' : '') + me.name;
             document.getElementById('my-stock-label').textContent =
-                `Portfolio: ${me.stockpile.length} | Capital: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
+                `Portfolio: ${me.sequence.length} | Capital: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
 
-            // My stockpile
-            const spRow = document.getElementById('my-stockpile-row');
+            // My sequence
+            const spRow = document.getElementById('my-sequence-row');
             spRow.innerHTML = '';
             const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
             const isMyTargetTurn = pending && state.players[pendingIdx]?.external_id === token;
-            me.stockpile.forEach((card, sIdx) => {
-                const isBurnCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
-                    (pending.requirements?.includes('Burn') || pending.requirements?.includes('REDACT_COST'));
+            me.sequence.forEach((card, sIdx) => {
+                const isSeverCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
+                    (pending.requirements?.includes('Sever') || pending.requirements?.includes('REDACT_COST'));
                 const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
                     (pending.requirements?.includes('ANY_STOCK') || pending.requirements?.includes('OWN_STOCK'));
                 const el = document.createElement('div');
                 el.id = `stock-${card.id}`;
                 el.className = 'mini-card stock-mine' +
-                    (isBurnCost || isStockTarget ? ' selectable-target' : '');
+                    (isSeverCost || isStockTarget ? ' selectable-target' : '');
                 el.textContent = card.name.split('/')[1] || card.name;
                 el.title = card.name;
-                if (isBurnCost) el.onclick = () => sendAction('SET_COST', { cost_type: 'Burn', card_index: sIdx });
-                else if (isStockTarget) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: sIdx, target_zone: 'stockpile', target_player_index: myIdx });
+                if (isSeverCost) el.onclick = () => sendAction('SET_COST', { cost_type: 'Sever', card_index: sIdx });
+                else if (isStockTarget) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: sIdx, target_zone: 'sequence', target_player_index: myIdx });
                 spRow.appendChild(el);
             });
 
@@ -1377,11 +1377,11 @@
 
             const isStocking = isMyTurn && phase === 'STOCK_CARD_SELECTION';
             const isReacting = hasPriority && phase === 'REACTION_SELECTION';
-            // Backend sends 'Pitch', 'Burn', 'Choice', or 'PITCH', 'BURN'. Make it case-insensitive or check all.
+            // Backend sends 'Entropy', 'Sever', 'Choice', or 'ENTROPY', 'SEVER'. Make it case-insensitive or check all.
             const reqs = pending?.requirements?.map(r => r.toUpperCase()) || [];
-            const isPitchCost = phase === 'PAYING_COSTS' && isMyTargetTurn && 
-                                (reqs.includes('PITCH') || reqs.includes('EXTRA_PITCH'));
-            const isPitchResolving = pending?.type === 'RESOLUTION_PITCH' && isMyTargetTurn;
+            const isEntropyCost = phase === 'PAYING_COSTS' && isMyTargetTurn && 
+                                (reqs.includes('ENTROPY') || reqs.includes('EXTRA_ENTROPY'));
+            const isEntropyResolving = pending?.type === 'RESOLUTION_ENTROPY' && isMyTargetTurn;
 
             me.hand.forEach((card, idx) => {
                 const el = document.createElement('div');
@@ -1389,15 +1389,15 @@
                 if (idx === selectedCardIdx) el.classList.add('selected');
                 if (isStocking) el.classList.add('selectable-stock');
                 if (isReacting) el.classList.add('selectable-react');
-                if (isPitchCost || isPitchResolving) el.classList.add('selectable-pitch');
+                if (isEntropyCost || isEntropyResolving) el.classList.add('selectable-pitch');
 
                 const showStock = phase !== 'REACTION_SELECTION';
                 const showReact = phase !== 'STOCK_CARD_SELECTION';
                 const def = cardData;
                 const reactDef = def[card.react_name] || {};
                 const stockDef = def[card.stock_name] || {};
-                const reactCost = (reactDef.tags || []).filter(t => ['Pitch', 'Burn', 'Choice'].includes(t)).join(', ');
-                const stockCost = (stockDef.tags || []).filter(t => ['Pitch', 'Burn', 'Choice'].includes(t)).join(', ');
+                const reactCost = (reactDef.tags || []).filter(t => ['Entropy', 'Sever', 'Choice'].includes(t)).join(', ');
+                const stockCost = (stockDef.tags || []).filter(t => ['Entropy', 'Sever', 'Choice'].includes(t)).join(', ');
                 const reactTargets = (reactDef.target_requirements || []).join(', ');
                 const stockTargets = (stockDef.target_requirements || []).join(', ');
 
@@ -1411,14 +1411,14 @@
       </div>
       <div class="card-ability-block">
         ${showReact ? `
-          <span class="ability-label react">HEDGE</span>
+          <span class="ability-label react">EFFECT</span>
           <div class="ability-desc">${card.react_desc || ''}</div>
           ${reactTargets ? `<div class="ability-meta">🎯 ${reactTargets}</div>` : ''}
           ${reactCost ? `<div class="ability-meta">💰 ${reactCost}</div>` : ''}
         `: ''}
         ${showReact && showStock ? '<div class="card-divider"></div>' : ''}
         ${showStock ? `
-          <span class="ability-label stock">INVEST</span>
+          <span class="ability-label stock">CAUSE</span>
           <div class="ability-desc">${card.stock_desc || ''}</div>
           ${stockTargets ? `<div class="ability-meta">🎯 ${stockTargets}</div>` : ''}
           ${stockCost ? `<div class="ability-meta">💰 ${stockCost}</div>` : ''}
@@ -1426,10 +1426,10 @@
       </div>
     `;
 
-                if (isPitchCost) {
-                    el.onclick = () => sendAction('SET_COST', { cost_type: 'Pitch', card_index: idx });
-                } else if (isPitchResolving) {
-                    el.onclick = () => sendAction('RESOLUTION_PITCH', { card_id: card.id });
+                if (isEntropyCost) {
+                    el.onclick = () => sendAction('SET_COST', { cost_type: 'Entropy', card_index: idx });
+                } else if (isEntropyResolving) {
+                    el.onclick = () => sendAction('RESOLUTION_ENTROPY', { card_id: card.id });
                 } else {
                     el.onclick = () => toggleSelect(idx);
                 }
@@ -1457,18 +1457,18 @@
                     const reactDef = def[selCard.react_name] || {};
                     const stockDef = def[selCard.stock_name] || {};
                     const tags = canReact ? (reactDef.tags || []) : (stockDef.tags || []);
-                    const isBurn = tags.includes('Burn');
-                    const isPitch = tags.includes('Pitch');
+                    const isSever = tags.includes('Sever');
+                    const isEntropy = tags.includes('Entropy');
                     
-                    if (isBurn && me.stockpile.length === 0) {
+                    if (isSever && me.sequence.length === 0) {
                         if (canReact) canReact = false;
                         if (canStock) canStock = false;
-                        cannotAffordReason = "Requires a Stockpile card to Burn.";
+                        cannotAffordReason = "Requires a Sequence card to Sever.";
                     }
-                    if (isPitch && me.hand.length < 2) { // Need 1 to play, 1 to discard
+                    if (isEntropy && me.hand.length < 2) { // Need 1 to play, 1 to discard
                         if (canReact) canReact = false;
                         if (canStock) canStock = false;
-                        cannotAffordReason = "Requires another card in hand to Pitch.";
+                        cannotAffordReason = "Requires another card in hand to Entropy.";
                     }
                 }
             }
@@ -1478,10 +1478,10 @@
             
             if (canStock) {
                 playBtn.classList.add('stocking');
-                playBtn.textContent = 'INVEST CARD';
+                playBtn.textContent = 'CAUSE CARD';
             } else {
                 playBtn.classList.remove('stocking');
-                playBtn.textContent = 'HEDGE CARD';
+                playBtn.textContent = 'EFFECT CARD';
             }
             
             playBtn.style.display = '';
@@ -1490,9 +1490,9 @@
             endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
 
             if (phase === 'STOCK_CARD_SELECTION' && isMyTurn)
-                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'INVEST ↓' : 'Pick a card to invest');
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'CAUSE ↓' : 'Pick a card to invest');
             else if (phase === 'REACTION_SELECTION' && hasPriority)
-                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'HEDGE or PASS ↓' : 'Select a card to hedge, or pass');
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'EFFECT or PASS ↓' : 'Select a card to hedge, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
                 label.textContent = 'Turn complete —';
             else label.textContent = '';
@@ -1519,7 +1519,7 @@
                 const reqs = pending.requirements || [];
                 document.getElementById('cost-label').textContent = `Pay cost: ${reqs.join(' or ')}`;
                 document.getElementById('cost-options').innerHTML = '';
-            } else if (pending?.type === 'RESOLUTION_PITCH' && isMyPending) {
+            } else if (pending?.type === 'RESOLUTION_ENTROPY' && isMyPending) {
                 bar.classList.add('visible');
                 const reason = pending.is_snatch ? "Diversify" : pending.card_name;
                 document.getElementById('cost-label').textContent = `You must pitch a card for ${reason}!`;
@@ -1550,10 +1550,10 @@
                 el.innerHTML = `
       <div class="card-name-top">${card.name}</div>
       <div class="card-ability-block">
-        <span class="ability-label react">HEDGE</span>
+        <span class="ability-label react">EFFECT</span>
         <div class="ability-desc">${card.react_desc || ''}</div>
         <div class="card-divider"></div>
-        <span class="ability-label stock">INVEST</span>
+        <span class="ability-label stock">CAUSE</span>
         <div class="ability-desc">${card.stock_desc || ''}</div>
       </div>
     `;
@@ -1587,11 +1587,11 @@
 
             uniqueCards.forEach(group => {
                 const el = document.createElement('div');
-                el.className = 'pot-card selectable-target';
+                el.className = 'nexus-card selectable-target';
                 el.style.cssText = 'width:90px;height:120px;cursor:pointer;position:relative;';
                 el.innerHTML = `
-        <div class="pot-card-name">${group.name}</div>
-        <div class="pot-ability-name" style="margin-top:auto;">select</div>
+        <div class="nexus-card-name">${group.name}</div>
+        <div class="nexus-ability-name" style="margin-top:auto;">select</div>
         <div style="position:absolute;bottom:4px;right:6px;font-size:0.9rem;font-weight:bold;color:#bc8cff;">x${group.count}</div>
       `;
                 el.onclick = () => {
@@ -1618,7 +1618,7 @@
             const pending = gameState.pending_action;
             if (phase === 'TARGETING' && pending &&
                 gameState.players[pending.source_player_idx]?.external_id === token) {
-                sendAction('SET_TARGETS', { target_card_index: cardIdx, target_zone: 'stockpile', target_player_index: playerIdx });
+                sendAction('SET_TARGETS', { target_card_index: cardIdx, target_zone: 'sequence', target_player_index: playerIdx });
             }
         }
 
@@ -1638,16 +1638,16 @@
                 if (!action.target_card_id && !action.target_player_id) return;
 
                 // Find source
-                const sourceEl = document.getElementById(`pot-card-${action.source_card_id}`);
+                const sourceEl = document.getElementById(`nexus-card-${action.source_card_id}`);
                 if (!sourceEl) return;
 
                 // Find target
                 let targetEl = null;
 
                 if (action.target_card_id) {
-                    targetEl = document.getElementById(`pot-card-${action.target_card_id}`);
+                    targetEl = document.getElementById(`nexus-card-${action.target_card_id}`);
                     if (!targetEl) {
-                        // Could be in a stockpile
+                        // Could be in a sequence
                         targetEl = document.getElementById(`stock-${action.target_card_id}`);
                     }
                     if (!targetEl) {

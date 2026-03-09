@@ -20,13 +20,13 @@ class Phase(Enum):
 class TargetRequirement(Enum):
     NONE = 0
     PLAYER = 1             # Targeted opponent (e.g. Blank/Check)
-    OPPONENT_STOCK = 2     # Specific card in opponent stockpile (e.g. Crush, Redact)
-    OWN_STOCK = 3          # Specific card in own stockpile (e.g. Betray cost)
-    EXTRA_PITCH = 7        # Pitch one extra card from hand (e.g. Hush cost)
-    REDACT_COST = 8        # Modal: Pitch 1 card OR Destroy 1 stockpile card (Redact cost)
+    OPPONENT_STOCK = 2     # Specific card in opponent sequence (e.g. Crush, Redact)
+    OWN_STOCK = 3          # Specific card in own sequence (e.g. Betray cost)
+    EXTRA_ENTROPY = 7        # Entropy one extra card from hand (e.g. Hush cost)
+    REDACT_COST = 8        # Modal: Entropy 1 card OR Destroy 1 sequence card (Redact cost)
     GRAVEYARD = 9          # Target a card in the graveyard
-    POT_CARD = 10          # Target a card currently in the pot (e.g. Hush)
-    ANY_STOCK = 11         # Target any card in any player's stockpile
+    NEXUS_CARD = 10          # Target a card currently in the nexus (e.g. Hush)
+    ANY_STOCK = 11         # Target any card in any player's sequence
 
 class Tag:
     def __init__(self, name: str, params: Optional[Dict[str, Any]] = None):
@@ -66,7 +66,7 @@ class Ability:
             if isinstance(t, str):
                 self.tags.append(Tag(t))
             elif isinstance(t, dict):
-                # e.g., {"type": "Choice", "options": ["Pitch", "Burn"]}
+                # e.g., {"type": "Choice", "options": ["Entropy", "Sever"]}
                 self.tags.append(Tag(t.get("type", "Unknown"), t))
                 
         self.target_requirements = []
@@ -105,8 +105,8 @@ class Ability:
         parts = []
         
         # 1. Costs/Tags
-        if self.has_tag("Pitch"): parts.append("[P]")
-        if self.has_tag("Burn"): parts.append("[B]")
+        if self.has_tag("Entropy"): parts.append("[P]")
+        if self.has_tag("Sever"): parts.append("[B]")
         
         # 2. Effects
         effect_texts = []
@@ -151,15 +151,15 @@ class Ability:
         return resolve_effects(self, state, action, view, depth)
 
 class Card:
-    def __init__(self, react_ability: Ability, stockpile_ability: Ability):
+    def __init__(self, react_ability: Ability, sequence_ability: Ability):
         self.id = str(uuid.uuid4())
         self.react_ability = react_ability
-        self.stockpile_ability = stockpile_ability
+        self.sequence_ability = sequence_ability
         self.owner: Optional['Player'] = None
 
     @property
     def name(self) -> str:
-        return f"{self.react_ability.name}/{self.stockpile_ability.name}"
+        return f"{self.react_ability.name}/{self.sequence_ability.name}"
         
     def to_dict(self):
         return {
@@ -167,8 +167,8 @@ class Card:
             "name": self.name,
             "react_name": self.react_ability.name,
             "react_desc": self.react_ability.description,
-            "stock_name": self.stockpile_ability.name,
-            "stock_desc": self.stockpile_ability.description
+            "stock_name": self.sequence_ability.name,
+            "stock_desc": self.sequence_ability.description
         }
 
     @property
@@ -176,14 +176,14 @@ class Card:
         return self.react_ability.target_requirements
         
     @property
-    def stockpile_requirements(self) -> List[TargetRequirement]:
-        return self.stockpile_ability.target_requirements
+    def sequence_requirements(self) -> List[TargetRequirement]:
+        return self.sequence_ability.target_requirements
         
     def execute_react(self, state, action, view):
         return self.react_ability.execute(state, action, view)
         
-    def execute_stockpile(self, state, action, view):
-        return self.stockpile_ability.execute(state, action, view)
+    def execute_sequence(self, state, action, view):
+        return self.sequence_ability.execute(state, action, view)
         
     def __str__(self):
         return self.name
@@ -224,7 +224,7 @@ class Player:
         self.is_bot = is_bot
         self.bot_profile = bot_profile if bot_profile else BotProfile() if is_bot else None
         self.hand = []
-        self.stockpile = []
+        self.sequence = []
         self.external_id: Optional[str] = None
         
     def to_dict(self, include_hand: bool = True):
@@ -235,7 +235,7 @@ class Player:
             "bot_profile": self.bot_profile.to_dict() if self.bot_profile else None,
             "external_id": self.external_id,  # Always included so frontend can identify local player
             "hand": [c.to_dict() for c in self.hand] if include_hand else len(self.hand),
-            "stockpile": [c.to_dict() for c in self.stockpile]
+            "sequence": [c.to_dict() for c in self.sequence]
         }
         return d
 
@@ -283,7 +283,7 @@ class Action:
         elif self.copied_card_name:
             t_str = f" copying [{self.copied_card_name}]"
             
-        ability = self.source_card.react_ability.name if self.ability_type == 'react' else self.source_card.stockpile_ability.name
+        ability = self.source_card.react_ability.name if self.ability_type == 'react' else self.source_card.sequence_ability.name
         return f"{self.source_player.name}'s {ability}{t_str}"
 
 # Effect resolution logic has been moved to effects.py.

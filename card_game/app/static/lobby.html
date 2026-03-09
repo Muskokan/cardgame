@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lobby | Windfall</title>
+    <title>Lobby | Cause & Effect</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -79,8 +79,8 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
-        const token = localStorage.getItem('windfall_token');
-        let name = localStorage.getItem('windfall_name');
+        const token = localStorage.getItem('cause_effect_token');
+        let name = localStorage.getItem('cause_effect_name');
 
         if (!code || !token) window.location.href = '/static/index.html';
 
@@ -97,7 +97,7 @@
         function populateStoredNames() {
             const dl = document.getElementById('stored-names');
             dl.innerHTML = '';
-            let storedNames = JSON.parse(localStorage.getItem('windfall_stored_names') || '[]');
+            let storedNames = JSON.parse(localStorage.getItem('cause_effect_stored_names') || '[]');
             storedNames.forEach(storedName => {
                 let opt = document.createElement('option');
                 opt.value = storedName;
@@ -134,7 +134,7 @@
                     if (seat.player_id === token) {
                         userSeated = true;
                         name = seat.name; // Keep local name in sync
-                        localStorage.setItem('windfall_name', name);
+                        localStorage.setItem('cause_effect_name', name);
                     }
 
                     let html = `<h3>${seat.name}</h3>`;
@@ -183,13 +183,13 @@
             const inputName = document.getElementById('modal-player-name').value.trim();
             if (!inputName) return;
             name = inputName;
-            localStorage.setItem('windfall_name', name);
+            localStorage.setItem('cause_effect_name', name);
 
             // Store in list of names
-            let storedNames = JSON.parse(localStorage.getItem('windfall_stored_names') || '[]');
+            let storedNames = JSON.parse(localStorage.getItem('cause_effect_stored_names') || '[]');
             if (!storedNames.includes(name)) {
                 storedNames.push(name);
-                localStorage.setItem('windfall_stored_names', JSON.stringify(storedNames));
+                localStorage.setItem('cause_effect_stored_names', JSON.stringify(storedNames));
             }
             populateStoredNames();
 

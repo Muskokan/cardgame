@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windfall | Online Multiplayer</title>
+    <title>Cause & Effect | Online Multiplayer</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -43,7 +43,7 @@
             try {
                 const res = await fetch('/api/create', { method: 'POST' });
                 const data = await res.json();
-                localStorage.setItem('windfall_token', data.player_id);
+                localStorage.setItem('cause_effect_token', data.player_id);
                 // Name will be entered in the lobby when claiming a seat
                 window.location.href = `/static/lobby.html?code=${data.code}`;
             } catch (e) {
@@ -62,7 +62,7 @@
 
                 if (!res.ok) throw new Error("Join failed");
                 const data = await res.json();
-                localStorage.setItem('windfall_token', data.player_id);
+                localStorage.setItem('cause_effect_token', data.player_id);
                 // Name will be entered in the lobby when claiming a seat
                 window.location.href = `/static/lobby.html?code=${code}`;
             } catch (e) {

@@ -1,5 +1,5 @@
 """
-effects.py — Effect resolution logic for Windfall.
+effects.py — Effect resolution logic for Cause & Effect.
 
 Extracted from models.py to cleanly separate data definitions (models.py)
 from runtime resolution logic (this module).
@@ -34,10 +34,10 @@ def _get_cards_data() -> dict:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _resolve_stockpile_target(state: "GameState", action: "Action", target_card):
+def _resolve_sequence_target(state: "GameState", action: "Action", target_card):
     """Identifies the owner and card for BOUNCE / STEAL / DESTROY targets."""
     tp = action.target_player
-    if target_card and target_card in state.pot:
+    if target_card and target_card in state.nexus:
         owner_action = next((a for a in state.stack if a.source_card == target_card), None)
         if owner_action:
             tp = owner_action.source_player
@@ -64,21 +64,21 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
     fizzle_reason = "Target no longer valid"
 
     for req in ability.target_requirements:
-        if req == TargetRequirement.POT_CARD:
-            if action.target_card and action.target_card in state.pot:
+        if req == TargetRequirement.NEXUS_CARD:
+            if action.target_card and action.target_card in state.nexus:
                 is_legal = True
                 break
         elif req in [TargetRequirement.OPPONENT_STOCK, TargetRequirement.OWN_STOCK, TargetRequirement.ANY_STOCK]:
             if action.target_card:
                 for p in state.players:
-                    if action.target_card in p.stockpile:
+                    if action.target_card in p.sequence:
                         is_legal = True
                         break
                 if is_legal:
                     break
         elif req == TargetRequirement.GRAVEYARD:
             if action.target_card and (
-                action.target_card in state.graveyard or action.target_card in state.pot
+                action.target_card in state.graveyard or action.target_card in state.nexus
             ):
                 is_legal = True
                 break
@@ -139,7 +139,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 if p.hand:
                     if not p.is_bot and view is None:
                         state.pending_action = {
-                            "type": "RESOLUTION_PITCH",
+                            "type": "RESOLUTION_ENTROPY",
                             "player_idx": state.players.index(p),
                             "card_name": action.source_card.name
                         }
@@ -165,7 +165,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 if p.hand:
                     if not p.is_bot and view is None:
                         state.pending_action = {
-                            "type": "RESOLUTION_PITCH",
+                            "type": "RESOLUTION_ENTROPY",
                             "player_idx": state.players.index(p),
                             "card_name": action.source_card.name,
                             "is_snatch": True
@@ -224,7 +224,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
 
 
         elif eff_type == "COUNTER_SPELL":
-            if target_cards and target_cards[0] in state.pot:
+            if target_cards and target_cards[0] in state.nexus:
                 targeted_card = target_cards[0]
                 targeted_action = next((a for a in state.stack if a.source_card == targeted_card), None)
                 src_name = targeted_action.source_player.name if targeted_action and targeted_action.source_player else "Unknown"
@@ -234,18 +234,18 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                     "card": targeted_card.name,
                     "message": f"  {tag} {ability.name} activates. Countered {src_name}'s {targeted_card.name}!",
                 })
-                state.log_event("TARGET_INFO", {"source": ability.name, "target": targeted_card.react_ability.name, "target_type": "POT"})
-                state.pot.remove(targeted_card)
+                state.log_event("TARGET_INFO", {"source": ability.name, "target": targeted_card.react_ability.name, "target_type": "NEXUS"})
+                state.nexus.remove(targeted_card)
                 targeted_card.owner = None
                 state.graveyard.append(targeted_card)
 
         elif eff_type == "BOUNCE_CARD":
             if target_cards:
-                tp, c = _resolve_stockpile_target(state, action, target_cards[0])
-                if tp and c in tp.stockpile:
+                tp, c = _resolve_sequence_target(state, action, target_cards[0])
+                if tp and c in tp.sequence:
                     state.log_event("EFFECT_RESULT", {"message": f"  {tag} {ability.name} activates. Returning {c.name} to {tp.name}'s hand."})
-                    state.log_event("TARGET_INFO", {"source": ability.name, "target": c.stockpile_ability.name, "target_type": "STOCK"})
-                    tp.stockpile.remove(c)
+                    state.log_event("TARGET_INFO", {"source": ability.name, "target": c.sequence_ability.name, "target_type": "STOCK"})
+                    tp.sequence.remove(c)
                     tp.hand.append(c)
 
         elif eff_type == "COPY_ABILITY":
@@ -282,15 +282,15 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                     state.graveyard.remove(c)
                     card_found = True
                     source_zone = "Graveyard"
-                elif c in state.pot:
-                    state.pot.remove(c)
+                elif c in state.nexus:
+                    state.nexus.remove(c)
                     card_found = True
-                    source_zone = "Pot"
+                    source_zone = "Nexus"
             if card_found:
                 c = target_cards[0]
                 dest_label = "top of deck" if destination == "deck_top" else f"{action.source_player.name}'s hand"
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. {c.name} moved from {source_zone} ⟶ {dest_label}."})
-                state.log_event("TARGET_INFO", {"source": ability.name, "target": c.stockpile_ability.name, "target_type": "GY/POT"})
+                state.log_event("TARGET_INFO", {"source": ability.name, "target": c.sequence_ability.name, "target_type": "GY/NEXUS"})
                 if destination == "deck_top":
                     c.owner = None
                     state.deck.insert(0, c)
@@ -299,37 +299,37 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                     action.source_player.hand.append(c)
 
         elif eff_type == "STEAL_CARD":
-            tp, c = _resolve_stockpile_target(state, action, target_cards[0] if target_cards else None)
+            tp, c = _resolve_sequence_target(state, action, target_cards[0] if target_cards else None)
             if not tp:
                 state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name}: no valid target found."})
                 continue
-            if c in state.pot:
-                state.pot.remove(c)
+            if c in state.nexus:
+                state.nexus.remove(c)
                 state.stack = [a for a in state.stack if a.source_card != c]
                 c.owner = action.source_player
-                action.source_player.stockpile.append(c)
-                state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stole {c.name} from {tp.name}'s Pot!"})
+                action.source_player.sequence.append(c)
+                state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stole {c.name} from {tp.name}'s Nexus!"})
                 state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {c.name} now activates for {action.source_player.name}!"})
                 from models import Action as _ActCls
-                state.stack.append(_ActCls(action.source_player, c, "stockpile", triggered=True))
-            elif tp.stockpile:
-                target_to_steal = c if c in tp.stockpile else random.choice(tp.stockpile)
+                state.stack.append(_ActCls(action.source_player, c, "sequence", triggered=True))
+            elif tp.sequence:
+                target_to_steal = c if c in tp.sequence else random.choice(tp.sequence)
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stealing {target_to_steal.name} from {tp.name}."})
-                tp.stockpile.remove(target_to_steal)
+                tp.sequence.remove(target_to_steal)
                 target_to_steal.owner = action.source_player
-                action.source_player.stockpile.append(target_to_steal)
+                action.source_player.sequence.append(target_to_steal)
                 state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {target_to_steal.name} now activates for {action.source_player.name}!"})
                 from models import Action as _ActCls
-                state.stack.append(_ActCls(action.source_player, target_to_steal, "stockpile", triggered=True))
+                state.stack.append(_ActCls(action.source_player, target_to_steal, "sequence", triggered=True))
             else:
                 state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name}: {tp.name} has no cards to steal."})
 
         elif eff_type == "DESTROY_CARD":
-            tp, c = _resolve_stockpile_target(state, action, target_cards[0] if target_cards else None)
-            if tp and tp.stockpile:
-                target_to_destroy = c if c in tp.stockpile else random.choice(tp.stockpile)
-                state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Destroyed {target_to_destroy.name} in {tp.name}'s stockpile."})
-                tp.stockpile.remove(target_to_destroy)
+            tp, c = _resolve_sequence_target(state, action, target_cards[0] if target_cards else None)
+            if tp and tp.sequence:
+                target_to_destroy = c if c in tp.sequence else random.choice(tp.sequence)
+                state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Destroyed {target_to_destroy.name} in {tp.name}'s sequence."})
+                tp.sequence.remove(target_to_destroy)
                 target_to_destroy.owner = None
                 state.graveyard.append(target_to_destroy)
                 state.log_event("CARD_DESTROYED", {"player": tp.name, "card": target_to_destroy.name})

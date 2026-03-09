@@ -1,14 +1,14 @@
 {
   "abilities": {
     "Hush": {
-      "description": "Counter target Stockpile placement or Reaction on the Stack.",
+      "description": "Counter target Sequence placement or Reaction on the Stack.",
       "console_description": "Counter target Stack/Stock.",
       "tags": [
         "React",
-        "Burn"
+        "Sever"
       ],
       "target_requirements": [
-        "POT_CARD"
+        "NEXUS_CARD"
       ],
       "effects": [
         {
@@ -67,8 +67,8 @@
       ]
     },
     "Redact": {
-      "description": "Return target Stockpile card to its owner's hand.",
-      "console_description": "Bounce target Stockpile card.",
+      "description": "Return target Sequence card to its owner's hand.",
+      "console_description": "Bounce target Sequence card.",
       "tags": [
         "React"
       ],
@@ -84,8 +84,8 @@
       ]
     },
     "Repeat": {
-      "description": "Copy a target Stockpile card from ANY player's Stockpile.",
-      "console_description": "Copy ANY Stockpile card.",
+      "description": "Copy a target Sequence card from ANY player's Sequence.",
+      "console_description": "Copy ANY Sequence card.",
       "tags": [
         "Stock"
       ],
@@ -100,14 +100,14 @@
       ]
     },
     "Reprise": {
-      "description": "Put target Graveyard card or active spell in the Pot on top of the deck.",
-      "console_description": "Top card from GY/Pot to deck.",
+      "description": "Put target Graveyard card or active spell in the Nexus on top of the deck.",
+      "console_description": "Top card from GY/Nexus to deck.",
       "tags": [
         "React"
       ],
       "target_requirements": [
         "GRAVEYARD",
-        "POT_CARD"
+        "NEXUS_CARD"
       ],
       "effects": [
         {
@@ -134,15 +134,15 @@
       ]
     },
     "Betray": {
-      "description": "Steal target opponent's Stockpile card. Its Stockpile ability triggers for you.",
+      "description": "Steal target opponent's Sequence card. Its Sequence ability triggers for you.",
       "console_description": "Steal & Trigger enemy card.",
       "tags": [
         "React",
-        "Pitch"
+        "Entropy"
       ],
       "target_requirements": [
         "OPPONENT_STOCK",
-        "POT_CARD"
+        "NEXUS_CARD"
       ],
       "effects": [
         {
@@ -152,7 +152,7 @@
       ]
     },
     "Crush": {
-      "description": "Destroy target opponent's Stockpile card.",
+      "description": "Destroy target opponent's Sequence card.",
       "tags": [
         "Stock"
       ],

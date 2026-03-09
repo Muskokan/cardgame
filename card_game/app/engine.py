@@ -24,7 +24,7 @@ class GameState:
         self.deck: List[Card] = generate_full_deck()
         random.shuffle(self.deck)
         self.graveyard: List[Card] = []
-        self.pot: List[Card] = []
+        self.nexus: List[Card] = []
         
         self.players: List[Player] = []
         
@@ -108,7 +108,7 @@ class GameState:
             "num_players": len(self.players),
             "starting_player": self.get_active_player().name,
             "mode": self.mode,
-            "message": f"\n--- Starting Windfall ({self.mode.upper()}) ---"
+            "message": f"\n--- Starting Cause & Effect ({self.mode.upper()}) ---"
         })
         
         # Deal cards: One by one in round-robin fashion (5 rounds)
@@ -161,7 +161,7 @@ class GameState:
             "priority_player_idx": self.priority_player_idx,
             "deck_count": len(self.deck),
             "graveyard": [c.to_dict() for c in self.graveyard],
-            "pot": [c.to_dict() for c in self.pot],
+            "nexus": [c.to_dict() for c in self.nexus],
             "stack": [a.to_dict() for a in self.stack],
             "players": [p.to_dict(include_hand=(p == perspective_player)) for p in self.players],
             "event_history": self.event_history,
@@ -329,7 +329,7 @@ class GameState:
             return
             
         elif self.current_phase == Phase.RESOLUTION:
-            if action_type in ["SNATCH_PICK", "RESOLUTION_PITCH"] and self.pending_action and self.pending_action.get("type") == action_type:
+            if action_type in ["SNATCH_PICK", "RESOLUTION_ENTROPY"] and self.pending_action and self.pending_action.get("type") == action_type:
                 self.submit_pending_input(kwargs)
             return
 
@@ -346,7 +346,7 @@ class GameState:
                 idx = kwargs.get("card_index", -1)
                 if 0 <= idx < len(player.hand):
                     played_card = player.hand.pop(idx)
-                    self._commit_card_play(player, played_card, 'stockpile')
+                    self._commit_card_play(player, played_card, 'sequence')
                         
         elif self.current_phase == Phase.REACTION_SELECTION:
             priority_p = self.players[self.priority_player_idx]
@@ -370,18 +370,18 @@ class GameState:
                     self._commit_card_play(player, react_card, 'react')
                     
     def _commit_card_play(self, player: Player, card: Card, action_type: str):
-        # Put the card physically on the "Field/Pot" while resolving
-        self.pot.append(card)
+        # Put the card physically on the "Field/Nexus" while resolving
+        self.nexus.append(card)
         
         action = Action(player, card, action_type)
         
         # Log to event history and store index
-        if action_type == 'stockpile':
+        if action_type == 'sequence':
             idx = self.log_event("CARD_STOCKED", {
                 "player": player.name, 
                 "card": card.name,
-                "ability": card.stockpile_ability.name,
-                "description": card.stockpile_ability.description
+                "ability": card.sequence_ability.name,
+                "description": card.sequence_ability.description
             })
         else:
             idx = self.log_event("CARD_REACTED", {
@@ -393,17 +393,17 @@ class GameState:
         
         action.history_idx = idx
         action.recap_idx = len(self.turn_history) - 1
-        # Mark as in the Pot ⚱
+        # Mark as in the Nexus ⚱
         self.update_action_status(action, '⚡' if action_type == 'react' else '✦', '⚱')
         self.stack.append(action)
         
-        ability = card.react_ability if action_type == 'react' else card.stockpile_ability
+        ability = card.react_ability if action_type == 'react' else card.sequence_ability
         
         needs_cost = False
         cost_tag = None
         if ability.tags:
             for tag in ability.tags:
-                if tag.name in ["Pitch", "Burn", "Choice"]:
+                if tag.name in ["Entropy", "Sever", "Choice"]:
                     needs_cost = True
                     cost_tag = tag
                     break
@@ -446,7 +446,7 @@ class GameState:
             self._handle_cost_selection(data, pending, action, player)
         elif p_type == "TARGET_SELECTION":
             self._handle_target_selection(data, action)
-        elif p_type in ["RESOLUTION_PITCH", "SNATCH_PICK"]:
+        elif p_type in ["RESOLUTION_ENTROPY", "SNATCH_PICK"]:
             self.pending_input_result = data
             self.pending_action = None
             if self.stack:
@@ -455,19 +455,19 @@ class GameState:
                 self._set_phase(Phase.REVIEW)
 
     def _handle_cost_selection(self, data: Dict[str, Any], pending: Dict[str, Any], action, player):
-        """Handles cost-payment input (Pitch / Burn / Choice narrowing)."""
+        """Handles cost-payment input (Entropy / Sever / Choice narrowing)."""
         choice = data.get("choice")
         tag = pending.get("tag")
-        # Only narrow/early-return for modal "Choice" tags (e.g. Redact: pick Pitch OR Burn).
-        # Simple Pitch/Burn tags (e.g. Hush's EXTRA_PITCH) must fall through to payment directly.
+        # Only narrow/early-return for modal "Choice" tags (e.g. Redact: pick Entropy OR Sever).
+        # Simple Entropy/Sever tags (e.g. Hush's EXTRA_ENTROPY) must fall through to payment directly.
         is_modal_choice = tag and tag.name == "Choice"
-        if choice in ["Pitch", "Burn"] and is_modal_choice:
+        if choice in ["Entropy", "Sever"] and is_modal_choice:
             pending["requirements"] = [choice]
             self.log_event("NARRATIVE", {"message": f"  - {player.name} chose to {choice}."})
             return  # Frontend will refresh and show just that cost as selectable
 
         cost_type = data.get("cost_type") or choice  # Handle both formats
-        if cost_type == "Pitch":
+        if cost_type == "Entropy":
             p_idx = int(data.get("card_index", -1))
             if p_idx == -1 and player.hand:
                 p_idx = 0  # Fallback: pitch first card
@@ -476,25 +476,25 @@ class GameState:
                 self.graveyard.append(pitched)
                 self.log_event("NARRATIVE", {"message": f"  -> {player.name} pitched {pitched.name} as a cost."})
 
-        elif cost_type == "Burn":
+        elif cost_type == "Sever":
             cost_name = data.get("card_name")
             cost_idx = data.get("card_index")
             cost_card = None
-            if cost_idx is not None and 0 <= int(cost_idx) < len(player.stockpile):
-                cost_card = player.stockpile[int(cost_idx)]
+            if cost_idx is not None and 0 <= int(cost_idx) < len(player.sequence):
+                cost_card = player.sequence[int(cost_idx)]
             elif cost_name:
-                cost_card = next((c for c in player.stockpile if c.name == cost_name), None)
+                cost_card = next((c for c in player.sequence if c.name == cost_name), None)
             if cost_card:
-                player.stockpile.remove(cost_card)
+                player.sequence.remove(cost_card)
                 self.graveyard.append(cost_card)
                 self.log_event("NARRATIVE", {"message": f"  -> {player.name} burned {cost_card.name} as a cost."})
-            elif player.stockpile:  # Fallback: burn first card
-                cost_card = player.stockpile.pop(0)
+            elif player.sequence:  # Fallback: burn first card
+                cost_card = player.sequence.pop(0)
                 self.graveyard.append(cost_card)
                 self.log_event("NARRATIVE", {"message": f"  -> {player.name} burned {cost_card.name} as a cost."})
 
         if pending.get("needs_target_after"):
-            ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.stockpile_ability
+            ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.sequence_ability
             self.pending_action = {
                 "type": "TARGET_SELECTION",
                 "player_idx": self.players.index(player),
@@ -521,21 +521,21 @@ class GameState:
         if t_card_idx is not None:
             idx = int(t_card_idx)
             t_zone = data.get("target_zone")
-            ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.stockpile_ability
+            ability = action.source_card.react_ability if action.ability_type == 'react' else action.source_card.sequence_ability
             reqs = ability.target_requirements
 
             if t_zone == 'graveyard' and 0 <= idx < len(self.graveyard):
                 action.target_card = self.graveyard[idx]
-            elif t_zone == 'pot' and 0 <= idx < len(self.pot):
-                action.target_card = self.pot[idx]
-            elif action.target_player and 0 <= idx < len(action.target_player.stockpile):
-                action.target_card = action.target_player.stockpile[idx]
+            elif t_zone == 'nexus' and 0 <= idx < len(self.nexus):
+                action.target_card = self.nexus[idx]
+            elif action.target_player and 0 <= idx < len(action.target_player.sequence):
+                action.target_card = action.target_player.sequence[idx]
             else:
                 # Fallback zone resolution
-                if action.target_player and 0 <= idx < len(action.target_player.stockpile):
-                    action.target_card = action.target_player.stockpile[idx]
-                elif TargetRequirement.POT_CARD in reqs and 0 <= idx < len(self.pot):
-                    action.target_card = self.pot[idx]
+                if action.target_player and 0 <= idx < len(action.target_player.sequence):
+                    action.target_card = action.target_player.sequence[idx]
+                elif TargetRequirement.NEXUS_CARD in reqs and 0 <= idx < len(self.nexus):
+                    action.target_card = self.nexus[idx]
                 elif TargetRequirement.GRAVEYARD in reqs and 0 <= idx < len(self.graveyard):
                     action.target_card = self.graveyard[idx]
 
@@ -593,8 +593,8 @@ class GameState:
         return False
 
     def check_win_condition(self, player: Player) -> bool:
-        """Checks if a player has met the Stockpile win conditions."""
-        sp = player.stockpile
+        """Checks if a player has met the Sequence win conditions."""
+        sp = player.sequence
         if len(sp) < 5:
             return False
             
@@ -647,11 +647,11 @@ class GameState:
                 })
                 action.resolving = True
                 
-                if not action.triggered and action.source_card not in self.pot:
+                if not action.triggered and action.source_card not in self.nexus:
                     self.log_event("ACTION_FIZZLED", {
                         "player": action.source_player.name,
                         "card": action.source_card.name,
-                        "reason": "Card is no longer in the pot"
+                        "reason": "Card is no longer in the nexus"
                     })
                     self.update_action_status(action, "❌", "🪦")
                     self.stack.pop()
@@ -659,8 +659,8 @@ class GameState:
 
                 if action.ability_type == 'react':
                     action.generator = action.source_card.execute_react(self, action, self.view)
-                elif action.ability_type == 'stockpile':
-                    action.generator = action.source_card.execute_stockpile(self, action, self.view)
+                elif action.ability_type == 'sequence':
+                    action.generator = action.source_card.execute_sequence(self, action, self.view)
 
             if action.generator:
                 import types
@@ -676,16 +676,16 @@ class GameState:
             self.stack.pop()  # Action is fully resolved
 
             if action.ability_type == 'react':
-                if action.source_card in self.pot:
-                    self.pot.remove(action.source_card)
+                if action.source_card in self.nexus:
+                    self.nexus.remove(action.source_card)
                     action.source_card.owner = None
                     self.graveyard.append(action.source_card)
                     self.update_action_status(action, "✓", "🪦")
-            elif action.ability_type == 'stockpile':
-                if action.source_card in self.pot:
-                    self.pot.remove(action.source_card)
+            elif action.ability_type == 'sequence':
+                if action.source_card in self.nexus:
+                    self.nexus.remove(action.source_card)
                     action.source_card.owner = action.source_player
-                    action.source_player.stockpile.append(action.source_card)
+                    action.source_player.sequence.append(action.source_card)
                     self.update_action_status(action, "✓", "✦")
             
             if self.check_any_winner():

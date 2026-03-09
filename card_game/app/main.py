@@ -167,33 +167,33 @@ def handle_pending_action(state: GameState, view: ConsoleView):
     
     if p_type == "COST_SELECTION":
         tag = pending["tag"]
-        if tag.name == "Pitch":
+        if tag.name == "Entropy":
             if player.is_bot:
                 import random
                 p_idx = random.randint(0, len(player.hand) - 1)
             else:
-                view.log(f"Choose an EXTRA card from your hand to [Pitch] as a cost:")
+                view.log(f"Choose an EXTRA card from your hand to [Entropy] as a cost:")
                 p_idx = view.prompt_choice("Card", [c.name for c in player.hand])
-            state.submit_pending_input({"cost_type": "Pitch", "card_index": p_idx})
+            state.submit_pending_input({"cost_type": "Entropy", "card_index": p_idx})
             
-        elif tag.name == "Burn":
+        elif tag.name == "Sever":
             if player.is_bot:
-                cost_card = ai.bot_choose_target_stockpile_card(player, state, player)
+                cost_card = ai.bot_choose_target_sequence_card(player, state, player)
                 c_name = cost_card.name if cost_card else ""
             else:
-                view.log(f"Choose a card in YOUR stockpile to [Burn] as a cost:")
-                unique_names = list(set([c.name for c in player.stockpile]))
+                view.log(f"Choose a card in YOUR sequence to [Sever] as a cost:")
+                unique_names = list(set([c.name for c in player.sequence]))
                 if unique_names:
                     c_idx = view.prompt_choice("Your Stock Card", unique_names)
                     c_name = unique_names[c_idx]
                 else:
                     c_name = ""
-            state.submit_pending_input({"cost_type": "Burn", "card_name": c_name})
+            state.submit_pending_input({"cost_type": "Sever", "card_name": c_name})
             
         elif tag.name == "Choice":
             opts = tag.params.get("options", [])
-            can_pitch = "Pitch" in opts and len(player.hand) > 0
-            can_destroy = "Burn" in opts and len(player.stockpile) > 0
+            can_pitch = "Entropy" in opts and len(player.hand) > 0
+            can_destroy = "Sever" in opts and len(player.sequence) > 0
             
             cost_choice = -1
             if player.is_bot:
@@ -203,32 +203,32 @@ def handle_pending_action(state: GameState, view: ConsoleView):
             else:
                 view.log(f"Choose how to pay the cost:")
                 avail_opts = []
-                if can_pitch: avail_opts.append("Pitch an extra card from your hand")
-                if can_destroy: avail_opts.append("Burn a card in your Stockpile")
+                if can_pitch: avail_opts.append("Entropy an extra card from your hand")
+                if can_destroy: avail_opts.append("Sever a card in your Sequence")
                 if not avail_opts:
                     return # Handled by engine fizzle if they submit bad choice or engine shouldn't prompt if unable to pay
                 c_idx = view.prompt_choice("Cost Type", avail_opts)
                 chosen_opt = avail_opts[c_idx]
-                cost_choice = 0 if "Pitch" in chosen_opt else 1
+                cost_choice = 0 if "Entropy" in chosen_opt else 1
                 
             if cost_choice == 0:
                 if player.is_bot:
                     import random
                     p_idx = random.randint(0, len(player.hand) - 1)
                 else:
-                    view.log(f"Choose a card to [Pitch]:")
+                    view.log(f"Choose a card to [Entropy]:")
                     p_idx = view.prompt_choice("Card", [c.name for c in player.hand])
-                state.submit_pending_input({"cost_type": "Pitch", "card_index": p_idx})
+                state.submit_pending_input({"cost_type": "Entropy", "card_index": p_idx})
             else:
                 if player.is_bot:
-                    cost_card = ai.bot_choose_target_stockpile_card(player, state, player)
+                    cost_card = ai.bot_choose_target_sequence_card(player, state, player)
                     c_name = cost_card.name if cost_card else ""
                 else:
-                    view.log(f"Choose a card in your Stockpile to [Burn]:")
-                    unique_names = list(set([c.name for c in player.stockpile]))
+                    view.log(f"Choose a card in your Sequence to [Sever]:")
+                    unique_names = list(set([c.name for c in player.sequence]))
                     s_idx = view.prompt_choice("Stock Card", unique_names)
                     c_name = unique_names[s_idx]
-                state.submit_pending_input({"cost_type": "Burn", "card_name": c_name})
+                state.submit_pending_input({"cost_type": "Sever", "card_name": c_name})
 
     elif p_type == "TARGET_SELECTION":
         reqs = pending.get("requirements", [])
@@ -246,8 +246,8 @@ def handle_pending_action(state: GameState, view: ConsoleView):
                     valid_targets.append((opp, None, None, f"[Player] {opp.name}"))
                     
             elif req == TargetRequirement.OPPONENT_STOCK:
-                for opp in [p for p in state.players if p != player and p.stockpile]:
-                    for c in opp.stockpile:
+                for opp in [p for p in state.players if p != player and p.sequence]:
+                    for c in opp.sequence:
                         valid_targets.append((opp, c, None, f"[{opp.name}'s Stock] {c.name}"))
 
             elif req == TargetRequirement.GRAVEYARD:
@@ -256,14 +256,14 @@ def handle_pending_action(state: GameState, view: ConsoleView):
 
             elif req == TargetRequirement.ANY_STOCK:
                 for p in state.players:
-                    for c in p.stockpile:
+                    for c in p.sequence:
                         valid_targets.append((p, c, c.name, f"[{p.name}'s Stock] {c.name}"))
                         
-            elif req == TargetRequirement.POT_CARD:
-                for c in state.pot:
+            elif req == TargetRequirement.NEXUS_CARD:
+                for c in state.nexus:
                     owner_action = next((a for a in state.stack if a.source_card == c), None)
                     if owner_action and owner_action.source_player != player:
-                        valid_targets.append((None, c, None, f"[Pot: {owner_action.source_player.name}] {c.name}"))
+                        valid_targets.append((None, c, None, f"[Nexus: {owner_action.source_player.name}] {c.name}"))
                         
         if not valid_targets:
             target_player, target_card, copied_name = None, None, None
@@ -284,7 +284,7 @@ def handle_pending_action(state: GameState, view: ConsoleView):
 
 def play_game():
     view = ConsoleView()
-    view.log("Welcome to Windfall Card Game!")
+    view.log("Welcome to Cause & Effect Card Game!")
     mode, total_players, ai_count, human_names = configure_game(view)
     state = GameState(num_players=total_players, num_bots=ai_count, mode=mode, human_names=human_names, view=view)
     
@@ -335,8 +335,8 @@ def play_game():
                     while True:
                         choice_idx = view.show_card_menu(priority_p, state, mode="REACT")
                         chosen_card = priority_p.hand[choice_idx]
-                        if chosen_card.react_ability.name == "Betray" and len(priority_p.stockpile) == 0:
-                            view.log("\n[ERROR] You cannot play Betray without a card in your Stockpile to destroy.\n")
+                        if chosen_card.react_ability.name == "Betray" and len(priority_p.sequence) == 0:
+                            view.log("\n[ERROR] You cannot play Betray without a card in your Sequence to destroy.\n")
                             continue
                         break
                     state.process_input(priority_p, "REACT", card_index=choice_idx)
@@ -364,7 +364,7 @@ def play_game():
     # Final board show
     view.show_board(state)
     if state.winner:
-        view.log(f"\nCongratulations {state.winner.name}! You have won Windfall!")
+        view.log(f"\nCongratulations {state.winner.name}! You have won Cause & Effect!")
     else:
         view.log("\nThe game ended in a draw.")
 def signal_handler(sig, frame):

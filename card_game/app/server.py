@@ -86,7 +86,7 @@ async def get_room_state(code: str):
         "active_player": state.players[state.active_player_idx].name,
         "players": players_full,
         "deck_count": len(state.deck),
-        "pot": [c.to_dict() for c in state.pot],
+        "nexus": [c.to_dict() for c in state.nexus],
         "graveyard": [c.to_dict() for c in state.graveyard],
         "stack": [a.to_dict() for a in state.stack],
         "full_history": state.full_history,
