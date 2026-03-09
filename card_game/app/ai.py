@@ -102,9 +102,9 @@ class HistoryAnalyzer:
         for entry in reversed(state.full_history):
             if entry["event"] == "NARRATIVE":
                 msg = entry["data"].get("message", "")
-                if "[SUCCESS] Cease & Desist counters" in msg and player.name in msg:
+                if "[SUCCESS] Stagnation counters" in msg and player.name in msg:
                     return True
-                if "causeed" in msg and player.name in msg: 
+                if "sequenced" in msg and player.name in msg: 
                     return False
         return False
 
@@ -295,8 +295,8 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
 
         # Reprise: use to deny a key graveyard target or soft-counter a powerful Nexus card
         if any(e == "MOVE_CARD" for e in effect_types):
-            # Deny graveyard if opponents could Return a high-value card
-            high_value = {"Crash", "Call", "Earnings", "Recoup"}
+            # Deny graveyard if opponents could Echo a high-value card
+            high_value = {"Erosion", "Pressure", "Momentum", "Echo"}
             gy_targets = [c for c in state.graveyard if c.name in high_value]
             nexus_high_value = [a for a in state.stack if a.source_player != bot
                               and a.source_card in state.nexus
@@ -331,7 +331,7 @@ def bot_choose_void_pick(bot: Player, void_pool: List[Card]) -> int:
             
     # Priority 2: High value cards
     for idx, card in enumerate(void_pool):
-        if card.name in ["Earnings", "Call", "Crash"]:
+        if card.name in ["Momentum", "Pressure", "Erosion"]:
             return idx
             
     # Priority 3: Anything we don't already have (diversity)
@@ -356,7 +356,7 @@ def bot_choose_target_sequence_card(bot: Player, state: 'GameState', target_play
         
     # Otherwise, pick a high value card if it exists
     for card in target_player.sequence:
-        if card.name in ["Earnings", "Call", "Crash"]: return card
+        if card.name in ["Momentum", "Pressure", "Erosion"]: return card
         
     return random.choice(target_player.sequence)
 

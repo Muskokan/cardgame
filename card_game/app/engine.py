@@ -392,7 +392,7 @@ class GameState:
         
         # Log to event history and store index
         if action_type == 'sequence':
-            idx = self.log_event("CARD_CAUSEED", {
+            idx = self.log_event("CARD_SEQUENCED", {
                 "player": player.name, 
                 "card": card.name,
                 "ability": card.sequence_ability.name,

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+Card_Power_Analysis.txt
+Card Power Analysis.txt
+debug_crash.txt
+.env

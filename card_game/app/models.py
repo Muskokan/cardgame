@@ -19,13 +19,13 @@ class Phase(Enum):
 
 class TargetRequirement(Enum):
     NONE = 0
-    PLAYER = 1             # Targeted opponent (e.g. Blank/Check)
-    OPPONENT_CAUSE = 2     # Specific card in opponent sequence (e.g. Crush, Redact)
-    OWN_CAUSE = 3          # Specific card in own sequence (e.g. Betray cost)
-    EXTRA_ENTROPY = 7        # Entropy one extra card from hand (e.g. Hush cost)
-    REDACT_COST = 8        # Modal: Entropy 1 card OR Destroy 1 sequence card (Redact cost)
+    PLAYER = 1             # Targeted opponent (e.g. Pressure)
+    OPPONENT_CAUSE = 2     # Specific card in opponent sequence (e.g. Erosion, Reflection)
+    OWN_CAUSE = 3          # Specific card in own sequence (e.g. Assimilation cost)
+    EXTRA_ENTROPY = 7        # Entropy one extra card from hand (e.g. Stagnation cost)
+    REDACT_COST = 8        # Modal: Entropy 1 card OR Destroy 1 sequence card (Reflection cost)
     GRAVEYARD = 9          # Target a card in the graveyard
-    NEXUS_CARD = 10          # Target a card currently in the nexus (e.g. Hush)
+    NEXUS_CARD = 10          # Target a card currently in the nexus (e.g. Stagnation)
     ANY_CAUSE = 11         # Target any card in any player's sequence
 
 class Tag:
@@ -123,7 +123,7 @@ class Ability:
             elif t == "BOUNCE_CARD":
                 effect_texts.append("Bounce")
             elif t == "COPY_ABILITY":
-                effect_texts.append("Repeat")
+                effect_texts.append("Resonance")
             elif t == "MOVE_CARD":
                 dest = "Hand" if eff.destination == "hand" else "Top"
                 effect_texts.append(f"Regen->{dest}")
@@ -202,7 +202,7 @@ class BotProfile:
     base_reaction_chance: float = 0.20 # 0.0 to 1.0
     aggression_weight: float = 1.0 # 0.0 (random) to 1.0 (strict threat evaluation)
     grudge_memory_weight: float = 1.0 # Multiplier for grudges (e.g., 1.5x)
-    tempo_hand_threshold: int = 5 # Hand size needed to trigger early-game tempo Hush counters (higher means less likely)
+    tempo_hand_threshold: int = 5 # Hand size needed to trigger early-game tempo Stagnation counters (higher means less likely)
     combo_snatch_chance: float = 0.0 # 0.0 to 1.0 probability to attempt a Reprise Snatch on costs
     win_con_flexibility: float = 0.5 # Threshold needed to commit to monochrome lane based on dupes.
 

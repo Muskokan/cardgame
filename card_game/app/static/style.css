@@ -1,6 +1,6 @@
 :root {
     --bg-color: #06090e;
-    /* Deep Bloomberg Terminal Black */
+    /* Deep Void Black */
     --glass-bg: rgba(10, 15, 20, 0.85);
     --glass-border: rgba(0, 240, 255, 0.15);
     /* Tech Cyan */
@@ -10,11 +10,11 @@
     --text-secondary: #94a3b8;
     --card-bg: #0d131a;
     --success: #00ff41;
-    /* Bull Market Green */
+    /* Success Green */
     --error: #ff3333;
-    /* Bear Market Red */
+    /* Crisis Red */
     --warning: #fbbf24;
-    /* Gold */
+    /* Alert Gold */
 }
 
 

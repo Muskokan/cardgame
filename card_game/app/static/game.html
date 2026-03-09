@@ -550,7 +550,7 @@
             color: #000;
         }
 
-        .btn-play.causeing {
+        .btn-play.causing {
             background: #f0883e;
         }
 
@@ -1041,9 +1041,9 @@
     <!-- Event Log -->
     <div id="event-log"></div>
 
-    <!-- Diversify pick overlay -->
+    <!-- Vacuum pick overlay -->
     <div id="snatch-overlay">
-        <div id="snatch-title">⚡ DIVERSIFY — Pick a card to take</div>
+        <div id="snatch-title">⚡ VACUUM — Pick a card to take</div>
         <div id="snatch-cards"></div>
     </div>
 
@@ -1235,7 +1235,7 @@
                     const isCauseTarget = phase === 'TARGETING' && isMyTargetTurn &&
                         (pending.requirements?.includes('ANY_CAUSE') ||
                             (pending.requirements?.includes('OPPONENT_CAUSE') && p.external_id !== token));
-                    const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
+                    const tooltipText = `${card.name}\n\nCAUSE: ${card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
                     causeHtml += `<div class="mini-card ${isCauseTarget ? 'selectable-target' : ''}"
         id="cause-${idx}-${sIdx}"
         title="${tooltipText}"
@@ -1301,7 +1301,7 @@
                 state.players[pendingIdx]?.external_id === token;
 
             if (!state.nexus || state.nexus.length === 0) {
-                nexus.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">ORDER BOOK</span>';
+                nexus.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">THE NEXUS</span>';
             } else {
                 state.nexus.forEach((card, idx) => {
                     const sa = state.stack?.find(a => a.source_card_name === card.name);
@@ -1311,7 +1311,7 @@
                     const nexusTargetable = phase === 'TARGETING' && isMyTargetTurn &&
                         pending.requirements?.includes('NEXUS_CARD');
 
-                    const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
+                    const tooltipText = `${card.name}\n\nCAUSE: ${card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
 
                     const el = document.createElement('div');
                     el.className = 'nexus-card' +
@@ -1352,7 +1352,7 @@
             document.getElementById('my-name').textContent =
                 (isMyTurn ? '➡ ' : '') + (hasPriority && phase === 'REACTION_SELECTION' ? '⚡ ' : '') + me.name;
             document.getElementById('my-cause-label').textContent =
-                `Momentum: ${me.sequence.length} | Nexus: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
+                `Sequence: ${me.sequence.length} | Hand: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
 
             // My sequence
             const spRow = document.getElementById('my-sequence-row');
@@ -1364,7 +1364,7 @@
                     (pending.requirements?.includes('Sever') || pending.requirements?.includes('REDACT_COST'));
                 const isCauseTarget = phase === 'TARGETING' && isMyTargetTurn &&
                     (pending.requirements?.includes('ANY_CAUSE') || pending.requirements?.includes('OWN_CAUSE'));
-                const tooltipText = `${card.name}\n\nCAUSE: ${card.stock_desc || card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
+                const tooltipText = `${card.name}\n\nCAUSE: ${card.cause_desc || ''}\n\nEFFECT: ${card.react_desc || ''}`;
                 const el = document.createElement('div');
                 el.id = `cause-${card.id}`;
                 el.className = 'mini-card cause-mine' +
@@ -1490,10 +1490,10 @@
             cancelBtn.onclick = () => sendAction('CANCEL', {});
             
             if (canCause) {
-                playBtn.classList.add('causeing');
+                playBtn.classList.add('causing');
                 playBtn.textContent = 'CAUSE CARD';
             } else {
-                playBtn.classList.remove('causeing');
+                playBtn.classList.remove('causing');
                 playBtn.textContent = 'EFFECT CARD';
             }
             
@@ -1503,7 +1503,7 @@
             endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
 
             if (phase === 'CAUSE_CARD_SELECTION' && isMyTurn)
-                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'CAUSE ↓' : 'Pick a card to invest');
+                label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'CAUSE ↓' : 'Pick a card to sequence');
             else if (phase === 'REACTION_SELECTION' && hasPriority)
                 label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'EFFECT or PASS ↓' : 'Select a card to effect, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
@@ -1534,7 +1534,7 @@
                 document.getElementById('cost-options').innerHTML = '<button class="btn btn-pass" style="background:#442d2d;color:#ff7b72;border-color:#6e3636;" onclick="sendAction(\'CANCEL\', {})">CANCEL ACTION</button>';
             } else if (pending?.type === 'RESOLUTION_ENTROPY' && isMyPending) {
                 bar.classList.add('visible');
-                const reason = pending.is_snatch ? "Diversify" : pending.card_name;
+                const reason = pending.is_snatch ? "Vacuum" : pending.card_name;
                 document.getElementById('cost-label').textContent = `You must pitch a card for ${reason}!`;
                 document.getElementById('cost-options').innerHTML = '';
             } else {

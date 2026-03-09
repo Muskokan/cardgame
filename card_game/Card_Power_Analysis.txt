@@ -1,20 +1,20 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                    CAUSE & EFFECT — CARD POWER ANALYSIS                      ║
-║                        Generated: 2026-03-09 15:43:55                        ║
+║                        Generated: 2026-03-09 15:57:39                        ║
 ║                     Data Source: 1,000 Simulated Games                      ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-  Win Conditions — 4 Identical: 294 (29.4%), 1 of Each 5: 706 (70.6%)
+  Win Conditions — 4 Identical: 34 (3.4%), 1 of Each 5: 966 (96.6%)
 
 ── CARD POWER RANKINGS ───────────────────────────────────────────────────────────
 
   CARD                 TIER   WIN RATE     RESOLVES     RESOLVE SHARE
   ───────────────────────────────────────────────────────────────────
-  Stasis/Echo          S       72.1%      7,796    ██████░░░░ 13.8%
-  Assimilation/Erosion A       67.6%     13,354    ██████████ 23.6%
-  Vacuum/Pressure      A       60.4%     12,422    ██████████ 22.0%
-  Stagnation/Momentum  A       59.7%     12,007    ██████████ 21.2%
-  Reflection/Resonance A       53.7%     10,959    █████████░ 19.4%
+  Stagnation/Momentum  A       58.7%     11,906    ██████████ 20.1%
+  Assimilation/Erosion A       58.6%     13,861    ██████████ 23.4%
+  Reflection/Resonance A       51.1%      9,324    ███████░░░ 15.7%
+  Vacuum/Pressure      A       50.9%     12,869    ██████████ 21.7%
+  Stasis/Echo          B       43.6%     11,327    █████████░ 19.1%
 
   TABLE NOTES
   ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─
@@ -32,62 +32,14 @@
 
   PLAYSTYLE        WINS       WIN RATE     VS FIELD
   ────────────────────────────────────────────────────
-  Defensive           268       26.8%    ████████
-  Aggressive          261       26.1%    ███████
-  Combo               254       25.4%    ███████
-  Ruthless            217       21.7%    ██████
+  Defensive           261       26.1%    ███████
+  Aggressive          249       24.9%    ███████
+  Combo               247       24.7%    ███████
+  Ruthless            243       24.3%    ███████
 
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           INDIVIDUAL CARD REPORTS                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                                 STASIS/ECHO                                  │
-├──────────────────────────────────────────────────────────────────────────────┤
-│  Role: Dual (Cause & Effect)                                                 │
-│  Mechanic: Cause: Echo | Effect: Stasis                                      │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-  BALANCE SCORE   [───────────│───◆──────]   +2 / ±5   [OVERTUNED]
-  Win Rate: 72.1%  (avg: 48.7%  |  delta: +23.4%)
-  Resolves: 7796 
-
-  STRATEGIC OVERVIEW
-  ────────────────────────────────────────
-  ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 72.1% of winning sequences.
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                             ASSIMILATION/EROSION                             │
-├──────────────────────────────────────────────────────────────────────────────┤
-│  Role: Dual (Cause & Effect)                                                 │
-│  Mechanic: Cause: Erosion | Effect: Assimilation                             │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 67.6%  (avg: 48.7%  |  delta: +18.9%)
-  Resolves: 13354 
-
-  STRATEGIC OVERVIEW
-  ────────────────────────────────────────
-  ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 67.6% of winning sequences.
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                               VACUUM/PRESSURE                                │
-├──────────────────────────────────────────────────────────────────────────────┤
-│  Role: Dual (Cause & Effect)                                                 │
-│  Mechanic: Cause: Pressure | Effect: Vacuum                                  │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 60.4%  (avg: 48.7%  |  delta: +11.7%)
-  Resolves: 12422 
-
-  STRATEGIC OVERVIEW
-  ────────────────────────────────────────
-  ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 60.4% of winning sequences.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                             STAGNATION/MOMENTUM                              │
@@ -97,8 +49,23 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 59.7%  (avg: 48.7%  |  delta: +11.0%)
-  Resolves: 12007 
+  Win Rate: 58.7%  (avg: 48.7%  |  delta: +10.0%)
+  Resolves: 11906 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Consistently balanced performance across varied game states.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                             ASSIMILATION/EROSION                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Erosion | Effect: Assimilation                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 58.6%  (avg: 48.7%  |  delta: +9.9%)
+  Resolves: 13861 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────
@@ -112,8 +79,38 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 53.7%  (avg: 48.7%  |  delta: +5.0%)
-  Resolves: 10959 
+  Win Rate: 51.1%  (avg: 48.7%  |  delta: +2.4%)
+  Resolves: 9324 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Consistently balanced performance across varied game states.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                               VACUUM/PRESSURE                                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Pressure | Effect: Vacuum                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
+  Win Rate: 50.9%  (avg: 48.7%  |  delta: +2.2%)
+  Resolves: 12869 
+
+  STRATEGIC OVERVIEW
+  ────────────────────────────────────────
+  ✔ Consistently balanced performance across varied game states.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                 STASIS/ECHO                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  Role: Dual (Cause & Effect)                                                 │
+│  Mechanic: Cause: Echo | Effect: Stasis                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  BALANCE SCORE   [───────────◆──────────]   +0 / ±5   [BALANCED]
+  Win Rate: 43.6%  (avg: 48.7%  |  delta: -5.1%)
+  Resolves: 11327 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────

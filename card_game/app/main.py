@@ -54,7 +54,7 @@ def show_rules(view):
 
     width = 72
     print("\n" + "═" * width)
-    print(f"{'  WINDFALL — HOW TO PLAY':^{width}}")
+    print(f"{'  CAUSE & EFFECT — HOW TO PLAY':^{width}}")
     print("═" * width)
 
     for sec_idx, section in enumerate(sections):
@@ -97,7 +97,7 @@ def show_rules(view):
 
 def configure_game(view):
     while True:
-        view.log("\n--- WINDFALL ---")
+        view.log("\n--- CAUSE & EFFECT ---")
         setup_idx = view.prompt_choice("Main Menu", [
             "How to Play / Rules",
             "Quick Start — 1v1 (vs 1 AI)", 
