@@ -171,8 +171,7 @@ def predict_nexus_outcome(player: Player, state: 'GameState') -> float:
 
 def bot_choose_cause(bot: Player, state: 'GameState') -> int:
     """Returns the index of the card to cause."""
-    # print(f"\n  [AI] {bot.name} ({bot.bot_profile.name.upper()}) is thinking...")
-
+    
     def is_valuable_cause(card) -> bool:
         ability = card.sequence_ability
         if not ability: return False
@@ -182,6 +181,17 @@ def bot_choose_cause(bot: Player, state: 'GameState') -> int:
         if TargetRequirement.OPPONENT_CAUSE in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.ANY_CAUSE in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.PLAYER in reqs and not any(op.hand for op in opponents): return False
+        
+        # COST CHECK
+        for tag in ability.tags:
+            if tag.name == "Entropy" and len(bot.hand) <= 1: return False # Need at least ONE OTHER card to pitch
+            if tag.name == "Sever" and not bot.sequence: return False
+            if tag.name == "Choice":
+                options = tag.params.get("options", [])
+                can_entropy = "Entropy" in options and len(bot.hand) >= 2 # Card itself + 1 to pitch
+                can_sever = "Sever" in options and len(bot.sequence) >= 1
+                if not (can_entropy or can_sever): return False
+
         return True
 
     sequence_names = [c.name for c in bot.sequence]
@@ -220,8 +230,14 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
     def is_usable_reaction(card) -> bool:
         ability = card.react_ability
         if not ability: return False
-        if ability.has_tag("Entropy") and len(bot.hand) <= 1: return False
-        if ability.has_tag("Sever") and len(bot.sequence) == 0: return False
+        if ability.has_tag("Entropy") and len(bot.hand) <= 1: return False # Reaction itself + 1 to pitch
+        if ability.has_tag("Sever") and not bot.sequence: return False
+        if ability.has_tag("Choice"):
+            tag = ability.get_tag("Choice")
+            options = tag.params.get("options", [])
+            can_entropy = "Entropy" in options and len(bot.hand) >= 2
+            can_sever = "Sever" in options and len(bot.sequence) >= 1
+            if not (can_entropy or can_sever): return False
         reqs = ability.target_requirements
         opponents = [p for p in state.players if p != bot]
         if TargetRequirement.NEXUS_CARD in reqs and not state.nexus: return False

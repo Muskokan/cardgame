@@ -1,20 +1,20 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                    CAUSE & EFFECT — CARD POWER ANALYSIS                      ║
-║                        Generated: 2026-03-09 15:28:52                        ║
+║                        Generated: 2026-03-09 15:43:55                        ║
 ║                     Data Source: 1,000 Simulated Games                      ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-  Win Conditions — 4 Identical: 263 (26.3%), 1 of Each 5: 737 (73.7%)
+  Win Conditions — 4 Identical: 294 (29.4%), 1 of Each 5: 706 (70.6%)
 
 ── CARD POWER RANKINGS ───────────────────────────────────────────────────────────
 
   CARD                 TIER   WIN RATE     RESOLVES     RESOLVE SHARE
   ───────────────────────────────────────────────────────────────────
-  Stasis/Echo          S       74.3%      7,970    ██████░░░░ 14.0%
-  Assimilation/Erosion A       66.6%     13,331    ██████████ 23.4%
-  Vacuum/Pressure      A       61.5%     12,509    ██████████ 22.0%
-  Stagnation/Momentum  A       59.7%     12,055    ██████████ 21.2%
-  Reflection/Resonance A       57.7%     11,109    █████████░ 19.5%
+  Stasis/Echo          S       72.1%      7,796    ██████░░░░ 13.8%
+  Assimilation/Erosion A       67.6%     13,354    ██████████ 23.6%
+  Vacuum/Pressure      A       60.4%     12,422    ██████████ 22.0%
+  Stagnation/Momentum  A       59.7%     12,007    ██████████ 21.2%
+  Reflection/Resonance A       53.7%     10,959    █████████░ 19.4%
 
   TABLE NOTES
   ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─
@@ -32,10 +32,10 @@
 
   PLAYSTYLE        WINS       WIN RATE     VS FIELD
   ────────────────────────────────────────────────────
-  Aggressive          258       25.8%    ███████
-  Combo               256       25.6%    ███████
-  Defensive           246       24.6%    ███████
-  Ruthless            240       24.0%    ███████
+  Defensive           268       26.8%    ████████
+  Aggressive          261       26.1%    ███████
+  Combo               254       25.4%    ███████
+  Ruthless            217       21.7%    ██████
 
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                           INDIVIDUAL CARD REPORTS                            ║
@@ -49,13 +49,13 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│───◆──────]   +2 / ±5   [OVERTUNED]
-  Win Rate: 74.3%  (avg: 48.7%  |  delta: +25.6%)
-  Resolves: 7970 
+  Win Rate: 72.1%  (avg: 48.7%  |  delta: +23.4%)
+  Resolves: 7796 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────
   ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 74.3% of winning sequences.
+  ✔ Appears in 72.1% of winning sequences.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                             ASSIMILATION/EROSION                             │
@@ -65,13 +65,13 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 66.6%  (avg: 48.7%  |  delta: +17.9%)
-  Resolves: 13331 
+  Win Rate: 67.6%  (avg: 48.7%  |  delta: +18.9%)
+  Resolves: 13354 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────
   ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 66.6% of winning sequences.
+  ✔ Appears in 67.6% of winning sequences.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                               VACUUM/PRESSURE                                │
@@ -81,13 +81,13 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 61.5%  (avg: 48.7%  |  delta: +12.8%)
-  Resolves: 12509 
+  Win Rate: 60.4%  (avg: 48.7%  |  delta: +11.7%)
+  Resolves: 12422 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────
   ✔ Statistically dominant in the current simulation meta.
-  ✔ Appears in 61.5% of winning sequences.
+  ✔ Appears in 60.4% of winning sequences.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                             STAGNATION/MOMENTUM                              │
@@ -98,7 +98,7 @@
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
   Win Rate: 59.7%  (avg: 48.7%  |  delta: +11.0%)
-  Resolves: 12055 
+  Resolves: 12007 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────
@@ -112,8 +112,8 @@
 └──────────────────────────────────────────────────────────────────────────────┘
 
   BALANCE SCORE   [───────────│─◆────────]   +1 / ±5   [SLIGHTLY STRONG]
-  Win Rate: 57.7%  (avg: 48.7%  |  delta: +9.0%)
-  Resolves: 11109 
+  Win Rate: 53.7%  (avg: 48.7%  |  delta: +5.0%)
+  Resolves: 10959 
 
   STRATEGIC OVERVIEW
   ────────────────────────────────────────

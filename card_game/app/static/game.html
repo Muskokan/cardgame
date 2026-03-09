@@ -1025,6 +1025,7 @@
                 <span id="action-label"></span>
                 <button class="btn btn-play" id="play-btn" disabled>PLAY</button>
                 <button class="btn btn-pass" id="pass-btn" disabled>PASS</button>
+                <button class="btn btn-pass" id="cancel-btn" style="display:none;background:#442d2d;color:#ff7b72;border-color:#6e3636;">CANCEL</button>
                 <button class="btn btn-end" id="end-btn" disabled style="display:none;">START NEXT TURN</button>
             </div>
             <div id="hand-row"></div>
@@ -1447,6 +1448,7 @@
             const label = document.getElementById('action-label');
             const playBtn = document.getElementById('play-btn');
             const passBtn = document.getElementById('pass-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
             const endBtn = document.getElementById('end-btn');
 
             let canCause = isMyTurn && phase === 'CAUSE_CARD_SELECTION' && selectedCardIdx >= 0;
@@ -1480,6 +1482,12 @@
 
             playBtn.disabled = !(canCause || canReact);
             passBtn.disabled = !canPass;
+            
+            const isMyPending = state.pending_action && state.players[state.pending_action.player_idx ?? state.pending_action.source_player_idx]?.external_id === token;
+            const canCancel = (phase === 'TARGETING' || phase === 'PAYING_COSTS') && isMyPending;
+            cancelBtn.style.display = canCancel ? '' : 'none';
+            cancelBtn.disabled = !canCancel;
+            cancelBtn.onclick = () => sendAction('CANCEL', {});
             
             if (canCause) {
                 playBtn.classList.add('causeing');
@@ -1523,7 +1531,7 @@
                 bar.classList.add('visible');
                 const reqs = pending.requirements || [];
                 document.getElementById('cost-label').textContent = `Pay cost: ${reqs.join(' or ')}`;
-                document.getElementById('cost-options').innerHTML = '';
+                document.getElementById('cost-options').innerHTML = '<button class="btn btn-pass" style="background:#442d2d;color:#ff7b72;border-color:#6e3636;" onclick="sendAction(\'CANCEL\', {})">CANCEL ACTION</button>';
             } else if (pending?.type === 'RESOLUTION_ENTROPY' && isMyPending) {
                 bar.classList.add('visible');
                 const reason = pending.is_snatch ? "Diversify" : pending.card_name;

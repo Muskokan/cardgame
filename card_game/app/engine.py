@@ -103,7 +103,7 @@ class GameState:
         return self.players[self.active_player_idx]
 
     def setup_game(self):
-        """Deals 5 cards to each player to start the game and begins the first turn."""
+        """Deals 9 cards to each player to start the game and begins the first turn."""
         self.log_event("GAME_START", {
             "num_players": len(self.players),
             "starting_player": self.get_active_player().name,
@@ -111,8 +111,8 @@ class GameState:
             "message": f"\n--- Starting Cause & Effect ({self.mode.upper()}) ---"
         })
         
-        # Deal cards: One by one in round-robin fashion (5 rounds)
-        for _ in range(5):
+        # Deal cards: One by one in round-robin fashion (9 rounds)
+        for _ in range(9):
             for player in self.players:
                 self.draw_card(player)
         
@@ -324,6 +324,21 @@ class GameState:
 
         active_p = self.get_active_player()
         if self.current_phase == Phase.TARGETING or self.current_phase == Phase.PAYING_COSTS:
+            if action_type == "CANCEL":
+                self.log_event("ACTION_FIZZLED", {
+                    "player": player.name,
+                    "card": self.stack[-1].source_card.name if self.stack else "Action",
+                    "reason": "Cancelled by player"
+                })
+                if self.stack:
+                    action = self.stack.pop()
+                    if action.source_card in self.nexus:
+                        self.nexus.remove(action.source_card)
+                        self.graveyard.append(action.source_card)
+                self.pending_action = None
+                self._set_phase(Phase.REVIEW)
+                return
+
             if action_type in ["SET_TARGETS", "PAY_COST", "SET_COST", "CHOOSE_COST_OPTION"]:
                 self.submit_pending_input(kwargs)
             return
@@ -411,6 +426,29 @@ class GameState:
         needs_target = bool(ability.target_requirements)
         
         if needs_cost:
+            # CHECK AFFORDABILITY
+            can_pay = False
+            if cost_tag.name == "Entropy":
+                can_pay = len(player.hand) >= 1
+            elif cost_tag.name == "Sever":
+                can_pay = len(player.sequence) >= 1
+            elif cost_tag.name == "Choice":
+                options = cost_tag.params.get("options", [])
+                if "Entropy" in options and len(player.hand) >= 1: can_pay = True
+                elif "Sever" in options and len(player.sequence) >= 1: can_pay = True
+            
+            if not can_pay:
+                self.log_event("ACTION_FIZZLED", {
+                    "player": player.name,
+                    "card": card.name,
+                    "reason": f"Cannot afford cost ({cost_tag.name})"
+                })
+                self.nexus.remove(card)
+                self.graveyard.append(card)
+                self.stack.pop()
+                self._set_phase(Phase.REVIEW)
+                return
+
             self.pending_action = {
                 "type": "COST_SELECTION",
                 "player_idx": self.players.index(player),
@@ -475,6 +513,8 @@ class GameState:
                 pitched = player.hand.pop(p_idx)
                 self.graveyard.append(pitched)
                 self.log_event("NARRATIVE", {"message": f"  -> {player.name} pitched {pitched.name} as a cost."})
+            else:
+                self.log_event("NARRATIVE", {"message": f"  -> {player.name} failed to find a card to pitch (Entropy)."})
 
         elif cost_type == "Sever":
             cost_name = data.get("card_name")
