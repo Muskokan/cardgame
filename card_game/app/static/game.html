@@ -19,12 +19,14 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
         }
 
         /* TABLE */
         #table {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             display: grid;
             grid-template-rows: auto 1fr;
             position: relative;
@@ -879,7 +881,7 @@
             }
 
             #my-zone {
-                padding: 0 4px 4px;
+                padding: 0 4px max(24px, env(safe-area-inset-bottom));
             }
 
             #hand-row {
