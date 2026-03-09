@@ -310,7 +310,6 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 c.owner = action.source_player
                 action.source_player.sequence.append(c)
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stole {c.name} from {tp.name}'s Nexus!"})
-                state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {c.name} now activates for {action.source_player.name}!"})
                 from models import Action as _ActCls
                 stolen_action = _ActCls(action.source_player, c, "sequence", triggered=True)
                 if tp_action:

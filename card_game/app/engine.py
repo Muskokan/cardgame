@@ -608,24 +608,23 @@ class GameState:
         self._finalize_action_placement(action.ability_type == 'react')
 
     def _finalize_action_placement(self, is_react: bool):
+        """Called after an action is successfully placed (and costs/targets are handled)."""
+        self._set_phase(Phase.REACTION_SELECTION)
+        self.reaction_passes = 0
+        
         if not is_react:
-            self._set_phase(Phase.REACTION_SELECTION)
-            self.reaction_passes = 0
+            # First card in a chain: priority goes to the player AFTER the active player.
             self.priority_player_idx = (self.active_player_idx + 1) % len(self.players)
         else:
-            self.reaction_passes += 1
+            # Reacting to a card: priority shifts to the NEXT player relative to who just reacted.
             self.priority_player_idx = (self.priority_player_idx + 1) % len(self.players)
-            if self.reaction_passes >= len(self.players):
-                self._set_phase(Phase.RESOLUTION)
-                self.resolve_stack()
-                self.check_win_condition(self.get_active_player())
-            else:
-                self._set_phase(Phase.REACTION_SELECTION)
-                
+        
+        # Win condition check (early bail-out if someone wins during resolution/placement?)
+        # Standard rules check win conditions after resolution, but we check here for sequence fills.
         for i in range(len(self.players)):
             p_idx = (self.active_player_idx + i) % len(self.players)
             if self.check_win_condition(self.players[p_idx]):
-                break
+                 break
 
     def check_any_winner(self) -> bool:
         """Checks all players for win conditions. Returns True if a winner is found."""
@@ -677,61 +676,71 @@ class GameState:
         """Resolves all actions on the stack in LIFO order."""
         self.log_event("STACK_RESOLUTION_START", {"count": len(self.stack)})
         
-        while self.stack:
-            if self.game_over:
-                break
-                
-            action = self.stack[-1]
-            if not getattr(action, 'resolving', False):
-                self.log_event("ACTION_RESOLVING", {
-                    "player": action.source_player.name,
-                    "card": action.source_card.name
-                })
-                action.resolving = True
-                
-                if not action.triggered and action.source_card not in self.nexus:
-                    self.log_event("ACTION_FIZZLED", {
+        try:
+            while self.stack:
+                if self.game_over:
+                    break
+                    
+                action = self.stack[-1]
+                if not getattr(action, 'resolving', False):
+                    self.log_event("ACTION_RESOLVING", {
                         "player": action.source_player.name,
-                        "card": action.source_card.name,
-                        "reason": "Card is no longer in the nexus"
+                        "card": action.source_card.name
                     })
-                    self.update_action_status(action, "❌", "🪦")
-                    self.stack.pop()
-                    continue
+                    action.resolving = True
+                    
+                    if not action.triggered and action.source_card not in self.nexus:
+                        self.log_event("ACTION_FIZZLED", {
+                            "player": action.source_player.name,
+                            "card": action.source_card.name,
+                            "reason": "Card is no longer in the nexus"
+                        })
+                        self.update_action_status(action, "❌", "🪦")
+                        self.stack.pop()
+                        continue
+
+                    if action.ability_type == 'react':
+                        action.generator = action.source_card.execute_react(self, action, self.view)
+                    elif action.ability_type == 'sequence':
+                        action.generator = action.source_card.execute_sequence(self, action, self.view)
+
+                if action.generator:
+                    import types
+                    if isinstance(action.generator, types.GeneratorType):
+                        try:
+                            next(action.generator)
+                            return  # Effect yielded "WAIT_FOR_INPUT"
+                        except StopIteration:
+                            action.generator = None
+                    else:
+                        action.generator = None
+
+                self.stack.pop()  # Action is fully resolved
 
                 if action.ability_type == 'react':
-                    action.generator = action.source_card.execute_react(self, action, self.view)
+                    if action.source_card in self.nexus:
+                        self.nexus.remove(action.source_card)
+                        action.source_card.owner = None
+                        self.graveyard.append(action.source_card)
+                        self.update_action_status(action, "✓", "🪦")
                 elif action.ability_type == 'sequence':
-                    action.generator = action.source_card.execute_sequence(self, action, self.view)
-
-            if action.generator:
-                import types
-                if isinstance(action.generator, types.GeneratorType):
-                    try:
-                        next(action.generator)
-                        return  # Effect yielded "WAIT_FOR_INPUT"
-                    except StopIteration:
-                        action.generator = None
-                else:
-                    action.generator = None
-
-            self.stack.pop()  # Action is fully resolved
-
-            if action.ability_type == 'react':
-                if action.source_card in self.nexus:
-                    self.nexus.remove(action.source_card)
-                    action.source_card.owner = None
-                    self.graveyard.append(action.source_card)
-                    self.update_action_status(action, "✓", "🪦")
-            elif action.ability_type == 'sequence':
-                if action.source_card in self.nexus:
-                    self.nexus.remove(action.source_card)
-                    action.source_card.owner = action.source_player
-                    action.source_player.sequence.append(action.source_card)
-                    self.update_action_status(action, "✓", "✦")
-            
-            if self.check_any_winner():
-                break
+                    if action.source_card in self.nexus:
+                        self.nexus.remove(action.source_card)
+                        action.source_card.owner = action.source_player
+                        action.source_player.sequence.append(action.source_card)
+                        self.update_action_status(action, "✓", "✦")
+                
+                if self.check_any_winner():
+                    break
+        except Exception as e:
+            # CRITICAL SAFETY: Ensure Nexus is cleaned up even on crash
+            self.log_event("DEBUG_ERROR", {"message": f"CRITICAL: Loop crashed during resolution: {str(e)}"})
+            for card in list(self.nexus):
+                self.nexus.remove(card)
+                self.graveyard.append(card)
+            self.stack.clear()
+            self._set_phase(Phase.REVIEW)
+            raise e
 
         self.log_event("STACK_RESOLUTION_END", {})
         

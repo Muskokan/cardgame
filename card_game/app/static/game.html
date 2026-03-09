@@ -1503,23 +1503,23 @@
                     const currentDef = canReact ? reactDef : causeDef;
                     const tags = currentDef.tags || [];
                     
-                    const isSever = tags.includes('Sever');
-                    const isEntropy = tags.includes('Entropy');
-                    const isChoice = tags.includes('Choice');
+                    const hasTag = (name) => tags.some(t => t === name || (t && t.name === name));
+                    
+                    const isSever = hasTag('Sever');
+                    const isEntropy = hasTag('Entropy');
+                    const isChoice = hasTag('Choice');
                     
                     if (isSever && me.sequence.length === 0) {
                         if (canReact) canReact = false;
                         if (canCause) canCause = false;
-                        cannotAffordReason = "REQUIRES CARD IN SEQUENCE";
+                        cannotAffordReason = "REQUIRES CARD IN SEVER SEQUENCE";
                     }
                     if (isEntropy && me.hand.length < 2) { 
                         if (canReact) canReact = false;
                         if (canCause) canCause = false;
-                        cannotAffordReason = "REQUIRES DISCARD (NEED 2+ CARDS)";
+                        cannotAffordReason = "REQUIRES ENTROPY DISCARD (NEED 2+ CARDS)";
                     }
                     if (isChoice) {
-                        // Check if at least one option is payable
-                        // This is a simplification; ideally we'd parse the params
                         const canSever = me.sequence.length > 0;
                         const canEntropy = me.hand.length >= 2;
                         if (!canSever && !canEntropy) {
