@@ -515,6 +515,18 @@
             }
         }
 
+        @keyframes targetPulse {
+            0%, 100% { box-shadow: 0 0 8px #ff7b7266; border-color: #ff7b72; }
+            50% { box-shadow: 0 0 20px #ff7b72aa; border-color: #ff7b72ff; }
+        }
+
+        .selectable-target {
+            border-color: #ff7b72 !important;
+            cursor: pointer !important;
+            animation: targetPulse 1s infinite !important;
+            z-index: 50;
+        }
+
         .opp-name {
             font-size: 0.75rem;
             font-weight: 700;
@@ -1608,6 +1620,10 @@
                 label.textContent = cannotAffordReason ? cannotAffordReason : (selectedCardIdx >= 0 ? 'EFFECT or PASS ↓' : 'Select a card to effect, or pass');
             else if (phase === 'REVIEW' && isMyTurn)
                 label.textContent = 'Turn complete —';
+            else if (phase === 'TARGETING' && isMyTargetTurn) {
+                const reqs = pending.requirements || [];
+                label.textContent = `Select Target: ${reqs.join(' or ')}`;
+            }
             else label.textContent = '';
 
             playBtn.onclick = () => {
