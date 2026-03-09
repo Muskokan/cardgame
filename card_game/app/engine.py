@@ -130,7 +130,7 @@ class GameState:
         # Rule: First player skips draw on turn 1 in 2-player games
         if self.turn_number == 1 and self.active_player_idx == 0 and len(self.players) == 2:
             self.log_event("NARRATIVE", {"message": f"{player.name} skips draw phase on turn 1 (2-player rule)."})
-            self._set_phase(Phase.STOCK_CARD_SELECTION)
+            self._set_phase(Phase.CAUSE_CARD_SELECTION)
         else:
             self.draw_card(player)
 
@@ -180,7 +180,7 @@ class GameState:
         self.current_phase = new_phase
         labels = {
             Phase.DRAW: "Draw Phase",
-            Phase.STOCK_CARD_SELECTION: "Stock Phase",
+            Phase.CAUSE_CARD_SELECTION: "Cause Phase",
             Phase.REACTION_SELECTION: "Reaction Phase",
             Phase.TARGETING: "Targeting Phase",
             Phase.PAYING_COSTS: "Paying Costs",
@@ -230,7 +230,7 @@ class GameState:
             self.log_event("CARD_DRAWN", {"player": player.name, "cards_left": len(self.deck)})
             
             if self.current_phase == Phase.DRAW:
-                self._set_phase(Phase.STOCK_CARD_SELECTION)
+                self._set_phase(Phase.CAUSE_CARD_SELECTION)
                 
             return True
         return False
@@ -247,8 +247,8 @@ class GameState:
         if not msg:
             if event_type == "CARD_DRAWN":
                 msg = f"{data['player']} drew a card."
-            elif event_type == "CARD_STOCKED":
-                msg = f"{data['player']} stocked {data['card']}."
+            elif event_type == "CARD_CAUSEED":
+                msg = f"{data['player']} causeed {data['card']}."
             elif event_type == "CARD_REACTED":
                 msg = f"{data['player']} reacted with {data['card']}."
             elif event_type == "REACTION_PASS":
@@ -264,7 +264,7 @@ class GameState:
             self.event_history.append(msg)
             if event_type in ["EFFECT_RESULT", "CARD_COUNTERED", "ACTION_FIZZLED", "WIN_EMPTY_DECK"]:
                 self.turn_history.append(msg)
-            elif event_type in ["CARD_STOCKED", "CARD_REACTED"]:
+            elif event_type in ["CARD_CAUSEED", "CARD_REACTED"]:
                  # Also add card plays to recap
                  self.turn_history.append(f"{data['player']} played {data['card']}")
 
@@ -341,8 +341,8 @@ class GameState:
         elif player != active_p and self.current_phase != Phase.REACTION_SELECTION:
             return 
 
-        if self.current_phase == Phase.STOCK_CARD_SELECTION:
-            if action_type == "STOCK":
+        if self.current_phase == Phase.CAUSE_CARD_SELECTION:
+            if action_type == "CAUSE":
                 idx = kwargs.get("card_index", -1)
                 if 0 <= idx < len(player.hand):
                     played_card = player.hand.pop(idx)
@@ -377,7 +377,7 @@ class GameState:
         
         # Log to event history and store index
         if action_type == 'sequence':
-            idx = self.log_event("CARD_STOCKED", {
+            idx = self.log_event("CARD_CAUSEED", {
                 "player": player.name, 
                 "card": card.name,
                 "ability": card.sequence_ability.name,

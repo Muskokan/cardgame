@@ -2,7 +2,7 @@
   "abilities": {
     "Stagnation": {
       "description": "Counter target Sequence placement or Reaction on the Stack.",
-      "console_description": "Counter target Stack/Stock.",
+      "console_description": "Counter target Stack/Cause.",
       "tags": [
         "React",
         "Sever"
@@ -25,7 +25,7 @@
     "Momentum": {
       "description": "Draw 1 card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [],
       "effects": [
@@ -53,7 +53,7 @@
     "Pressure": {
       "description": "Target opponent pitches 1 card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
         "PLAYER"
@@ -73,7 +73,7 @@
         "React"
       ],
       "target_requirements": [
-        "ANY_STOCK"
+        "ANY_CAUSE"
       ],
       "effects": [
         {
@@ -87,10 +87,10 @@
       "description": "Copy a target Sequence card from ANY player's Sequence.",
       "console_description": "Copy ANY Sequence card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
-        "ANY_STOCK"
+        "ANY_CAUSE"
       ],
       "effects": [
         {
@@ -120,7 +120,7 @@
     "Echo": {
       "description": "Put target Graveyard card into your hand.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
         "GRAVEYARD"
@@ -141,7 +141,7 @@
         "Entropy"
       ],
       "target_requirements": [
-        "OPPONENT_STOCK",
+        "OPPONENT_CAUSE",
         "NEXUS_CARD"
       ],
       "effects": [
@@ -154,10 +154,10 @@
     "Erosion": {
       "description": "Destroy target opponent's Sequence card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
-        "OPPONENT_STOCK"
+        "OPPONENT_CAUSE"
       ],
       "effects": [
         {
@@ -170,27 +170,27 @@
   "roster": [
     {
       "react_name": "Stagnation",
-      "stock_name": "Momentum",
+      "cause_name": "Momentum",
       "count": 14
     },
     {
       "react_name": "Vacuum",
-      "stock_name": "Pressure",
+      "cause_name": "Pressure",
       "count": 14
     },
     {
       "react_name": "Reflection",
-      "stock_name": "Resonance",
+      "cause_name": "Resonance",
       "count": 14
     },
     {
       "react_name": "Stasis",
-      "stock_name": "Echo",
+      "cause_name": "Echo",
       "count": 14
     },
     {
       "react_name": "Assimilation",
-      "stock_name": "Erosion",
+      "cause_name": "Erosion",
       "count": 14
     }
   ]

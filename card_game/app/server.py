@@ -134,10 +134,10 @@ async def handle_bot_turns(code: str):
     # Check if current priority belongs to a bot
     # Note: GameState.priority_player_idx or GameState.active_player_idx?
     # REACTION_SELECTION uses priority_player_idx.
-    # STOCK_CARD_SELECTION uses active_player_idx.
+    # CAUSE_CARD_SELECTION uses active_player_idx.
     
     current_p = None
-    if state.current_phase == Phase.STOCK_CARD_SELECTION:
+    if state.current_phase == Phase.CAUSE_CARD_SELECTION:
         current_p = state.get_active_player()
     elif state.current_phase in [Phase.REACTION_SELECTION, Phase.TARGETING, Phase.PAYING_COSTS]:
         # Priority player acts in these phases
@@ -159,9 +159,9 @@ async def handle_bot_turns(code: str):
         import ai
         
         action_taken = False
-        if state.current_phase == Phase.STOCK_CARD_SELECTION:
-            idx = ai.bot_choose_stock(current_p, state)
-            state.process_input(current_p, "STOCK", card_index=idx)
+        if state.current_phase == Phase.CAUSE_CARD_SELECTION:
+            idx = ai.bot_choose_cause(current_p, state)
+            state.process_input(current_p, "CAUSE", card_index=idx)
             action_taken = True
         elif state.current_phase == Phase.REACTION_SELECTION:
             idx = ai.bot_choose_reaction(current_p, state)
@@ -308,8 +308,8 @@ async def auto_pass_disconnected(code: str, player_id: str, timeout: int = 60):
         print(f"[AUTO-PASS] {current_p.name} disconnected — auto-passing after {timeout}s")
         if state.current_phase in [Phase.REACTION_SELECTION]:
             state.process_input(current_p, "PASS")
-        elif state.current_phase in [Phase.STOCK_CARD_SELECTION, Phase.REVIEW]:
-            # Can't auto-stock, so skip turn
+        elif state.current_phase in [Phase.CAUSE_CARD_SELECTION, Phase.REVIEW]:
+            # Can't auto-cause, so skip turn
             state.end_turn()
         await broadcast_state(code)
         asyncio.create_task(handle_bot_turns(code))

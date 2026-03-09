@@ -184,7 +184,7 @@ def handle_pending_action(state: GameState, view: ConsoleView):
                 view.log(f"Choose a card in YOUR sequence to [Sever] as a cost:")
                 unique_names = list(set([c.name for c in player.sequence]))
                 if unique_names:
-                    c_idx = view.prompt_choice("Your Stock Card", unique_names)
+                    c_idx = view.prompt_choice("Your Cause Card", unique_names)
                     c_name = unique_names[c_idx]
                 else:
                     c_name = ""
@@ -226,7 +226,7 @@ def handle_pending_action(state: GameState, view: ConsoleView):
                 else:
                     view.log(f"Choose a card in your Sequence to [Sever]:")
                     unique_names = list(set([c.name for c in player.sequence]))
-                    s_idx = view.prompt_choice("Stock Card", unique_names)
+                    s_idx = view.prompt_choice("Cause Card", unique_names)
                     c_name = unique_names[s_idx]
                 state.submit_pending_input({"cost_type": "Sever", "card_name": c_name})
 
@@ -245,19 +245,19 @@ def handle_pending_action(state: GameState, view: ConsoleView):
                 for opp in [p for p in state.players if p != player]:
                     valid_targets.append((opp, None, None, f"[Player] {opp.name}"))
                     
-            elif req == TargetRequirement.OPPONENT_STOCK:
+            elif req == TargetRequirement.OPPONENT_CAUSE:
                 for opp in [p for p in state.players if p != player and p.sequence]:
                     for c in opp.sequence:
-                        valid_targets.append((opp, c, None, f"[{opp.name}'s Stock] {c.name}"))
+                        valid_targets.append((opp, c, None, f"[{opp.name}'s Cause] {c.name}"))
 
             elif req == TargetRequirement.GRAVEYARD:
                 for c in state.graveyard:
                     valid_targets.append((None, c, None, f"[Graveyard] {c.name}"))
 
-            elif req == TargetRequirement.ANY_STOCK:
+            elif req == TargetRequirement.ANY_CAUSE:
                 for p in state.players:
                     for c in p.sequence:
-                        valid_targets.append((p, c, c.name, f"[{p.name}'s Stock] {c.name}"))
+                        valid_targets.append((p, c, c.name, f"[{p.name}'s Cause] {c.name}"))
                         
             elif req == TargetRequirement.NEXUS_CARD:
                 for c in state.nexus:
@@ -308,17 +308,17 @@ def play_game():
             last_phase = state.current_phase
             last_priority = state.priority_player_idx
         
-        if state.current_phase == Phase.STOCK_CARD_SELECTION:
-            if last_phase != Phase.STOCK_CARD_SELECTION:
+        if state.current_phase == Phase.CAUSE_CARD_SELECTION:
+            if last_phase != Phase.CAUSE_CARD_SELECTION:
                 view.log(f"--- {current_p.name}'s Turn ---")
-            view.log("\n[Phase: STOCK]")
-            view.log("\n[Phase: STOCK]")
+            view.log("\n[Phase: CAUSE]")
+            view.log("\n[Phase: CAUSE]")
             if not current_p.is_bot:
-                choice_idx = view.show_card_menu(current_p, state, mode="STOCK")
+                choice_idx = view.show_card_menu(current_p, state, mode="CAUSE")
             else:
-                choice_idx = ai.bot_choose_stock(current_p, state)
+                choice_idx = ai.bot_choose_cause(current_p, state)
             
-            state.process_input(current_p, "STOCK", card_index=choice_idx)
+            state.process_input(current_p, "CAUSE", card_index=choice_idx)
             view.render_events(state)
             
         elif state.current_phase == Phase.REACTION_SELECTION:

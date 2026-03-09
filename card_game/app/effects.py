@@ -68,7 +68,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
             if action.target_card and action.target_card in state.nexus:
                 is_legal = True
                 break
-        elif req in [TargetRequirement.OPPONENT_STOCK, TargetRequirement.OWN_STOCK, TargetRequirement.ANY_STOCK]:
+        elif req in [TargetRequirement.OPPONENT_CAUSE, TargetRequirement.OWN_CAUSE, TargetRequirement.ANY_CAUSE]:
             if action.target_card:
                 for p in state.players:
                     if action.target_card in p.sequence:
@@ -244,7 +244,7 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 tp, c = _resolve_sequence_target(state, action, target_cards[0])
                 if tp and c in tp.sequence:
                     state.log_event("EFFECT_RESULT", {"message": f"  {tag} {ability.name} activates. Returning {c.name} to {tp.name}'s hand."})
-                    state.log_event("TARGET_INFO", {"source": ability.name, "target": c.sequence_ability.name, "target_type": "STOCK"})
+                    state.log_event("TARGET_INFO", {"source": ability.name, "target": c.sequence_ability.name, "target_type": "CAUSE"})
                     tp.sequence.remove(c)
                     tp.hand.append(c)
 
@@ -254,23 +254,23 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 continue
             state.log_event("EFFECT_RESULT", {"message": f"  {tag} {ability.name} activates. Copying {action.copied_card_name}."})
             parts = action.copied_card_name.split("/")
-            stock_name = parts[1] if len(parts) > 1 else action.copied_card_name
-            state.log_event("TARGET_INFO", {"source": ability.name, "target": stock_name, "target_type": "STOCK"})
-            stock_data = abilities_data.get(stock_name)
-            if stock_data:
-                copied_effects = stock_data.get("effects", [])
+            cause_name = parts[1] if len(parts) > 1 else action.copied_card_name
+            state.log_event("TARGET_INFO", {"source": ability.name, "target": cause_name, "target_type": "CAUSE"})
+            cause_data = abilities_data.get(cause_name)
+            if cause_data:
+                copied_effects = cause_data.get("effects", [])
                 if any(e.get("type") == "COPY_ABILITY" for e in copied_effects):
-                    state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name} cannot copy {stock_name} — copying a copy ability would create an infinite loop."})
+                    state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name} cannot copy {cause_name} — copying a copy ability would create an infinite loop."})
                     continue
                 copied_ab = _Ability(
-                    stock_name,
-                    stock_data.get("description", "No description."),
-                    stock_data.get("tags", []),
-                    stock_data.get("target_requirements", []),
-                    stock_data.get("console_description", ""),
+                    cause_name,
+                    cause_data.get("description", "No description."),
+                    cause_data.get("tags", []),
+                    cause_data.get("target_requirements", []),
+                    cause_data.get("console_description", ""),
                     copied_effects,
                 )
-                state.log_event("EFFECT_RESULT", {"message": f"  [ECHO] -> {stock_name} activates."})
+                state.log_event("EFFECT_RESULT", {"message": f"  [ECHO] -> {cause_name} activates."})
                 copied_ab.execute(state, action, view, depth + 1)
 
         elif eff_type == "MOVE_CARD":

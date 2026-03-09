@@ -9,7 +9,7 @@ from colors import Colors
 class Phase(Enum):
     SETUP = auto()
     DRAW = auto()
-    STOCK_CARD_SELECTION = auto()
+    CAUSE_CARD_SELECTION = auto()
     REACTION_SELECTION = auto()
     TARGETING = auto()
     PAYING_COSTS = auto()
@@ -20,13 +20,13 @@ class Phase(Enum):
 class TargetRequirement(Enum):
     NONE = 0
     PLAYER = 1             # Targeted opponent (e.g. Blank/Check)
-    OPPONENT_STOCK = 2     # Specific card in opponent sequence (e.g. Crush, Redact)
-    OWN_STOCK = 3          # Specific card in own sequence (e.g. Betray cost)
+    OPPONENT_CAUSE = 2     # Specific card in opponent sequence (e.g. Crush, Redact)
+    OWN_CAUSE = 3          # Specific card in own sequence (e.g. Betray cost)
     EXTRA_ENTROPY = 7        # Entropy one extra card from hand (e.g. Hush cost)
     REDACT_COST = 8        # Modal: Entropy 1 card OR Destroy 1 sequence card (Redact cost)
     GRAVEYARD = 9          # Target a card in the graveyard
     NEXUS_CARD = 10          # Target a card currently in the nexus (e.g. Hush)
-    ANY_STOCK = 11         # Target any card in any player's sequence
+    ANY_CAUSE = 11         # Target any card in any player's sequence
 
 class Tag:
     def __init__(self, name: str, params: Optional[Dict[str, Any]] = None):
@@ -167,8 +167,8 @@ class Card:
             "name": self.name,
             "react_name": self.react_ability.name,
             "react_desc": self.react_ability.description,
-            "stock_name": self.sequence_ability.name,
-            "stock_desc": self.sequence_ability.description
+            "cause_name": self.sequence_ability.name,
+            "cause_desc": self.sequence_ability.description
         }
 
     @property
@@ -300,10 +300,10 @@ def generate_full_deck() -> List[Card]:
     
     for pairing in roster:
         react_name = pairing["react_name"]
-        stock_name = pairing["stock_name"]
+        cause_name = pairing["cause_name"]
         count = pairing["count"]
         r_data = abilities_data[react_name]
-        s_data = abilities_data[stock_name]
+        s_data = abilities_data[cause_name]
         
         for _ in range(count):
             react_ability = Ability(
@@ -314,8 +314,8 @@ def generate_full_deck() -> List[Card]:
                 r_data.get("console_description", ""),
                 r_data.get("effects", [])
             )
-            stock_ability = Ability(
-                stock_name, 
+            cause_ability = Ability(
+                cause_name, 
                 s_data.get("description", "No description."), 
                 s_data.get("tags", []), 
                 s_data.get("target_requirements", []),
@@ -323,6 +323,6 @@ def generate_full_deck() -> List[Card]:
                 s_data.get("effects", [])
             )
             
-            deck.append(Card(react_ability, stock_ability))
+            deck.append(Card(react_ability, cause_ability))
             
     return deck

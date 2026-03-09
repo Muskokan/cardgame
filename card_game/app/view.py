@@ -49,7 +49,7 @@ class ConsoleView(GameView):
             self.log(data.get("message", "Game Started."))
         elif event_type == "CARD_DRAWN":
             self.log(f"  · {data['player']} drew a card.")
-        elif event_type == "CARD_STOCKED":
+        elif event_type == "CARD_CAUSEED":
             target = f" ⟶ {data['target']}" if data.get('target') else ""
             self.log(f"  ✦ {Colors.BOLD}{data['player']}{Colors.RESET} » {Colors.SKY_BLUE}{data['card']}{Colors.RESET}{target}")
         elif event_type == "CARD_REACTED":
@@ -91,9 +91,9 @@ class ConsoleView(GameView):
         print("=" * 78)
 
         # Build Sequence Strings (Left Column)
-        stock_lines = []
-        stock_lines.append(f"{Colors.BOLD}[ PLAYER SEQUENCES ]{Colors.RESET}")
-        stock_lines.append("")
+        cause_lines = []
+        cause_lines.append(f"{Colors.BOLD}[ PLAYER SEQUENCES ]{Colors.RESET}")
+        cause_lines.append("")
         
         for p in state.players:
             is_active = hasattr(state, 'active_player_idx') and p == state.players[state.active_player_idx]
@@ -105,13 +105,13 @@ class ConsoleView(GameView):
             bot_tag = f" (Bot: {p.bot_profile.name.title()})" if p.is_bot else " (Human)"
             # Bold the active player, don't bold the non-active players
             name_format = f"{Colors.BOLD}{p.name}{Colors.RESET}{player_color}" if is_active else f"{p.name}"
-            stock_lines.append(f"{marker}{player_color}{name_format}{bot_tag}{Colors.RESET}")
+            cause_lines.append(f"{marker}{player_color}{name_format}{bot_tag}{Colors.RESET}")
             
             if p.is_bot:
-                stock_lines.append(f"    Hand: {Colors.CYAN}{len(p.hand)} cards{Colors.RESET}")
+                cause_lines.append(f"    Hand: {Colors.CYAN}{len(p.hand)} cards{Colors.RESET}")
 
             if p.sequence:
-                stock_lines.append("    +----------------------+")
+                cause_lines.append("    +----------------------+")
                 names = [c.name for c in p.sequence]
                 unique_names = list(set(names))
                 for name in sorted(unique_names):
@@ -119,11 +119,11 @@ class ConsoleView(GameView):
                     bar = "#" * count + "." * (5 - count)
                     threat = " !" if count >= 4 else ""
                     display_name = (name[:11] + "..") if len(name) > 13 else name
-                    stock_lines.append(f"    | {display_name:<13} {Colors.GREEN}{bar}{Colors.RESET}{threat} |")
-                stock_lines.append("    +----------------------+")
+                    cause_lines.append(f"    | {display_name:<13} {Colors.GREEN}{bar}{Colors.RESET}{threat} |")
+                cause_lines.append("    +----------------------+")
             else:
-                stock_lines.append("    Stock: [Empty]")
-            stock_lines.append("")
+                cause_lines.append("    Cause: [Empty]")
+            cause_lines.append("")
 
         # Build Stack Strings (Right Column)
         stack_lines = []
@@ -183,9 +183,9 @@ class ConsoleView(GameView):
             stack_lines.append("  ( The table is empty )")
 
         # Merge Columns
-        max_rows = max(len(stock_lines), len(stack_lines))
+        max_rows = max(len(cause_lines), len(stack_lines))
         for i in range(max_rows):
-            left = stock_lines[i] if i < len(stock_lines) else ""
+            left = cause_lines[i] if i < len(cause_lines) else ""
             right = stack_lines[i] if i < len(stack_lines) else ""
             
             # ANSI escape codes don't count for length
@@ -250,7 +250,7 @@ class ConsoleView(GameView):
         
         return True
 
-    def _render_hand_cards(self, player, state, mode="STOCK"):
+    def _render_hand_cards(self, player, state, mode="CAUSE"):
         """Helper to render cards in a row format."""
         if not player.hand:
             print(f"\n{Colors.BOLD}[ YOUR HAND - Empty ]{Colors.RESET}")
@@ -270,21 +270,21 @@ class ConsoleView(GameView):
                 nums = "".join([f"      [{j+i+1}]      " for j in range(len(chunk))])
                 print(nums)
             
-            # Contextual Logic: Show Stock info if Active Player in Stock Phase, else React info
-            is_stock_phase = (state.current_phase == Phase.STOCK_CARD_SELECTION)
+            # Contextual Logic: Show Cause info if Active Player in Cause Phase, else React info
+            is_cause_phase = (state.current_phase == Phase.CAUSE_CARD_SELECTION)
             is_active_player = (player == state.players[state.active_player_idx])
             
             # Line 2: Card Names and Affordance
             names = ""
             for c in chunk:
-                if is_stock_phase and is_active_player:
+                if is_cause_phase and is_active_player:
                     focused_ability = c.sequence_ability
                     color = Colors.SKY_BLUE
                 else:
                     focused_ability = c.react_ability
                     color = Colors.ORANGE
                     
-                if mode in ["STOCK", "REACT"]:
+                if mode in ["CAUSE", "REACT"]:
                     can_pay = self._can_afford_ability(player, c, focused_ability, state)
                     if not can_pay:
                         color = Colors.RED
@@ -309,7 +309,7 @@ class ConsoleView(GameView):
             desc_line_2: str = ""
             
             for c in chunk:
-                if is_stock_phase and is_active_player:
+                if is_cause_phase and is_active_player:
                     desc = c.sequence_ability.get_dynamic_description()
                 else:
                     desc = c.react_ability.get_dynamic_description()
@@ -345,7 +345,7 @@ class ConsoleView(GameView):
             
         print("-" * 78)
 
-    def show_card_menu(self, player, state, mode="STOCK"):
+    def show_card_menu(self, player, state, mode="CAUSE"):
         """Displays hand as horizontal cards for selection."""
         if not player.hand:
             return -1
@@ -427,8 +427,8 @@ class ConsoleView(GameView):
                 # Only log for the player if they are active? 
                 # For console simplicity, just log it.
                 print(f"{data['player']} drew a card. ({data['cards_left']} left)")
-            elif etype == "CARD_STOCKED":
-                print(f"\n==> {data['player']} is stocking {data['card']} into their Sequence.")
+            elif etype == "CARD_CAUSEED":
+                print(f"\n==> {data['player']} is causeing {data['card']} into their Sequence.")
                 print(f"    Activating '{data['ability']}'!")
                 print(f"    Effect: {data['description']}")
             elif etype == "REACTION_PASS":

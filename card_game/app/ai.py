@@ -86,15 +86,15 @@ class HistoryAnalyzer:
         return score
 
     @staticmethod
-    def get_stock_velocity(player: Player, state: 'GameState', window: int = 10) -> float:
-        """Calculates how many cards the player has stocked in the last N turns."""
-        stocks = 0
+    def get_cause_velocity(player: Player, state: 'GameState', window: int = 10) -> float:
+        """Calculates how many cards the player has causeed in the last N turns."""
+        causes = 0
         start_turn = max(1, state.turn_number - window)
         for entry in state.full_history:
             if entry["turn"] < start_turn: continue
-            if entry["event"] == "CARD_STOCKED" and entry["data"].get("player") == player.name:
-                stocks += 1
-        return stocks / window
+            if entry["event"] == "CARD_CAUSEED" and entry["data"].get("player") == player.name:
+                causes += 1
+        return causes / window
 
     @staticmethod
     def was_countered_recently(player: Player, state: 'GameState') -> bool:
@@ -104,7 +104,7 @@ class HistoryAnalyzer:
                 msg = entry["data"].get("message", "")
                 if "[SUCCESS] Cease & Desist counters" in msg and player.name in msg:
                     return True
-                if "stocked" in msg and player.name in msg: 
+                if "causeed" in msg and player.name in msg: 
                     return False
         return False
 
@@ -169,19 +169,18 @@ def predict_nexus_outcome(player: Player, state: 'GameState') -> float:
                 if eff.type == "MOVE_CARD" and eff.destination == "hand": predicted_score += 10.0
     return predicted_score
 
-def bot_choose_stock(bot: Player, state: 'GameState') -> int:
-    """Returns the index of the card to stock."""
-    print(f"\n  [AI] {bot.name} ({bot.bot_profile.name.upper()}) is thinking...")
-    time.sleep(1)
+def bot_choose_cause(bot: Player, state: 'GameState') -> int:
+    """Returns the index of the card to cause."""
+    # print(f"\n  [AI] {bot.name} ({bot.bot_profile.name.upper()}) is thinking...")
 
-    def is_valuable_stock(card) -> bool:
+    def is_valuable_cause(card) -> bool:
         ability = card.sequence_ability
         if not ability: return False
         reqs = ability.target_requirements
         opponents = [p for p in state.players if p != bot]
         if TargetRequirement.GRAVEYARD in reqs and not state.graveyard: return False
-        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.sequence for op in opponents): return False
-        if TargetRequirement.ANY_STOCK in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.OPPONENT_CAUSE in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.ANY_CAUSE in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.PLAYER in reqs and not any(op.hand for op in opponents): return False
         return True
 
@@ -191,12 +190,12 @@ def bot_choose_stock(bot: Player, state: 'GameState') -> int:
     # Win Condition Priority
     if len(unique_names) >= 4:
         for idx, card in enumerate(bot.hand):
-            if card.name not in unique_names and is_valuable_stock(card): return idx
+            if card.name not in unique_names and is_valuable_cause(card): return idx
     for idx, card in enumerate(bot.hand):
-        if card.name in sequence_names and sequence_names.count(card.name) < 4 and is_valuable_stock(card): return idx
+        if card.name in sequence_names and sequence_names.count(card.name) < 4 and is_valuable_cause(card): return idx
             
     # Scoring-based choice
-    valuable_indices = [i for i, c in enumerate(bot.hand) if is_valuable_stock(c)]
+    valuable_indices = [i for i, c in enumerate(bot.hand) if is_valuable_cause(c)]
     if not valuable_indices: return random.randint(0, len(bot.hand) - 1)
         
     scores = {}
@@ -206,7 +205,7 @@ def bot_choose_stock(bot: Player, state: 'GameState') -> int:
         score = 10.0
         ability = card.sequence_ability
         is_aggressive = any(e.type in ["DESTROY_CARD", "STEAL_CARD", "FORCE_DISCARD"] for e in ability.effects)
-        if is_aggressive or TargetRequirement.PLAYER in ability.target_requirements or TargetRequirement.OPPONENT_STOCK in ability.target_requirements:
+        if is_aggressive or TargetRequirement.PLAYER in ability.target_requirements or TargetRequirement.OPPONENT_CAUSE in ability.target_requirements:
             score += 20.0 * profile.aggression_weight
         if any(e.type == "DRAW_CARDS" for e in ability.effects): score += 15.0
         if any(e.type in ["COPY_ABILITY", "MOVE_CARD"] for e in ability.effects): score += 20.0 * profile.combo_snatch_chance
@@ -227,8 +226,8 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
         opponents = [p for p in state.players if p != bot]
         if TargetRequirement.NEXUS_CARD in reqs and not state.nexus: return False
         if TargetRequirement.GRAVEYARD in reqs and not state.graveyard: return False
-        if TargetRequirement.OPPONENT_STOCK in reqs and not any(op.sequence for op in opponents): return False
-        if TargetRequirement.ANY_STOCK in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.OPPONENT_CAUSE in reqs and not any(op.sequence for op in opponents): return False
+        if TargetRequirement.ANY_CAUSE in reqs and not any(op.sequence for op in opponents): return False
         if TargetRequirement.PLAYER in reqs and not any(op.hand for op in opponents): return False
         return True
 
@@ -254,7 +253,7 @@ def bot_choose_reaction(bot: Player, state: 'GameState') -> int:
                 if a.source_player != bot and a.source_card in state.nexus and not _is_already_handled(a.source_card, state):
                     if is_desperate or random.random() < 0.2: return idx
 
-        # 1b. DISRUPT imminent win from stock (Bounce/Destroy/Steal)
+        # 1b. DISRUPT imminent win from cause (Bounce/Destroy/Steal)
         if any(e.type in ["BOUNCE_CARD", "DESTROY_CARD", "STEAL_CARD"] for e in effects):
             if threats: return idx # Use any disruption to stop a winner
             if any(a.target_card and a.target_card in bot.sequence and a.source_player != bot for a in state.stack): return idx
@@ -351,34 +350,34 @@ def bot_choose_target_from_list(bot: Player, state: 'GameState', valid_targets: 
     """
     from models import TargetRequirement
 
-    # --- ANY_STOCK / COPY_ABILITY logic ---
-    # copied_name is the 3rd element and is set for ANY_STOCK targets (e.g., "Liquidate/Cause")
-    # We parse the stock-side ability name and apply priority tiers to avoid dumb loops
+    # --- ANY_CAUSE / COPY_ABILITY logic ---
+    # copied_name is the 3rd element and is set for ANY_CAUSE targets (e.g., "Liquidate/Cause")
+    # We parse the cause-side ability name and apply priority tiers to avoid dumb loops
     # like Cause copying Cause.
     copy_targets = [(tp, tc, cn, desc) for tp, tc, cn, desc in valid_targets if cn]
     if copy_targets:
         HIGH_VALUE = ["Earnings", "Recoup", "Crash", "Call"]
         AVOID = ["Cause"]  # copying Cause is usually a waste — it will just copy something else
 
-        def _stock_name(cn: str) -> str:
-            """Extract the stock ability name from a card name like 'Redact/Repeat'."""
+        def _cause_name(cn: str) -> str:
+            """Extract the cause ability name from a card name like 'Redact/Repeat'."""
             parts = cn.split("/")
             return parts[1] if len(parts) > 1 else cn
 
-        # Tier 1: High-value stock abilities on opponents near winning (best snipe)
+        # Tier 1: High-value cause abilities on opponents near winning (best snipe)
         for tp, tc, cn, desc in copy_targets:
-            sn = _stock_name(cn)
+            sn = _cause_name(cn)
             if sn in HIGH_VALUE and tp in state.players and is_near_win(tp):
                 return (tp, tc, cn)
 
-        # Tier 2: Any high-value stock ability from any player
+        # Tier 2: Any high-value cause ability from any player
         for tp, tc, cn, desc in copy_targets:
-            sn = _stock_name(cn)
+            sn = _cause_name(cn)
             if sn in HIGH_VALUE:
                 return (tp, tc, cn)
 
         # Tier 3: Anything that's not in the AVOID list
-        non_avoid = [(tp, tc, cn, desc) for tp, tc, cn, desc in copy_targets if _stock_name(cn) not in AVOID]
+        non_avoid = [(tp, tc, cn, desc) for tp, tc, cn, desc in copy_targets if _cause_name(cn) not in AVOID]
         if non_avoid:
             tp, tc, cn, _ = random.choice(non_avoid)
             return (tp, tc, cn)
@@ -396,7 +395,7 @@ def bot_choose_target_from_list(bot: Player, state: 'GameState', valid_targets: 
             if owner_action and is_near_win(owner_action.source_player):
                 return (None, t_card, None)
 
-    if TargetRequirement.OPPONENT_STOCK in reqs or TargetRequirement.GRAVEYARD in reqs:
+    if TargetRequirement.OPPONENT_CAUSE in reqs or TargetRequirement.GRAVEYARD in reqs:
         for t_player, t_card, c_name, desc in valid_targets:
             if t_player and is_near_win(t_player):
                 return (t_player, t_card, None)
@@ -425,19 +424,19 @@ def bot_choose_targets(bot: Player, state: 'GameState') -> dict:
     if TargetRequirement.PLAYER in reqs:
         targets["target_player_index"] = state.players.index(target_player)
     
-    if TargetRequirement.OPPONENT_STOCK in reqs or TargetRequirement.ANY_STOCK in reqs:
-        # If the preferred target has a stock, attack it
+    if TargetRequirement.OPPONENT_CAUSE in reqs or TargetRequirement.ANY_CAUSE in reqs:
+        # If the preferred target has a cause, attack it
         if target_player.sequence:
             targets["target_player_index"] = state.players.index(target_player)
             targets["target_card_index"] = 0 
         else:
-            # Fallback: check ANY opponent's stock
-            any_opp_with_stock = next((p for p in opponents if p.sequence), None)
-            if any_opp_with_stock:
-                targets["target_player_index"] = state.players.index(any_opp_with_stock)
+            # Fallback: check ANY opponent's cause
+            any_opp_with_cause = next((p for p in opponents if p.sequence), None)
+            if any_opp_with_cause:
+                targets["target_player_index"] = state.players.index(any_opp_with_cause)
                 targets["target_card_index"] = 0
-            elif TargetRequirement.ANY_STOCK in reqs and bot.sequence:
-                # Absolute last resort: target self only if strictly ANY_STOCK required
+            elif TargetRequirement.ANY_CAUSE in reqs and bot.sequence:
+                # Absolute last resort: target self only if strictly ANY_CAUSE required
                 # Wait, this fixes Crash targeting self. 
                 # If they have no valid opponents, and they MUST pick something...
                 targets["target_player_index"] = state.players.index(bot)

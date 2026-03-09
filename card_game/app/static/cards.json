@@ -2,7 +2,7 @@
   "abilities": {
     "Hush": {
       "description": "Counter target Sequence placement or Reaction on the Stack.",
-      "console_description": "Counter target Stack/Stock.",
+      "console_description": "Counter target Stack/Cause.",
       "tags": [
         "React",
         "Sever"
@@ -25,7 +25,7 @@
     "Money": {
       "description": "Draw 1 card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [],
       "effects": [
@@ -53,7 +53,7 @@
     "Check": {
       "description": "Target opponent pitches 1 card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
         "PLAYER"
@@ -73,7 +73,7 @@
         "React"
       ],
       "target_requirements": [
-        "ANY_STOCK"
+        "ANY_CAUSE"
       ],
       "effects": [
         {
@@ -87,10 +87,10 @@
       "description": "Copy a target Sequence card from ANY player's Sequence.",
       "console_description": "Copy ANY Sequence card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
-        "ANY_STOCK"
+        "ANY_CAUSE"
       ],
       "effects": [
         {
@@ -120,7 +120,7 @@
     "Return": {
       "description": "Put target Graveyard card into your hand.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
         "GRAVEYARD"
@@ -141,7 +141,7 @@
         "Entropy"
       ],
       "target_requirements": [
-        "OPPONENT_STOCK",
+        "OPPONENT_CAUSE",
         "NEXUS_CARD"
       ],
       "effects": [
@@ -154,10 +154,10 @@
     "Crush": {
       "description": "Destroy target opponent's Sequence card.",
       "tags": [
-        "Stock"
+        "Cause"
       ],
       "target_requirements": [
-        "OPPONENT_STOCK"
+        "OPPONENT_CAUSE"
       ],
       "effects": [
         {
@@ -170,27 +170,27 @@
   "roster": [
     {
       "react_name": "Hush",
-      "stock_name": "Money",
+      "cause_name": "Money",
       "count": 14
     },
     {
       "react_name": "Snatch",
-      "stock_name": "Check",
+      "cause_name": "Check",
       "count": 14
     },
     {
       "react_name": "Redact",
-      "stock_name": "Repeat",
+      "cause_name": "Repeat",
       "count": 14
     },
     {
       "react_name": "Reprise",
-      "stock_name": "Return",
+      "cause_name": "Return",
       "count": 14
     },
     {
       "react_name": "Betray",
-      "stock_name": "Crush",
+      "cause_name": "Crush",
       "count": 14
     }
   ]
