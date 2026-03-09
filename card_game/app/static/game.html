@@ -1376,8 +1376,7 @@
         <span class="nexus-owner">${sa?.source_player_name || ''}</span>
         <span class="nexus-type-icon">${isReact ? '⚡' : isCause ? '✦' : ''}</span>
         <div class="nexus-card-name">
-            <div class="name-react">${pReactName}</div>
-            <div class="name-cause">${pCauseName}</div>
+            <div class="${isReact ? 'name-react' : 'name-cause'}">${abilityName || card.name}</div>
         </div>
         ${abilityName ? `<div class="nexus-ability-name">${abilityName}</div>` : ''}
       `;
