@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windfall | Online Multiplayer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container hero">
+        <h1>WINDFALL</h1>
+        <p class="text-secondary">A highly technical 2-4 player card game about priority, reaction, and careful
+            stockpiling.</p>
+
+        <div class="join-box glass-panel">
+            <button id="create-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 2rem;">Create Private
+                Table</button>
+
+            <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 2px;">OR
+                JOIN BY CODE</div>
+            <input type="text" id="room-code" placeholder="ENTER 4-CHAR CODE" maxlength="4"
+                style="text-align: center; text-transform: uppercase;">
+            <button id="join-btn" class="btn" style="width: 100%;">Join Lobby</button>
+        </div>
+
+        <div id="error-msg" style="color: var(--error); margin-top: 1rem; display: none;"></div>
+    </div>
+
+    <script>
+        const createBtn = document.getElementById('create-btn');
+        const joinBtn = document.getElementById('join-btn');
+        const roomCodeInput = document.getElementById('room-code');
+        const errorMsg = document.getElementById('error-msg');
+
+        function showError(msg) {
+            errorMsg.innerText = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        createBtn.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/create', { method: 'POST' });
+                const data = await res.json();
+                localStorage.setItem('windfall_token', data.player_id);
+                // Name will be entered in the lobby when claiming a seat
+                window.location.href = `/static/lobby.html?code=${data.code}`;
+            } catch (e) {
+                showError("Failed to create room.");
+            }
+        });
+
+        joinBtn.addEventListener('click', async () => {
+            const code = roomCodeInput.value.trim().toUpperCase();
+            if (!code) return showError("Code required.");
+
+            try {
+                const res = await fetch(`/api/join/${code}`, {
+                    method: 'POST'
+                });
+
+                if (!res.ok) throw new Error("Join failed");
+                const data = await res.json();
+                localStorage.setItem('windfall_token', data.player_id);
+                // Name will be entered in the lobby when claiming a seat
+                window.location.href = `/static/lobby.html?code=${code}`;
+            } catch (e) {
+                showError("Room not found or game already started.");
+            }
+        });
+    </script>
+</body>
+
+</html>

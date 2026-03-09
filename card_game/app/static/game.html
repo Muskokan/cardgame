@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windfall</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* TABLE */
+        #table {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a3a2a 0%, #0d1f15 60%, #060e09 100%);
+        }
+
+        #table::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255, 255, 255, 0.008) 40px, rgba(255, 255, 255, 0.008) 41px);
+            pointer-events: none;
+        }
+
+        /* TOP: opponents */
+        #opponents-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 14px 20px 0;
+            gap: 16px;
+            min-height: 180px;
+        }
+
+        /* CENTER: deck/pot/graveyard */
+        #center-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            padding: 8px;
+        }
+
+        #deck-pile,
+        #graveyard-pile {
+            width: 72px;
+            height: 100px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #8b949e;
+            gap: 4px;
+            cursor: default;
+        }
+
+        #deck-pile {
+            background: url('/static/dog.png') center/cover;
+            border: 2px solid #30363d;
+            position: relative;
+        }
+
+        #deck-pile .deck-count,
+        .gy-count {
+            position: absolute;
+            bottom: -22px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #58a6ff;
+            white-space: nowrap;
+        }
+
+        #graveyard-pile {
+            background: #161b22;
+            border: 2px dashed #30363d;
+            position: relative;
+        }
+
+        #pot-zone {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+            min-height: 110px;
+            padding: 8px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* BOTTOM: your zone */
+        #my-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 16px 12px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        #my-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        #my-stockpile-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 36px;
+        }
+
+        #hand-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: nowrap;
+            overflow: visible;
+            padding: 14px 4px 4px;
+        }
+
+        /* PHASE BANNER */
+        #phase-banner {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(13, 17, 23, 0.92);
+            border: 1px solid #30363d;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 4px 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        #phase-banner.phase-stock {
+            color: #f0883e;
+            border-color: #f0883e44;
+        }
+
+        #phase-banner.phase-react {
+            color: #58a6ff;
+            border-color: #58a6ff44;
+        }
+
+        #phase-banner.phase-resolve {
+            color: #bc8cff;
+            border-color: #bc8cff44;
+        }
+
+        #phase-banner.phase-review {
+            color: #3fb950;
+            border-color: #3fb95044;
+        }
+
+        #phase-banner.phase-target {
+            color: #ff7b72;
+            border-color: #ff7b7244;
+        }
+
+        #phase-banner.phase-cost {
+            color: #ffa657;
+            border-color: #ffa65744;
+        }
+
+        /* CARDS — hand */
+        .hand-card {
+            width: 88px;
+            height: 122px;
+            border-radius: 10px;
+            border: 2px solid #30363d;
+            background: #161b22;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .hand-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            z-index: 10;
+        }
+
+        .hand-card.selected {
+            border-color: #58a6ff;
+            box-shadow: 0 0 14px #58a6ff88;
+            transform: translateY(-10px);
+        }
+
+        .hand-card.selectable-stock {
+            border-color: #f0883e;
+            box-shadow: 0 0 8px #f0883e55;
+        }
+
+        .hand-card.selectable-react {
+            border-color: #58a6ff;
+            box-shadow: 0 0 8px #58a6ff55;
+        }
+
+        .hand-card.selectable-pitch {
+            border-color: #ff7b72;
+            box-shadow: 0 0 8px #ff7b7255;
+            cursor: pointer;
+        }
+
+        .card-name-top {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: #8b949e;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-ability-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .ability-label {
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .ability-label.react {
+            background: #1a3a5c;
+            color: #58a6ff;
+        }
+
+        .ability-label.stock {
+            background: #3a2800;
+            color: #f0883e;
+        }
+
+        .ability-desc {
+            font-size: 0.55rem;
+            color: #8b949e;
+            line-height: 1.3;
+        }
+
+        .ability-meta {
+            font-size: 0.5rem;
+            color: #555;
+        }
+
+        .card-divider {
+            height: 1px;
+            background: #30363d;
+            margin: 3px 0;
+        }
+
+        /* CARDS — pot */
+        .pot-card {
+            width: 80px;
+            height: 110px;
+            border-radius: 10px;
+            border: 2px solid #30363d;
+            background: #161b22;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+
+        .pot-card.pot-react {
+            border-color: #58a6ff;
+            box-shadow: 0 0 12px #58a6ff66;
+        }
+
+        .pot-card.pot-stock {
+            border-color: #f0883e;
+            box-shadow: 0 0 12px #f0883e66;
+        }
+
+        .pot-card.resolving {
+            animation: resolveFlash 0.6s ease-in-out 2;
+        }
+
+        .pot-card.selectable-target {
+            border-color: #ff7b72 !important;
+            box-shadow: 0 0 14px #ff7b7299;
+            cursor: pointer;
+            animation: targetPulse 1s infinite;
+        }
+
+        @keyframes resolveFlash {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(2.5);
+            }
+        }
+
+        @keyframes targetPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 14px #ff7b7299;
+            }
+
+            50% {
+                box-shadow: 0 0 28px #ff7b72cc;
+            }
+        }
+
+        .pot-owner {
+            font-size: 0.5rem;
+            color: #8b949e;
+            position: absolute;
+            top: 3px;
+            left: 5px;
+        }
+
+        .pot-type-icon {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            font-size: 0.9rem;
+        }
+
+        .pot-card-name {
+            font-size: 0.62rem;
+            font-weight: 700;
+            margin-top: 14px;
+            color: #e6edf3;
+        }
+
+        .pot-ability-name {
+            font-size: 0.55rem;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+
+        /* CARDS — back (opponents + deck) */
+        .card-back {
+            width: 68px;
+            height: 94px;
+            border-radius: 8px;
+            border: 2px solid #30363d;
+            background: url('/static/dog.png') center/cover #0d1f3a;
+            flex-shrink: 0;
+        }
+
+        /* MINI CARDS — stockpile */
+        .mini-card {
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .mini-card.stock-mine {
+            border-color: #f0883e55;
+        }
+
+        .mini-card.selectable-target {
+            border-color: #ff7b72;
+            box-shadow: 0 0 8px #ff7b7266;
+            cursor: pointer;
+            animation: targetPulse 1s infinite;
+        }
+
+        .mini-card.selectable-gy {
+            border-color: #bc8cff;
+            box-shadow: 0 0 8px #bc8cff66;
+            cursor: pointer;
+        }
+
+        /* OPPONENT ZONE */
+        .opp-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .opp-zone.priority {
+            border-color: #58a6ff;
+            box-shadow: 0 0 20px #58a6ff55;
+            animation: priorityPulse 1.4s infinite;
+        }
+
+        .opp-zone.active-turn {
+            border-color: #f0883e;
+            box-shadow: 0 0 14px #f0883e44;
+        }
+
+        .opp-zone.targetable {
+            border-color: #ff7b72;
+            box-shadow: 0 0 18px #ff7b7266;
+            cursor: pointer;
+            animation: targetPulse 1s infinite;
+        }
+
+        @keyframes priorityPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px #58a6ff55;
+            }
+
+            50% {
+                box-shadow: 0 0 35px #58a6ffaa;
+            }
+        }
+
+        .opp-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #e6edf3;
+        }
+
+        .opp-backs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .opp-stockpile-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 20px;
+        }
+
+        /* MY ZONE PRIORITY */
+        #my-zone.priority {
+            outline: 3px solid #58a6ff;
+            outline-offset: 4px;
+            border-radius: 14px;
+            box-shadow: 0 0 24px #58a6ff44;
+            animation: priorityPulse 1.4s infinite;
+        }
+
+        /* ACTION BAR — inline above hand */
+        #action-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid #21262d;
+        }
+
+        .btn {
+            padding: 7px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:disabled {
+            opacity: 0.28;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-stock {
+            background: #f0883e;
+            color: #000;
+        }
+
+        .btn-react {
+            background: #58a6ff;
+            color: #000;
+        }
+
+        .btn-pass {
+            background: #4a1c1f;
+            color: #ff7b72;
+            border: 1px solid #7a2b30;
+        }
+
+        .btn-end {
+            background: #3fb950;
+            color: #000;
+        }
+
+        #action-label {
+            font-size: 0.7rem;
+            color: #8b949e;
+            padding: 0 8px;
+        }
+
+        /* EVENT LOG OVERLAY */
+        #event-log {
+            position: fixed;
+            bottom: 60px; /* Above the action bar / hand */
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            pointer-events: none;
+            width: 320px;
+        }
+
+        .log-item {
+            background: rgba(13, 17, 23, 0.95);
+            border-left: 4px solid #bc8cff;
+            border-radius: 6px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            color: #e6edf3;
+            font-size: 0.85rem;
+            animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: opacity 0.4s, transform 0.4s;
+            max-width: 100%;
+        }
+
+        .log-item.pitch {
+            border-left-color: #ff7b72;
+        }
+
+        .log-item.success {
+            border-left-color: #3fb950;
+        }
+
+        .log-item.countered {
+            border-left-color: #8b949e;
+            text-decoration: line-through;
+        }
+
+        .log-item.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        /* DIVERSIFY PICK overlay */
+        #snatch-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 90;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        #snatch-overlay.visible {
+            display: flex;
+        }
+
+        #snatch-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        #snatch-cards,
+        #gy-cards {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90vw;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        /* GY TARGET overlay */
+        #gy-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 110;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        #gy-overlay.visible {
+            display: flex;
+        }
+
+        #gy-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #bc8cff;
+        }
+
+        /* SVG arrows */
+        #arrow-svg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .targeting-arrow {
+            stroke: #bc8cff;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 6;
+            animation: dash 1s linear infinite;
+            filter: drop-shadow(0 0 5px #bc8cff);
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -12;
+            }
+        }
+
+        /* TOAST */
+        #toast-container {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .toast {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .toast-disconnect {
+            border-color: #ff7b72;
+            color: #ff7b72;
+        }
+
+        .toast-reconnect {
+            border-color: #3fb950;
+            color: #3fb950;
+        }
+
+        /* COST PROMPT */
+        #cost-bar {
+            position: absolute;
+            bottom: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid #f0883e;
+            border-radius: 10px;
+            padding: 8px 16px;
+            z-index: 40;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #f0883e;
+        }
+
+        #cost-bar.visible {
+            display: flex;
+        }
+
+        /* GY pile top card */
+        .gy-top {
+            width: 72px;
+            height: 100px;
+            border-radius: 8px;
+            border: 2px solid #30363d;
+            background: #161b22;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.62rem;
+            color: #8b949e;
+            text-align: center;
+            padding: 4px;
+        }
+
+        .gy-top.selectable-target {
+            border-color: #bc8cff;
+            box-shadow: 0 0 8px #bc8cff66;
+            cursor: pointer;
+            animation: targetPulse 1s infinite;
+        }
+
+        /* Responsive Layout - Mobile */
+        @media screen and (max-width: 768px) {
+            #opponents-row {
+                padding: 10px 5px 0;
+                gap: 8px;
+                min-height: auto;
+                flex-wrap: wrap; /* Wrap opponents if space is tight */
+            }
+
+            .opp-zone {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+
+            .card-back {
+                width: 48px;
+                height: 68px;
+            }
+
+            .mini-card {
+                height: 24px;
+                padding: 0 4px;
+                font-size: 0.5rem;
+            }
+
+            #center-zone {
+                gap: 16px;
+                padding: 4px;
+                flex-wrap: wrap; /* Allow pot to break onto new line */
+            }
+
+            #deck-pile, #graveyard-pile, .gy-top {
+                width: 54px;
+                height: 76px;
+            }
+
+            #pot-zone {
+                min-width: 120px;
+                min-height: 80px;
+                padding: 4px;
+            }
+
+            .pot-card {
+                width: 60px;
+                height: 84px;
+                padding: 4px;
+            }
+
+            .pot-card-name {
+                font-size: 0.5rem;
+                margin-top: 10px;
+            }
+
+            .pot-ability-name {
+                font-size: 0.45rem;
+            }
+
+            #my-zone {
+                padding: 0 8px 8px;
+            }
+
+            .hand-card {
+                width: 70px;
+                height: 100px;
+                padding: 4px;
+            }
+
+            .card-name-top {
+                font-size: 0.5rem;
+            }
+
+            .ability-label {
+                font-size: 0.45rem;
+            }
+
+            .ability-desc {
+                font-size: 0.45rem;
+            }
+
+            #action-bar {
+                padding: 4px 6px;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 5px 12px;
+                font-size: 0.7rem;
+            }
+
+            #event-log {
+                width: 260px;
+                bottom: 80px;
+                left: 10px;
+            }
+
+            .log-item {
+                font-size: 0.75rem;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Phase banner -->
+    <div id="phase-banner">LOADING...</div>
+
+    <!-- SVG targeting arrows -->
+    <svg id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#bc8cff" />
+            </marker>
+        </defs>
+    </svg>
+
+    <!-- Main table -->
+    <div id="table">
+        <!-- Opponents row -->
+        <div id="opponents-row"></div>
+
+        <!-- Center zone -->
+        <div id="center-zone">
+            <div id="deck-pile">
+                <div class="deck-count" id="deck-count">0</div>
+            </div>
+            <div id="pot-zone"></div>
+            <div id="graveyard-pile" title="Graveyard">
+                <div id="gy-top-card"></div>
+                <div class="gy-count" id="gy-count">0</div>
+            </div>
+        </div>
+
+        <!-- My zone -->
+        <div id="my-zone">
+            <div id="my-info">
+                <span id="my-name" style="font-weight:700;font-size:0.9rem;"></span>
+                <span id="my-stock-label" style="font-size:0.7rem;color:#8b949e;"></span>
+            </div>
+            <div id="my-stockpile-row"></div>
+            <!-- Action buttons above hand -->
+            <div id="action-bar">
+                <span id="action-label"></span>
+                <button class="btn btn-stock" id="stock-btn" disabled>STOCK</button>
+                <button class="btn btn-react" id="react-btn" disabled>REACT</button>
+                <button class="btn btn-pass" id="pass-btn" disabled>PASS</button>
+                <button class="btn btn-end" id="end-btn" disabled style="display:none;">START NEXT TURN</button>
+            </div>
+            <div id="hand-row"></div>
+        </div>
+    </div>
+
+    <!-- Cost prompt bar -->
+    <div id="cost-bar">
+        <span id="cost-label">Pay a cost to play this card:</span>
+        <div id="cost-options" style="display:flex;gap:8px;"></div>
+    </div>
+
+    <!-- Event Log -->
+    <div id="event-log"></div>
+
+    <!-- Diversify pick overlay -->
+    <div id="snatch-overlay">
+        <div id="snatch-title">⚡ DIVERSIFY — Pick a card to take</div>
+        <div id="snatch-cards"></div>
+    </div>
+
+    <!-- Graveyard target overlay -->
+    <div id="gy-overlay">
+        <div id="gy-title">🎯 Select target from Graveyard...</div>
+        <div id="gy-cards"></div>
+        <button class="btn btn-pass" onclick="hideGyOverlay()">CANCEL</button>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <script>
+        const code = new URLSearchParams(location.search).get('code');
+        const token = localStorage.getItem('windfall_token');
+        if (!token) { location.href = '/'; }
+
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${location.host}/ws/${code}/${token}`);
+
+        let gameState = null;
+        let selectedCardIdx = -1;
+        let cardData = {};  // from cards.json keyed by ability name
+        let prevEventHistoryLen = 0;
+        let resQueue = [];  // resolution animation queue
+        let resPlaying = false;
+
+        // Fetch card definitions for rich display
+        fetch('/static/cards.json').then(r => r.json()).then(d => {
+            cardData = d.abilities || {};
+        });
+
+        ws.onmessage = e => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'STATE_UPDATE') {
+                const prev = gameState;
+                gameState = data.state;
+                handleStateUpdate(prev, gameState);
+            } else if (data.type === 'PLAYER_DISCONNECTED') {
+                showToast(`⚠ ${data.player_name} disconnected`, 'toast-disconnect');
+            } else if (data.type === 'PLAYER_RECONNECTED') {
+                showToast(`✓ ${data.player_name} reconnected`, 'toast-reconnect');
+            }
+        };
+
+        function handleStateUpdate(prev, state) {
+            // Queue resolution animations for new effect events
+            if (state.event_history) {
+                const newLen = state.event_history.length;
+                if (newLen > prevEventHistoryLen) {
+                    const newLines = state.event_history.slice(prevEventHistoryLen);
+                    newLines.forEach(line => {
+                        const cleanLine = line.replace(/\u001b\[[0-9;]*m/g, '').trim();
+                        if (cleanLine.startsWith('[SUCCESS]')) {
+                            resQueue.push({text: cleanLine.replace('[SUCCESS]', '').trim(), type: 'success'});
+                        } else if (cleanLine.startsWith('->')) {
+                            resQueue.push({text: cleanLine.replace('->', '').trim(), type: 'pitch'});
+                        } else if (cleanLine.startsWith('[COUNTERED]')) {
+                            resQueue.push({text: cleanLine.replace('[COUNTERED]', '').trim(), type: 'countered'});
+                        }
+                    });
+                    prevEventHistoryLen = newLen;
+                }
+            }
+            renderGame();
+            playResolutionQueue();
+        }
+
+        function playResolutionQueue() {
+            if (resPlaying || resQueue.length === 0) return;
+            resPlaying = true;
+            const processNext = () => {
+                if (resQueue.length === 0) {
+                    resPlaying = false;
+                    return;
+                }
+                const item = resQueue.shift();
+                showLogItem(item);
+                // Wait a short time before popping the next item so they stack nicely
+                setTimeout(processNext, 400);
+            };
+            processNext();
+        }
+
+        function showLogItem(item) {
+            const container = document.getElementById('event-log');
+            if(!container) return;
+            const el = document.createElement('div');
+            el.className = `log-item ${item.type}`;
+            
+            let prefix = '';
+            if (item.type === 'success') prefix = '⚡ ';
+            if (item.type === 'pitch') prefix = '💰 ';
+            if (item.type === 'countered') prefix = '❌ ';
+            
+            el.innerHTML = `<strong>${prefix}</strong> ${item.text}`;
+            container.appendChild(el);
+            
+            // Auto fade out
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                setTimeout(() => el.remove(), 400);
+            }, 3000);
+        }
+
+        function showGyOverlay() {
+            document.getElementById('gy-overlay').classList.add('visible');
+        }
+        function hideGyOverlay() {
+            document.getElementById('gy-overlay').classList.remove('visible');
+        }
+
+        /* ─── MAIN RENDER ─── */
+        function renderGame() {
+            if (!gameState) return;
+            const myIdx = gameState.players.findIndex(p => p.external_id === token);
+            const me = myIdx >= 0 ? gameState.players[myIdx] : null;
+            const isMyTurn = me && gameState.players[gameState.active_player_idx]?.external_id === token;
+            const hasPriority = me && gameState.players[gameState.priority_player_idx]?.external_id === token;
+            const phase = gameState.current_phase;
+
+            renderPhaseBanner(phase, isMyTurn, hasPriority, gameState);
+            renderOpponents(gameState, myIdx, me);
+            renderCenter(gameState, me, myIdx);
+            renderMyZone(gameState, me, myIdx, hasPriority, isMyTurn);
+            renderActionBar(phase, isMyTurn, hasPriority, me);
+            renderCostBar(gameState, me, myIdx);
+            renderSnatchOverlay(gameState, me, myIdx);
+            drawTargetingArrows(gameState, myIdx);
+
+            if (gameState.game_over) {
+                setTimeout(() => alert(`Game Over! Winner: ${gameState.winner_name}`), 300);
+            }
+        }
+
+        /* ─── PHASE BANNER ─── */
+        function renderPhaseBanner(phase, isMyTurn, hasPriority, state) {
+            const b = document.getElementById('phase-banner');
+            const labels = {
+                DRAW: '🃏 DRAW PHASE', STOCK_CARD_SELECTION: '✦ STOCK PHASE',
+                REACTION_SELECTION: '⚡ REACTION PHASE', TARGETING: '🎯 SELECT TARGET',
+                PAYING_COSTS: '💰 PAY COST', RESOLUTION: '⚙ RESOLVING', REVIEW: '✔ REVIEW', SETUP: '⏳ SETUP'
+            };
+            let cls = '';
+            if (phase === 'STOCK_CARD_SELECTION') cls = 'phase-stock';
+            else if (phase === 'REACTION_SELECTION') cls = 'phase-react';
+            else if (phase === 'RESOLUTION') cls = 'phase-resolve';
+            else if (phase === 'REVIEW') cls = 'phase-review';
+            else if (phase === 'TARGETING') cls = 'phase-target';
+            else if (phase === 'PAYING_COSTS') cls = 'phase-cost';
+            b.className = cls;
+            let txt = labels[phase] || phase;
+            if (phase === 'STOCK_CARD_SELECTION') txt += isMyTurn ? ' — YOUR TURN' : ` — ${state.players[state.active_player_idx]?.name}'s TURN`;
+            if (phase === 'REACTION_SELECTION') txt += hasPriority ? ' — YOUR PRIORITY' : ` — ${state.players[state.priority_player_idx]?.name}'s PRIORITY`;
+            b.textContent = txt;
+        }
+
+        /* ─── OPPONENTS ─── */
+        function renderOpponents(state, myIdx, me) {
+            const row = document.getElementById('opponents-row');
+            row.innerHTML = '';
+            const phase = state.current_phase;
+            const pending = state.pending_action;
+            const isMyTargetTurn = pending && me && state.players[pending.source_player_idx]?.external_id === token;
+
+            state.players.forEach((p, idx) => {
+                if (idx === myIdx) return;
+                const zone = document.createElement('div');
+                zone.className = 'opp-zone';
+                zone.id = `opp-zone-${idx}`;
+                const isPriority = state.priority_player_idx === idx && phase === 'REACTION_SELECTION';
+                const isActive = state.active_player_idx === idx;
+                if (isPriority) zone.classList.add('priority');
+                else if (isActive) zone.classList.add('active-turn');
+
+                const isTargetable = phase === 'TARGETING' && isMyTargetTurn &&
+                    pending.requirements?.includes('PLAYER') && p.external_id !== token;
+                if (isTargetable) {
+                    zone.classList.add('targetable');
+                    zone.onclick = () => sendAction('SET_TARGETS', { target_player_index: idx });
+                }
+
+                const handCount = Array.isArray(p.hand) ? p.hand.length : (p.hand || 0);
+                const backs = Array.from({ length: handCount }, () => `<div class="card-back"></div>`).join('');
+
+                let stockHtml = '<div class="opp-stockpile-row">';
+                p.stockpile.forEach((card, sIdx) => {
+                    const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
+                        (pending.requirements?.includes('ANY_STOCK') ||
+                            (pending.requirements?.includes('OPPONENT_STOCK') && p.external_id !== token));
+                    stockHtml += `<div class="mini-card ${isStockTarget ? 'selectable-target' : ''}"
+        id="stock-${idx}-${sIdx}"
+        title="${card.name}"
+        onclick="event.stopPropagation();handleStockTarget(${idx},${sIdx},'${card.id}')"
+      >${card.name.split('/')[1] || card.name}</div>`;
+                });
+                stockHtml += '</div>';
+
+                zone.innerHTML = `
+      <div class="opp-name">${isPriority ? '⚡ ' : ''}${isActive ? '➡ ' : ''}${p.name}</div>
+      <div class="opp-backs">${backs}</div>
+      ${stockHtml}
+    `;
+                row.appendChild(zone);
+            });
+        }
+
+        /* ─── CENTER: POT / DECK / GRAVEYARD ─── */
+        function renderCenter(state, me, myIdx) {
+            // Deck count
+            document.getElementById('deck-count').textContent = `${state.deck_count} cards`;
+
+            // Graveyard top
+            const gyEl = document.getElementById('gy-top-card');
+            const gyCountEl = document.getElementById('gy-count');
+            gyCountEl.textContent = state.graveyard ? state.graveyard.length : 0;
+
+            if (state.graveyard && state.graveyard.length > 0) {
+                const top = state.graveyard[state.graveyard.length - 1];
+                const snatchPickIds = state.pending_action?.type === 'SNATCH_PICK'
+                    ? (state.pending_action.pitched_card_ids || []) : [];
+                const isMySP = state.pending_action?.type === 'SNATCH_PICK' &&
+                    state.players[state.pending_action.source_player_idx]?.external_id === token;
+                // GY target?
+                const isMyTargetTurn = state.pending_action && me &&
+                    state.players[state.pending_action.player_idx ?? state.pending_action.source_player_idx]?.external_id === token;
+                const gyTargetable = state.current_phase === 'TARGETING' && isMyTargetTurn &&
+                    state.pending_action.requirements?.includes('GRAVEYARD');
+                const el = document.createElement('div');
+                el.className = 'gy-top' + (gyTargetable ? ' selectable-target' : '');
+                el.id = `gy-${top.id}`;
+                el.title = `Liquidated (${state.graveyard.length})`;
+                el.textContent = top.name;
+                if (gyTargetable) {
+                    el.onclick = () => {
+                        populateGyOverlay(state);
+                        showGyOverlay();
+                    };
+                }
+                gyEl.innerHTML = '';
+                gyEl.appendChild(el);
+            } else {
+                gyEl.innerHTML = '<div class="gy-top">Empty</div>';
+            }
+
+            // Pot
+            const pot = document.getElementById('pot-zone');
+            pot.innerHTML = '';
+            const phase = state.current_phase;
+            const pending = state.pending_action;
+            const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
+            const isMyTargetTurn = pending && me &&
+                state.players[pendingIdx]?.external_id === token;
+
+            if (!state.pot || state.pot.length === 0) {
+                pot.innerHTML = '<span style="font-size:0.7rem;color:#30363d;">ORDER BOOK</span>';
+            } else {
+                state.pot.forEach((card, idx) => {
+                    const sa = state.stack?.find(a => a.source_card_name === card.name);
+                    const isReact = sa?.ability_type === 'react';
+                    const isStock = sa?.ability_type === 'stockpile';
+                    const resolving = phase === 'RESOLUTION';
+                    const potTargetable = phase === 'TARGETING' && isMyTargetTurn &&
+                        pending.requirements?.includes('POT_CARD');
+
+                    const el = document.createElement('div');
+                    el.className = 'pot-card' +
+                        (isReact ? ' pot-react' : isStock ? ' pot-stock' : '') +
+                        (resolving ? ' resolving' : '') +
+                        (potTargetable ? ' selectable-target' : '');
+                    el.id = `pot-card-${card.id}`;
+                    if (potTargetable) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: idx, target_zone: 'pot' });
+
+                    const abilityName = isReact ? card.react_name : (isStock ? card.stock_name : '');
+                    el.innerHTML = `
+        <span class="pot-owner">${sa?.source_player_name || ''}</span>
+        <span class="pot-type-icon">${isReact ? '⚡' : isStock ? '✦' : ''}</span>
+        <div class="pot-card-name">${card.name}</div>
+        ${abilityName ? `<div class="pot-ability-name">${abilityName}</div>` : ''}
+      `;
+                    pot.appendChild(el);
+                });
+            }
+        }
+
+        /* ─── MY ZONE ─── */
+        function renderMyZone(state, me, myIdx, hasPriority, isMyTurn) {
+            if (!me) { document.getElementById('my-zone').innerHTML = ''; return; }
+            const phase = state.current_phase;
+            const pending = state.pending_action;
+            const myZone = document.getElementById('my-zone');
+            myZone.className = hasPriority && phase === 'REACTION_SELECTION' ? 'priority' : '';
+
+            document.getElementById('my-name').textContent =
+                (isMyTurn ? '➡ ' : '') + (hasPriority && phase === 'REACTION_SELECTION' ? '⚡ ' : '') + me.name;
+            document.getElementById('my-stock-label').textContent =
+                `Portfolio: ${me.stockpile.length} | Capital: ${Array.isArray(me.hand) ? me.hand.length : 0}`;
+
+            // My stockpile
+            const spRow = document.getElementById('my-stockpile-row');
+            spRow.innerHTML = '';
+            const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
+            const isMyTargetTurn = pending && state.players[pendingIdx]?.external_id === token;
+            me.stockpile.forEach((card, sIdx) => {
+                const isBurnCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
+                    (pending.requirements?.includes('Burn') || pending.requirements?.includes('REDACT_COST'));
+                const isStockTarget = phase === 'TARGETING' && isMyTargetTurn &&
+                    (pending.requirements?.includes('ANY_STOCK') || pending.requirements?.includes('OWN_STOCK'));
+                const el = document.createElement('div');
+                el.id = `stock-${card.id}`;
+                el.className = 'mini-card stock-mine' +
+                    (isBurnCost || isStockTarget ? ' selectable-target' : '');
+                el.textContent = card.name.split('/')[1] || card.name;
+                el.title = card.name;
+                if (isBurnCost) el.onclick = () => sendAction('SET_COST', { cost_type: 'Burn', card_index: sIdx });
+                else if (isStockTarget) el.onclick = () => sendAction('SET_TARGETS', { target_card_index: sIdx, target_zone: 'stockpile', target_player_index: myIdx });
+                spRow.appendChild(el);
+            });
+
+            // Hand
+            const handRow = document.getElementById('hand-row');
+            handRow.innerHTML = '';
+            if (!Array.isArray(me.hand)) return;
+
+            const isStocking = isMyTurn && phase === 'STOCK_CARD_SELECTION';
+            const isReacting = hasPriority && phase === 'REACTION_SELECTION';
+            const isPitchCost = phase === 'PAYING_COSTS' && isMyTargetTurn &&
+                (pending.requirements?.includes('Pitch') || pending.requirements?.includes('EXTRA_PITCH'));
+            const isPitchResolving = pending?.type === 'RESOLUTION_PITCH' && isMyTargetTurn;
+
+            me.hand.forEach((card, idx) => {
+                const el = document.createElement('div');
+                el.className = 'hand-card';
+                if (idx === selectedCardIdx) el.classList.add('selected');
+                if (isStocking) el.classList.add('selectable-stock');
+                if (isReacting) el.classList.add('selectable-react');
+                if (isPitchCost || isPitchResolving) el.classList.add('selectable-pitch');
+
+                const showStock = phase !== 'REACTION_SELECTION';
+                const showReact = phase !== 'STOCK_CARD_SELECTION';
+                const def = cardData;
+                const reactDef = def[card.react_name] || {};
+                const stockDef = def[card.stock_name] || {};
+                const reactCost = (reactDef.tags || []).filter(t => ['Pitch', 'Burn', 'Choice'].includes(t)).join(', ');
+                const stockCost = (stockDef.tags || []).filter(t => ['Pitch', 'Burn', 'Choice'].includes(t)).join(', ');
+                const reactTargets = (reactDef.target_requirements || []).join(', ');
+                const stockTargets = (stockDef.target_requirements || []).join(', ');
+
+                el.innerHTML = `
+      <div class="card-name-top">${card.name}</div>
+      <div class="card-ability-block">
+        ${showReact ? `
+          <span class="ability-label react">HEDGE</span>
+          <div class="ability-desc">${card.react_desc || ''}</div>
+          ${reactTargets ? `<div class="ability-meta">🎯 ${reactTargets}</div>` : ''}
+          ${reactCost ? `<div class="ability-meta">💰 ${reactCost}</div>` : ''}
+        `: ''}
+        ${showReact && showStock ? '<div class="card-divider"></div>' : ''}
+        ${showStock ? `
+          <span class="ability-label stock">INVEST</span>
+          <div class="ability-desc">${card.stock_desc || ''}</div>
+          ${stockTargets ? `<div class="ability-meta">🎯 ${stockTargets}</div>` : ''}
+          ${stockCost ? `<div class="ability-meta">💰 ${stockCost}</div>` : ''}
+        `: ''}
+      </div>
+    `;
+
+                if (isPitchCost) {
+                    el.onclick = () => sendAction('SET_COST', { cost_type: 'Pitch', card_index: idx });
+                } else if (isPitchResolving) {
+                    el.onclick = () => sendAction('RESOLUTION_PITCH', { card_id: card.id });
+                } else {
+                    el.onclick = () => toggleSelect(idx);
+                }
+                handRow.appendChild(el);
+            });
+        }
+
+        /* ─── ACTION BAR ─── */
+        function renderActionBar(phase, isMyTurn, hasPriority, me) {
+            const label = document.getElementById('action-label');
+            const stockBtn = document.getElementById('stock-btn');
+            const reactBtn = document.getElementById('react-btn');
+            const passBtn = document.getElementById('pass-btn');
+            const endBtn = document.getElementById('end-btn');
+
+            const canStock = isMyTurn && phase === 'STOCK_CARD_SELECTION' && selectedCardIdx >= 0;
+            const canReact = hasPriority && phase === 'REACTION_SELECTION' && selectedCardIdx >= 0;
+            const canPass = hasPriority && phase === 'REACTION_SELECTION';
+
+            stockBtn.disabled = !canStock;
+            reactBtn.disabled = !canReact;
+            passBtn.disabled = !canPass;
+            stockBtn.style.display = '';
+            reactBtn.style.display = '';
+            passBtn.style.display = '';
+            endBtn.style.display = phase === 'REVIEW' && isMyTurn ? '' : 'none';
+            endBtn.disabled = !(phase === 'REVIEW' && isMyTurn);
+
+            if (phase === 'STOCK_CARD_SELECTION' && isMyTurn)
+                label.textContent = selectedCardIdx >= 0 ? 'Select INVEST ↓' : 'Pick a card to invest';
+            else if (phase === 'REACTION_SELECTION' && hasPriority)
+                label.textContent = selectedCardIdx >= 0 ? 'HEDGE or PASS ↓' : 'Select a card to hedge, or pass';
+            else if (phase === 'REVIEW' && isMyTurn)
+                label.textContent = 'Turn complete —';
+            else label.textContent = '';
+
+            stockBtn.onclick = () => { sendAction('STOCK', { card_index: selectedCardIdx }); selectedCardIdx = -1; };
+            reactBtn.onclick = () => { sendAction('REACT', { card_index: selectedCardIdx }); selectedCardIdx = -1; };
+            passBtn.onclick = () => sendAction('PASS', {});
+            endBtn.onclick = () => sendAction('END_TURN', {});
+        }
+
+        /* ─── COST BAR ─── */
+        function renderCostBar(state, me, myIdx) {
+            const bar = document.getElementById('cost-bar');
+            const pending = state.pending_action;
+
+            const pendingIdx = pending ? (pending.player_idx !== undefined ? pending.player_idx : pending.source_player_idx) : -1;
+            const isMyPending = pending && state.players[pendingIdx]?.external_id === token;
+
+            if (state.current_phase === 'PAYING_COSTS' && isMyPending) {
+                bar.classList.add('visible');
+                const reqs = pending.requirements || [];
+                document.getElementById('cost-label').textContent = `Pay cost: ${reqs.join(' or ')}`;
+                document.getElementById('cost-options').innerHTML = '';
+            } else if (pending?.type === 'RESOLUTION_PITCH' && isMyPending) {
+                bar.classList.add('visible');
+                const reason = pending.is_snatch ? "Diversify" : pending.card_name;
+                document.getElementById('cost-label').textContent = `You must pitch a card for ${reason}!`;
+                document.getElementById('cost-options').innerHTML = '';
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        /* ─── DIVERSIFY OVERLAY ─── */
+        function renderSnatchOverlay(state, me, myIdx) {
+            const ov = document.getElementById('snatch-overlay');
+            const pending = state.pending_action;
+            if (!pending || pending.type !== 'SNATCH_PICK' ||
+                state.players[pending.source_player_idx]?.external_id !== token) {
+                ov.classList.remove('visible');
+                return;
+            }
+            ov.classList.add('visible');
+            const container = document.getElementById('snatch-cards');
+            container.innerHTML = '';
+            const ids = pending.pitched_card_ids || [];
+            const pitched = state.graveyard.filter(c => ids.includes(c.id));
+            pitched.forEach(card => {
+                const el = document.createElement('div');
+                el.className = 'hand-card selectable-react';
+                el.style.cssText = 'width:110px;height:150px;cursor:pointer;';
+                el.innerHTML = `
+      <div class="card-name-top">${card.name}</div>
+      <div class="card-ability-block">
+        <span class="ability-label react">HEDGE</span>
+        <div class="ability-desc">${card.react_desc || ''}</div>
+        <div class="card-divider"></div>
+        <span class="ability-label stock">INVEST</span>
+        <div class="ability-desc">${card.stock_desc || ''}</div>
+      </div>
+    `;
+                el.onclick = () => sendAction('SNATCH_PICK', { card_id: card.id });
+                container.appendChild(el);
+            });
+        }
+
+        /* ─── GRAVEYARD TARGET OVERLAY ─── */
+        function populateGyOverlay(state) {
+            const container = document.getElementById('gy-cards');
+            container.innerHTML = '';
+            
+            if (!state.graveyard || state.graveyard.length === 0) return;
+
+            // Group cards by name
+            const grouped = {};
+            // Iterate forwards so we keep the index of the most recent one
+            state.graveyard.forEach((card, idx) => {
+                if (!grouped[card.name]) {
+                    grouped[card.name] = { count: 0, latestIndex: -1, name: card.name };
+                }
+                grouped[card.name].count++;
+                grouped[card.name].latestIndex = idx;
+            });
+
+            // Get up to 5 unique card types, sorted by most recently added
+            const uniqueCards = Object.values(grouped)
+                .sort((a, b) => b.latestIndex - a.latestIndex)
+                .slice(0, 5);
+
+            uniqueCards.forEach(group => {
+                const el = document.createElement('div');
+                el.className = 'pot-card selectable-target';
+                el.style.cssText = 'width:90px;height:120px;cursor:pointer;position:relative;';
+                el.innerHTML = `
+        <div class="pot-card-name">${group.name}</div>
+        <div class="pot-ability-name" style="margin-top:auto;">select</div>
+        <div style="position:absolute;bottom:4px;right:6px;font-size:0.9rem;font-weight:bold;color:#bc8cff;">x${group.count}</div>
+      `;
+                el.onclick = () => {
+                    hideGyOverlay();
+                    sendAction('SET_TARGETS', { target_card_index: group.latestIndex, target_zone: 'graveyard' });
+                };
+                container.appendChild(el);
+            });
+        }
+
+        /* ─── HELPERS ─── */
+        function toggleSelect(idx) {
+            selectedCardIdx = selectedCardIdx === idx ? -1 : idx;
+            renderGame();
+        }
+
+        function sendAction(type, data) {
+            ws.send(JSON.stringify({ action: type, ...data }));
+        }
+
+        function handleStockTarget(playerIdx, cardIdx, cardId) {
+            if (!gameState) return;
+            const phase = gameState.current_phase;
+            const pending = gameState.pending_action;
+            if (phase === 'TARGETING' && pending &&
+                gameState.players[pending.source_player_idx]?.external_id === token) {
+                sendAction('SET_TARGETS', { target_card_index: cardIdx, target_zone: 'stockpile', target_player_index: playerIdx });
+            }
+        }
+
+        function clearArrows() {
+            const svg = document.getElementById('arrow-svg');
+            // Remove all paths but keep the defs marker
+            Array.from(svg.querySelectorAll('path')).forEach(p => p.remove());
+        }
+
+        function drawTargetingArrows(state, myIdx) {
+            clearArrows();
+            if (!state || !state.stack || state.stack.length === 0) return;
+
+            const svg = document.getElementById('arrow-svg');
+
+            state.stack.forEach(action => {
+                if (!action.target_card_id && !action.target_player_id) return;
+
+                // Find source
+                const sourceEl = document.getElementById(`pot-card-${action.source_card_id}`);
+                if (!sourceEl) return;
+
+                // Find target
+                let targetEl = null;
+
+                if (action.target_card_id) {
+                    targetEl = document.getElementById(`pot-card-${action.target_card_id}`);
+                    if (!targetEl) {
+                        // Could be in a stockpile
+                        targetEl = document.getElementById(`stock-${action.target_card_id}`);
+                    }
+                    if (!targetEl) {
+                        // Could be in graveyard
+                        const gy = document.getElementById('gy-top');
+                        if (gy && state.graveyard && state.graveyard.length > 0 &&
+                            state.graveyard[state.graveyard.length - 1].id === action.target_card_id) {
+                            targetEl = gy;
+                        }
+                    }
+                } else if (action.target_player_id) {
+                    const idx = state.players.findIndex(p => p.external_id === action.target_player_id);
+                    if (idx >= 0 && idx !== myIdx) {
+                        targetEl = document.getElementById(`opp-zone-${idx}`);
+                    } else if (idx === myIdx) {
+                        targetEl = document.getElementById('my-zone');
+                    }
+                }
+
+                if (sourceEl && targetEl) {
+                    const sRect = sourceEl.getBoundingClientRect();
+                    const tRect = targetEl.getBoundingClientRect();
+
+                    const sx = sRect.left + sRect.width / 2;
+                    const sy = sRect.top + sRect.height / 2;
+                    const tx = tRect.left + tRect.width / 2;
+                    const ty = tRect.top + tRect.height / 2;
+
+                    // Draw a bezier curve
+                    const dx = tx - sx;
+                    const dy = ty - sy;
+
+                    // Control points for the curve
+                    const cp1x = sx + dx * 0.2;
+                    const cp1y = sy - 50;
+                    const cp2x = sx + dx * 0.8;
+                    const cp2y = ty - 50;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${sx} ${sy} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${tx} ${ty}`);
+                    path.setAttribute('class', 'targeting-arrow');
+                    path.setAttribute('marker-end', 'url(#arrowhead)');
+                    svg.appendChild(path);
+                }
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (gameState) {
+                const myIdx = gameState.players.findIndex(p => p.external_id === token);
+                drawTargetingArrows(gameState, myIdx);
+            }
+        });
+
+        function showToast(msg, cls = 'toast-disconnect', dur = 4000) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `toast ${cls}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), dur);
+        }
+    </script>
+</body>
+
+</html>

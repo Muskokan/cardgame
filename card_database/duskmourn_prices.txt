@@ -1,0 +1,279 @@
+Card Name	Set Code	Set Number	SKU	Rarity	Price (USD)
+Abandoned Campground	DSK	255	DSK255	Common	$0.12
+Abhorrent Oculus	DSK	42	DSK042	Mythic	$14.22
+Acrobatic Cheerleader	DSK	1	DSK001	Common	$0.04
+A-Kona, Rescue Beastie	DSK	A-187	DSKA-187	Rare	N/A
+A-Leyline of Resonance	DSK	A-143	DSKA-143	Rare	N/A
+Altanak, the Thrice-Called	DSK	166	DSK166	Uncommon	$0.20
+Anthropede	DSK	167	DSK167	Common	$0.05
+Appendage Amalgam	DSK	83	DSK083	Common	$0.16
+Arabella, Abandoned Doll	DSK	208	DSK208	Uncommon	$0.44
+Attack-in-the-Box	DSK	242	DSK242	Uncommon	$0.07
+Balemurk Leech	DSK	84	DSK084	Common	$0.22
+Balustrade Wurm	DSK	168	DSK168	Rare	$0.26
+Baseball Bat	DSK	209	DSK209	Uncommon	$0.08
+Bashful Beastie	DSK	169	DSK169	Common	$0.03
+Bear Trap	DSK	243	DSK243	Common	$0.15
+Beastie Beatdown	DSK	210	DSK210	Uncommon	$0.12
+Bedhead Beastie	DSK	125	DSK125	Common	$0.05
+Betrayer's Bargain	DSK	126	DSK126	Uncommon	$0.08
+Blazemire Verge	DSK	256	DSK256	Rare	$11.65
+Bleeding Woods	DSK	257	DSK257	Common	$0.20
+Boilerbilges Ripper	DSK	127	DSK127	Common	$0.05
+Bottomless Pool // Locker Room	DSK	43	DSK043	Uncommon	$0.18
+Break Down the Door	DSK	170	DSK170	Uncommon	$0.15
+Broodspinner	DSK	211	DSK211	Uncommon	$0.22
+Cackling Slasher	DSK	85	DSK085	Common	$0.03
+Cathartic Parting	DSK	171	DSK171	Uncommon	$0.14
+Cautious Survivor	DSK	172	DSK172	Common	$0.07
+Central Elevator // Promising Stairs	DSK	44	DSK044	Rare	$0.23
+Chainsaw	DSK	128	DSK128	Rare	$0.70
+Charred Foyer // Warped Space	DSK	129	DSK129	Mythic	$2.76
+Clammy Prowler	DSK	45	DSK045	Common	$0.10
+Clockwork Percussionist	DSK	130	DSK130	Common	$0.20
+Come Back Wrong	DSK	86	DSK086	Rare	$0.33
+Commune with Evil	DSK	87	DSK087	Uncommon	$0.18
+Conductive Machete	DSK	244	DSK244	Uncommon	$0.11
+Coordinated Clobbering	DSK	173	DSK173	Uncommon	$0.10
+Cracked Skull	DSK	88	DSK088	Common	$0.10
+Creeping Peeper	DSK	46	DSK046	Common	$0.04
+Cryptid Inspector	DSK	174	DSK174	Common	$0.09
+Cult Healer	DSK	2	DSK002	Common	$0.08
+Cursed Recording	DSK	131	DSK131	Rare	$0.19
+Cursed Windbreaker	DSK	47	DSK047	Uncommon	$0.07
+Cynical Loner	DSK	89	DSK089	Uncommon	$0.24
+Daggermaw Megalodon	DSK	48	DSK048	Common	$0.18
+Dashing Bloodsucker	DSK	90	DSK090	Uncommon	$0.10
+Dazzling Theater // Prop Room	DSK	3	DSK003	Rare	$0.81
+Defiant Survivor	DSK	175	DSK175	Uncommon	$0.06
+Defiled Crypt // Cadaver Lab	DSK	91	DSK091	Uncommon	$0.19
+Demonic Counsel	DSK	92	DSK092	Rare	$1.72
+Derelict Attic // Widow's Walk	DSK	93	DSK093	Common	$0.17
+Dissection Tools	DSK	245	DSK245	Rare	$0.31
+Disturbing Mirth	DSK	212	DSK212	Uncommon	$0.09
+Diversion Specialist	DSK	132	DSK132	Uncommon	$0.08
+Dollmaker's Shop // Porcelain Gallery	DSK	4	DSK004	Mythic	$4.67
+Don't Make a Sound	DSK	49	DSK049	Common	$0.22
+Doomsday Excruciator	DSK	94	DSK094	Rare	$1.56
+Drag to the Roots	DSK	213	DSK213	Uncommon	$0.22
+Duskmourn's Domination	DSK	50	DSK050	Uncommon	$0.03
+Emerge from the Cocoon	DSK	5	DSK005	Common	$0.09
+Enduring Courage	DSK	133	DSK133	Rare	$2.48
+Enduring Curiosity	DSK	51	DSK051	Rare	$10.26
+Enduring Innocence	DSK	6	DSK006	Rare	$5.66
+Enduring Tenacity	DSK	95	DSK095	Rare	$5.41
+Enduring Vitality	DSK	176	DSK176	Rare	$7.82
+Enter the Enigma	DSK	52	DSK052	Common	$0.18
+Entity Tracker	DSK	53	DSK053	Rare	$0.86
+Erratic Apparition	DSK	54	DSK054	Common	$0.05
+Etched Cornfield	DSK	258	DSK258	Common	$0.13
+Ethereal Armor	DSK	7	DSK007	Uncommon	$0.29
+Exorcise	DSK	8	DSK008	Uncommon	$0.32
+Fanatic of the Harrowing	DSK	96	DSK096	Common	$0.14
+Fear of Abduction	DSK	9	DSK009	Uncommon	$0.08
+Fear of Being Hunted	DSK	134	DSK134	Uncommon	$0.13
+Fear of Burning Alive	DSK	135	DSK135	Uncommon	$0.29
+Fear of Exposure	DSK	177	DSK177	Uncommon	$0.10
+Fear of Failed Tests	DSK	55	DSK055	Uncommon	$0.18
+Fear of Falling	DSK	56	DSK056	Uncommon	$0.08
+Fear of Immobility	DSK	10	DSK010	Common	$0.05
+Fear of Impostors	DSK	57	DSK057	Uncommon	$0.26
+Fear of Infinity	DSK	214	DSK214	Uncommon	$0.26
+Fear of Isolation	DSK	58	DSK058	Uncommon	$0.26
+Fear of Lost Teeth	DSK	97	DSK097	Common	$0.15
+Fear of Missing Out	DSK	136	DSK136	Rare	$3.99
+Fear of Surveillance	DSK	11	DSK011	Common	$0.09
+Fear of the Dark	DSK	98	DSK098	Common	$0.15
+Final Vengeance	DSK	99	DSK099	Common	$0.11
+Flesh Burrower	DSK	178	DSK178	Common	$0.20
+Floodfarm Verge	DSK	259	DSK259	Rare	$11.70
+Floodpits Drowner	DSK	59	DSK059	Uncommon	$0.87
+Forest	DSK	285	DSK285	Common	$0.13
+Found Footage	DSK	246	DSK246	Common	$0.04
+Frantic Strength	DSK	179	DSK179	Common	$0.09
+Friendly Ghost	DSK	12	DSK012	Common	$0.10
+Friendly Teddy	DSK	247	DSK247	Common	$0.21
+Funeral Room // Awakening Hall	DSK	100	DSK100	Mythic	$5.95
+Get Out	DSK	60	DSK060	Uncommon	$0.36
+Ghostly Dancers	DSK	13	DSK013	Rare	$0.35
+Ghostly Keybearer	DSK	61	DSK061	Uncommon	$0.11
+Ghost Vacuum	DSK	248	DSK248	Rare	$2.34
+Give In to Violence	DSK	101	DSK101	Common	$0.09
+Glassworks // Shattered Yard	DSK	137	DSK137	Common	$0.13
+Glimmerburst	DSK	62	DSK062	Common	$0.08
+Glimmerlight	DSK	249	DSK249	Common	$0.07
+Glimmer Seeker	DSK	14	DSK014	Uncommon	$0.05
+Gloomlake Verge	DSK	260	DSK260	Rare	$17.45
+Grab the Prize	DSK	138	DSK138	Common	$0.29
+Grand Entryway // Elegant Rotunda	DSK	15	DSK015	Common	$0.12
+Grasping Longneck	DSK	180	DSK180	Common	$0.06
+Greenhouse // Rickety Gazebo	DSK	181	DSK181	Uncommon	$0.21
+Gremlin Tamer	DSK	215	DSK215	Uncommon	$0.25
+Grievous Wound	DSK	102	DSK102	Rare	$0.41
+Growing Dread	DSK	216	DSK216	Uncommon	$0.13
+Hand That Feeds	DSK	139	DSK139	Common	$0.04
+Hardened Escort	DSK	16	DSK016	Common	$0.07
+Haunted Screen	DSK	250	DSK250	Uncommon	$0.10
+Hauntwoods Shrieker	DSK	182	DSK182	Mythic	$1.15
+Hedge Shredder	DSK	183	DSK183	Rare	$2.83
+Horrid Vigor	DSK	184	DSK184	Common	$0.19
+House Cartographer	DSK	185	DSK185	Uncommon	$0.12
+Hushwood Verge	DSK	261	DSK261	Rare	$8.46
+Impossible Inferno	DSK	140	DSK140	Common	$0.05
+Infernal Phantom	DSK	141	DSK141	Uncommon	$0.09
+Innocuous Rat	DSK	103	DSK103	Common	$0.18
+Inquisitive Glimmer	DSK	217	DSK217	Uncommon	$0.30
+Insidious Fungus	DSK	186	DSK186	Uncommon	$0.41
+Intruding Soulrager	DSK	218	DSK218	Uncommon	$0.04
+Irreverent Gremlin	DSK	142	DSK142	Uncommon	$0.26
+Island	DSK	279	DSK279	Common	$0.16
+Jump Scare	DSK	17	DSK017	Common	$0.15
+Kaito, Bane of Nightmares	DSK	220	DSK220	Mythic	$20.71
+Keys to the House	DSK	251	DSK251	Uncommon	$0.19
+Killer's Mask	DSK	104	DSK104	Uncommon	$0.06
+Kona, Rescue Beastie	DSK	187	DSK187	Rare	$1.17
+Lakeside Shack	DSK	262	DSK262	Common	$0.18
+Let's Play a Game	DSK	105	DSK105	Uncommon	$0.27
+Leyline of Hope	DSK	18	DSK018	Rare	$0.55
+Leyline of Mutation	DSK	188	DSK188	Rare	$0.34
+Leyline of Resonance	DSK	143	DSK143	Rare	$0.66
+Leyline of the Void	DSK	106	DSK106	Rare	$0.48
+Leyline of Transformation	DSK	63	DSK063	Rare	$0.42
+Lionheart Glimmer	DSK	19	DSK019	Uncommon	$0.24
+Live or Die	DSK	107	DSK107	Uncommon	$0.22
+Living Phone	DSK	20	DSK020	Common	$0.12
+Malevolent Chandelier	DSK	252	DSK252	Common	$0.08
+Manifest Dread	DSK	189	DSK189	Common	$0.08
+Marina Vendrell	DSK	221	DSK221	Rare	$0.27
+Marina Vendrell's Grimoire	DSK	64	DSK064	Rare	$0.29
+Marvin, Murderous Mimic	DSK	253	DSK253	Rare	$2.84
+Meathook Massacre II	DSK	108	DSK108	Mythic	$2.02
+Meat Locker // Drowned Diner	DSK	65	DSK065	Common	$0.12
+Miasma Demon	DSK	109	DSK109	Uncommon	$0.07
+Midnight Mayhem	DSK	222	DSK222	Uncommon	$0.12
+Mirror Room // Fractured Realm	DSK	67	DSK067	Mythic	$2.31
+Moldering Gym // Weight Room	DSK	190	DSK190	Common	$0.15
+Monstrous Emergence	DSK	191	DSK191	Common	$0.15
+Most Valuable Slayer	DSK	144	DSK144	Common	$0.05
+Mountain	DSK	283	DSK283	Common	$0.14
+Murder	DSK	110	DSK110	Common	$0.26
+Murky Sewer	DSK	263	DSK263	Common	$0.20
+Nashi, Searcher in the Dark	DSK	223	DSK223	Rare	$0.25
+Neglected Manor	DSK	264	DSK264	Common	$0.21
+Niko, Light of Hope	DSK	224	DSK224	Mythic	$0.41
+Norin, Swift Survivalist	DSK	145	DSK145	Uncommon	$0.14
+Nowhere to Run	DSK	111	DSK111	Uncommon	$0.84
+Oblivious Bookworm	DSK	225	DSK225	Uncommon	$0.19
+Omnivorous Flytrap	DSK	192	DSK192	Rare	$0.24
+Optimistic Scavenger	DSK	21	DSK021	Uncommon	$0.29
+Orphans of the Wheat	DSK	22	DSK022	Uncommon	$0.04
+Osseous Sticktwister	DSK	112	DSK112	Uncommon	$0.19
+Overgrown Zealot	DSK	193	DSK193	Uncommon	$0.20
+Overlord of the Balemurk	DSK	113	DSK113	Mythic	$28.24
+Overlord of the Boilerbilges	DSK	146	DSK146	Mythic	$1.89
+Overlord of the Floodpits	DSK	68	DSK068	Mythic	$3.64
+Overlord of the Hauntwoods	DSK	194	DSK194	Mythic	$11.18
+Overlord of the Mistmoors	DSK	23	DSK023	Mythic	$3.18
+Painter's Studio // Defaced Gallery	DSK	147	DSK147	Uncommon	$0.15
+Paranormal Analyst	DSK	69	DSK069	Uncommon	$0.24
+Patched Plaything	DSK	24	DSK024	Uncommon	$0.10
+Patchwork Beastie	DSK	195	DSK195	Uncommon	$0.19
+Peculiar Lighthouse	DSK	265	DSK265	Common	$0.18
+Peer Past the Veil	DSK	226	DSK226	Rare	$0.14
+Piggy Bank	DSK	148	DSK148	Uncommon	$0.26
+Piranha Fly	DSK	70	DSK070	Common	$0.03
+Plains	DSK	277	DSK277	Common	$0.14
+Popular Egotist	DSK	114	DSK114	Uncommon	$0.21
+Possessed Goat	DSK	25	DSK025	Common	$0.08
+Pyroclasm	DSK	149	DSK149	Uncommon	$0.34
+Ragged Playmate	DSK	150	DSK150	Common	$0.21
+Rampaging Soulrager	DSK	151	DSK151	Common	$0.04
+Raucous Carnival	DSK	266	DSK266	Common	$0.12
+Razorkin Hordecaller	DSK	152	DSK152	Uncommon	$0.15
+Razorkin Needlehead	DSK	153	DSK153	Rare	$7.89
+Razortrap Gorge	DSK	267	DSK267	Common	$0.26
+Reluctant Role Model	DSK	26	DSK026	Rare	$0.34
+Restricted Office // Lecture Hall	DSK	227	DSK227	Rare	$0.33
+Resurrected Cultist	DSK	115	DSK115	Common	$0.05
+Ripchain Razorkin	DSK	154	DSK154	Common	$0.04
+Rip, Spawn Hunter	DSK	228	DSK228	Rare	$0.23
+Rite of the Moth	DSK	229	DSK229	Uncommon	$0.19
+Roaring Furnace // Steaming Sauna	DSK	230	DSK230	Rare	$0.37
+Rootwise Survivor	DSK	196	DSK196	Uncommon	$0.08
+Savior of the Small	DSK	27	DSK027	Uncommon	$0.05
+Saw	DSK	254	DSK254	Uncommon	$0.19
+Sawblade Skinripper	DSK	231	DSK231	Uncommon	$0.11
+Say Its Name	DSK	197	DSK197	Common	$0.06
+Scorching Dragonfire	DSK	156	DSK156	Common	$0.11
+Scrabbling Skullcrab	DSK	71	DSK071	Uncommon	$0.20
+Screaming Nemesis	DSK	157	DSK157	Mythic	$7.74
+Seized from Slumber	DSK	28	DSK028	Common	$0.13
+Shardmage's Rescue	DSK	29	DSK029	Uncommon	$0.25
+Sheltered by Ghosts	DSK	30	DSK030	Uncommon	$4.90
+Shepherding Spirits	DSK	31	DSK031	Common	$0.14
+Shrewd Storyteller	DSK	232	DSK232	Uncommon	$0.08
+Shroudstomper	DSK	233	DSK233	Uncommon	$0.26
+Silent Hallcreeper	DSK	72	DSK072	Rare	$2.81
+Skullsnap Nuisance	DSK	234	DSK234	Uncommon	$0.17
+Slavering Branchsnapper	DSK	198	DSK198	Common	$0.16
+Smoky Lounge // Misty Salon	DSK	235	DSK235	Uncommon	$0.22
+Spectral Snatcher	DSK	116	DSK116	Common	$0.10
+Spineseeker Centipede	DSK	199	DSK199	Common	$0.08
+Splitskin Doll	DSK	33	DSK033	Uncommon	$0.25
+Split Up	DSK	32	DSK032	Rare	$1.86
+Sporogenic Infection	DSK	117	DSK117	Uncommon	$0.11
+Stalked Researcher	DSK	73	DSK073	Common	$0.03
+Stay Hidden, Stay Silent	DSK	74	DSK074	Uncommon	$0.06
+Strangled Cemetery	DSK	268	DSK268	Common	$0.20
+Surgical Suite // Hospital Room	DSK	34	DSK034	Uncommon	$0.21
+Swamp	DSK	281	DSK281	Common	$0.10
+Terramorphic Expanse	DSK	269	DSK269	Common	$0.17
+The Jolly Balloon Man	DSK	219	DSK219	Rare	$0.98
+The Mindskinner	DSK	66	DSK066	Rare	$2.97
+The Rollercrusher Ride	DSK	155	DSK155	Mythic	$0.49
+The Swarmweaver	DSK	236	DSK236	Rare	$0.29
+The Tale of Tamiyo	DSK	75	DSK075	Rare	$0.21
+The Wandering Rescuer	DSK	41	DSK041	Mythic	$2.41
+Thornspire Verge	DSK	270	DSK270	Rare	$6.51
+Threats Around Every Corner	DSK	200	DSK200	Uncommon	$0.29
+Ticket Booth // Tunnel of Hate	DSK	158	DSK158	Common	$0.09
+Toby, Beastie Befriender	DSK	35	DSK035	Rare	$0.33
+Trapped in the Screen	DSK	36	DSK036	Common	$0.13
+Trial of Agony	DSK	159	DSK159	Uncommon	$0.09
+Tunnel Surveyor	DSK	76	DSK076	Common	$0.03
+Turn Inside Out	DSK	160	DSK160	Common	$0.18
+Twist Reality	DSK	77	DSK077	Common	$0.14
+Twitching Doll	DSK	201	DSK201	Rare	$1.82
+Tyvar, the Pummeler	DSK	202	DSK202	Mythic	$5.14
+Unable to Scream	DSK	78	DSK078	Common	$0.28
+Undead Sprinter	DSK	237	DSK237	Rare	$0.27
+Under the Skin	DSK	203	DSK203	Uncommon	$0.12
+Underwater Tunnel // Slimy Aquarium	DSK	79	DSK079	Common	$0.13
+Unholy Annex // Ritual Chamber	DSK	118	DSK118	Rare	$1.76
+Unidentified Hovership	DSK	37	DSK037	Rare	$0.26
+Unnerving Grasp	DSK	80	DSK080	Uncommon	$0.06
+Unsettling Twins	DSK	38	DSK038	Common	$0.09
+Unstoppable Slasher	DSK	119	DSK119	Rare	$5.04
+Untimely Malfunction	DSK	161	DSK161	Uncommon	$6.96
+Unwanted Remake	DSK	39	DSK039	Uncommon	$0.26
+Unwilling Vessel	DSK	81	DSK081	Uncommon	$0.08
+Valgavoth's Faithful	DSK	121	DSK121	Uncommon	$0.28
+Valgavoth's Lair	DSK	271	DSK271	Rare	$0.75
+Valgavoth's Onslaught	DSK	204	DSK204	Rare	$0.22
+Valgavoth, Terror Eater	DSK	120	DSK120	Mythic	$15.63
+Vanish from Sight	DSK	82	DSK082	Common	$0.04
+Vengeful Possession	DSK	162	DSK162	Uncommon	$0.21
+Veteran Survivor	DSK	40	DSK040	Uncommon	$0.24
+Vicious Clown	DSK	163	DSK163	Common	$0.07
+Victor, Valgavoth's Seneschal	DSK	238	DSK238	Rare	$0.27
+Vile Mutilator	DSK	122	DSK122	Uncommon	$0.15
+Violent Urge	DSK	164	DSK164	Uncommon	$0.26
+Walk-In Closet // Forgotten Cellar	DSK	205	DSK205	Mythic	$7.28
+Waltz of Rage	DSK	165	DSK165	Rare	$0.28
+Wary Watchdog	DSK	206	DSK206	Common	$0.16
+Wickerfolk Thresher	DSK	207	DSK207	Uncommon	$0.24
+Wildfire Wickerfolk	DSK	239	DSK239	Uncommon	$0.17
+Winter, Misanthropic Guide	DSK	240	DSK240	Rare	$0.21
+Winter's Intervention	DSK	123	DSK123	Common	$0.04
+Withering Torment	DSK	124	DSK124	Uncommon	$4.15
+Zimone, All-Questioning	DSK	241	DSK241	Rare	$0.24

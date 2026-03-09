@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\chefj\.gemini\antigravity\scratch\card_game\server.py", line 251, in websocket_endpoint
+    room.state.process_input(player, action, **data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chefj\.gemini\antigravity\scratch\card_game\engine.py", line 333, in process_input
+    self.submit_pending_input(kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\chefj\.gemini\antigravity\scratch\card_game\engine.py", line 439, in submit_pending_input
+    p_idx = pending.get("player_idx")
+                          ^^^^^^^^^^^
+KeyError: 'player_idx'

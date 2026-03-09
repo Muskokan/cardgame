@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dice Pot — Party Dice Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0d0f1a;
+      --surface: #151827;
+      --surface2: #1e2235;
+      --surface3: #252a42;
+      --accent: #7c5dfa;
+      --accent2: #f7c948;
+      --green: #4ade80;
+      --red: #f87171;
+      --text: #e2e8ff;
+      --text-dim: #7b82a8;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --die-size: 72px;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ─── SCREENS ─────────────────────────────────────── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 860px;
+      animation: fadeIn .35s ease;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ─── HEADER ─────────────────────────────────────── */
+    .logo {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 1rem;
+    }
+
+    /* ─── CARDS ──────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface3);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      width: 100%;
+    }
+
+    /* ─── SETUP SCREEN ───────────────────────────────── */
+    .player-count-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .player-count-row label {
+      font-size: 1rem;
+      color: var(--text-dim);
+      flex: 1;
+    }
+
+    .count-btn {
+      background: var(--surface2);
+      border: 1px solid var(--surface3);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .count-btn:hover {
+      background: var(--surface3);
+    }
+
+    #player-count-display {
+      font-size: 1.4rem;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .players-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .player-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-label {
+      font-size: .9rem;
+      color: var(--text-dim);
+      min-width: 70px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--surface2);
+      border: 1.5px solid var(--surface3);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      padding: 13px 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform .12s, box-shadow .12s, filter .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 93, 250, .4);
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--surface3);
+    }
+
+    .btn-gold {
+      background: var(--accent2);
+      color: #0d0f1a;
+      box-shadow: 0 4px 20px rgba(247, 201, 72, .35);
+    }
+
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: .9rem;
+    }
+
+    /* ─── SCOREBOARD ──────────────────────────────────── */
+    .scoreboard {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .score-card {
+      background: var(--surface);
+      border: 1.5px solid var(--surface3);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      min-width: 120px;
+      text-align: center;
+      transition: border-color .25s;
+    }
+
+    .score-card.active-player {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 93, 250, .25);
+    }
+
+    .score-card .name {
+      font-size: .85rem;
+      color: var(--text-dim);
+    }
+
+    .score-card .pts {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .score-card .dice-count {
+      font-size: .8rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* ─── PHASE HEADER ───────────────────────────────── */
+    .phase-header {
+      text-align: center;
+    }
+
+    .phase-label {
+      display: inline-block;
+      background: var(--surface3);
+      padding: 4px 14px;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .phase-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .phase-sub {
+      color: var(--text-dim);
+      font-size: .95rem;
+      margin-top: 4px;
+    }
+
+    /* ─── DICE ───────────────────────────────────────── */
+    .section-title {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 12px;
+    }
+
+    .dice-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      min-height: 88px;
+      padding: 16px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed var(--surface3);
+    }
+
+    .die {
+      width: var(--die-size);
+      height: var(--die-size);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 900;
+      cursor: pointer;
+      position: relative;
+      background: var(--surface3);
+      border: 2px solid transparent;
+      transition: transform .15s, box-shadow .15s, border-color .15s, background .15s;
+      user-select: none;
+    }
+
+    .die:hover {
+      transform: scale(1.08);
+    }
+
+    .die.selected {
+      border-color: var(--accent2);
+      background: rgba(247, 201, 72, .12);
+      box-shadow: 0 0 0 3px rgba(247, 201, 72, .3);
+    }
+
+    .die.glow-green {
+      border-color: var(--green);
+      background: rgba(74, 222, 128, .1);
+      box-shadow: 0 0 0 3px rgba(74, 222, 128, .25);
+    }
+
+    .die .die-owner {
+      position: absolute;
+      bottom: -18px;
+      font-size: .65rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      font-weight: 400;
+    }
+
+    .dice-pool-wrap {
+      margin-bottom: 28px;
+    }
+
+    /* ─── STOCKPILES ──────────────────────────────────── */
+    .stockpiles {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .stockpile-row {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--surface3);
+      padding: 14px 18px;
+      transition: border-color .2s;
+    }
+
+    .stockpile-row.active-stockpile {
+      border-color: var(--accent);
+    }
+
+    .stockpile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .stockpile-name {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .stockpile-score {
+      font-size: .85rem;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .stockpile-dice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stockpile-empty {
+      color: var(--text-dim);
+      font-size: .85rem;
+      font-style: italic;
+    }
+
+    .glow-purple {
+      box-shadow: 0 0 10px 2px rgba(124, 93, 250, .55);
+      border-color: var(--accent) !important;
+      cursor: pointer;
+    }
+
+    .glow-purple:hover {
+      opacity: .8;
+      transform: scale(1.08);
+    }
+
+    .glow-green {
+      box-shadow: 0 0 10px 2px rgba(74, 222, 128, .55);
+      border-color: var(--green) !important;
+      cursor: pointer;
+    }
+
+    .glow-green:hover {
+      opacity: .8;
+      transform: scale(1.08);
+    }
+
+    /* ─── PLAYER PICKER ──────────────────────────────── */
+    .player-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .pick-btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--surface3);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .pick-btn:hover {
+      border-color: var(--accent);
+      background: rgba(124, 93, 250, .12);
+    }
+
+    .pick-btn.active {
+      border-color: var(--accent);
+      background: rgba(124, 93, 250, .18);
+      color: var(--accent);
+    }
+
+    /* ─── INFO BOX ───────────────────────────────────── */
+    .info-box {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      color: var(--text-dim);
+      font-size: .92rem;
+      text-align: center;
+      border: 1px solid var(--surface3);
+    }
+
+    .info-box strong {
+      color: var(--text);
+    }
+
+    /* ─── TIEBREAKER SCREEN ───────────────────────────── */
+    .tb-counters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .tb-counter-card {
+      background: var(--surface);
+      border: 1.5px solid var(--surface3);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      min-width: 150px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .tb-counter-card .tb-name {
+      font-size: .85rem;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .tb-counter-val {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1;
+      transition: color .2s;
+    }
+
+    .tb-counter-val.on-target {
+      color: var(--green);
+    }
+
+    .tb-counter-val.close {
+      color: var(--accent2);
+    }
+
+    .tb-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .tb-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 2px solid var(--surface3);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tb-btn:hover {
+      background: var(--surface3);
+      border-color: var(--accent);
+    }
+
+    .tb-btn:active {
+      transform: scale(.94);
+    }
+
+    .tb-dist {
+      font-size: .78rem;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+
+    /* ─── WIN SCREEN ──────────────────────────────────── */
+    .win-trophy {
+      font-size: 5rem;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .win-name {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--accent2);
+    }
+
+    .win-subtitle {
+      color: var(--text-dim);
+      margin-top: 6px;
+      font-size: 1rem;
+    }
+
+    .final-scores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .final-score-card {
+      background: var(--surface2);
+      border: 1.5px solid var(--surface3);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .final-score-card.winner {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(247, 201, 72, .25);
+    }
+
+    .final-score-card .f-name {
+      font-size: .85rem;
+      color: var(--text-dim);
+    }
+
+    .final-score-card .f-pts {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .tiebreaker-result {
+      font-size: .95rem;
+      color: var(--text-dim);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--surface3);
+    }
+
+    /* ─── ROLL ANIMATION ──────────────────────────────── */
+    @keyframes rollIn {
+      0% {
+        transform: scale(.4) rotate(-30deg);
+        opacity: 0;
+      }
+
+      60% {
+        transform: scale(1.15) rotate(5deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .die.rolling {
+      animation: rollIn .45s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    /* ─── NUMPAD ──────────────────────────────────────── */
+    .numpad-section {
+      width: 100%;
+      display: none;
+    }
+
+    .numpad-display {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .numpad-slot {
+      width: 64px;
+      height: 72px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 2px solid var(--surface3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--text);
+      transition: border-color .2s, background .2s;
+    }
+
+    .numpad-slot.filled {
+      border-color: var(--accent);
+      background: rgba(124, 93, 250, .1);
+    }
+
+    .numpad-slot.modifier {
+      border-color: var(--accent2);
+      background: rgba(247, 201, 72, .12);
+      color: var(--accent2);
+    }
+
+    .numpad-slot.ready {
+      border-color: var(--green);
+      background: rgba(74, 222, 128, .1);
+    }
+
+    .numpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .np-btn {
+      height: 58px;
+      border-radius: 12px;
+      border: 2px solid var(--surface3);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .12s, border-color .12s, opacity .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .np-btn:not(:disabled):hover {
+      background: var(--surface3);
+      border-color: var(--accent);
+    }
+
+    .np-btn:not(:disabled):active {
+      transform: scale(.94);
+    }
+
+    .np-btn:disabled {
+      opacity: .28;
+      cursor: not-allowed;
+    }
+
+    .np-btn.mod-btn {
+      color: var(--accent2);
+      border-color: rgba(247, 201, 72, .4);
+    }
+
+    .np-btn.mod-btn:not(:disabled):hover {
+      background: rgba(247, 201, 72, .12);
+      border-color: var(--accent2);
+    }
+
+    .np-btn.enter-btn {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .np-btn.enter-btn:not(:disabled):hover {
+      filter: brightness(1.15);
+    }
+
+    .np-btn.undo-btn {
+      background: var(--surface3);
+    }
+
+    .np-btn.miss-btn {
+      color: var(--red);
+      border-color: rgba(248, 113, 113, .35);
+    }
+
+    .np-btn.miss-btn:not(:disabled):hover {
+      background: rgba(248, 113, 113, .12);
+      border-color: var(--red);
+    }
+
+    .np-blank {
+      height: 58px;
+    }
+
+    /* empty cell for _ */
+    .pot-ref-label {
+      font-size: .75rem;
+      color: var(--text-dim);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+
+    .pot-ref {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed var(--surface3);
+      min-height: 52px;
+    }
+
+    .pot-die {
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: var(--surface3);
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pot-die.match {
+      background: rgba(124, 93, 250, .25);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    /* ─── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 560px) {
+      :root {
+        --die-size: 52px;
+      }
+
+      .logo {
+        font-size: 2rem;
+      }
+
+      .numpad-slot {
+        width: 54px;
+        height: 60px;
+        font-size: 1.3rem;
+      }
+
+      .np-btn {
+        height: 52px;
+        font-size: 1rem;
+      }
+
+      .numpad-grid {
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════════
+     SCREEN 1 — SETUP
+══════════════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-setup">
+    <div>
+      <div class="logo">🎲 Snatch and <span>Grab</span></div>
+      <div class="subtitle">A fast-paced party dice game</div>
+    </div>
+    <div class="card" style="max-width:480px;">
+      <div class="player-count-row">
+        <label>Number of players</label>
+        <button class="count-btn" id="btn-dec">−</button>
+        <span id="player-count-display">2</span>
+        <button class="count-btn" id="btn-inc">+</button>
+      </div>
+      <div class="players-list" id="players-list"></div>
+      <div style="margin-top:24px; text-align:center;">
+        <button class="btn btn-primary" id="btn-start">Start Game →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+     SCREEN 2 — GAME
+══════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-game">
+    <!-- Scoreboard -->
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="divider"></div>
+
+    <!-- Phase header -->
+    <div class="phase-header">
+      <span class="phase-label" id="phase-label">The Pot</span>
+      <div class="phase-title" id="phase-title">Roll the pot!</div>
+      <div class="phase-sub" id="phase-sub">Each player's dice are rolled into a shared pot.</div>
+    </div>
+
+    <!-- Info / instruction -->
+    <div class="info-box" id="info-box">
+      Loading…
+    </div>
+
+    <!-- THE POT -->
+    <div class="card" id="pot-section" style="width:100%;">
+      <div class="section-title">🫙 The Pot</div>
+      <div class="dice-pool-wrap">
+        <div class="dice-pool" id="pot-pool"></div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;" id="pot-actions">
+        <button class="btn btn-primary" id="btn-roll-pot">🎲 Roll the Pot</button>
+      </div>
+    </div>
+
+    <!-- TURN BANNER (shown during claiming phase) -->
+    <div class="card" id="turn-banner" style="width:100%; display:none;"></div>
+
+    <!-- NUMPAD (shown during claiming phase) -->
+    <div class="numpad-section card" id="numpad-section">
+      <!-- Dart counter -->
+      <div id="np-darts" style="text-align:center;font-size:1.4rem;margin-bottom:12px;letter-spacing:4px;"></div>
+      <!-- 3-slot display -->
+      <div class="numpad-display">
+        <div class="numpad-slot" id="np-slot-0"></div>
+        <div class="numpad-slot" id="np-slot-1"></div>
+        <div class="numpad-slot" id="np-slot-2"></div>
+      </div>
+      <!-- Numpad grid: T 0 D / 7 8 9 / 4 5 6 / 1 2 3 / U _ E -->
+      <div class="numpad-grid">
+        <button class="np-btn mod-btn" id="np-T" onclick="numpadPress('T')">T</button>
+        <button class="np-btn" id="np-0" onclick="numpadPress('0')">0</button>
+        <button class="np-btn mod-btn" id="np-D" onclick="numpadPress('D')">D</button>
+        <button class="np-btn" id="np-7" onclick="numpadPress('7')">7</button>
+        <button class="np-btn" id="np-8" onclick="numpadPress('8')">8</button>
+        <button class="np-btn" id="np-9" onclick="numpadPress('9')">9</button>
+        <button class="np-btn" id="np-4" onclick="numpadPress('4')">4</button>
+        <button class="np-btn" id="np-5" onclick="numpadPress('5')">5</button>
+        <button class="np-btn" id="np-6" onclick="numpadPress('6')">6</button>
+        <button class="np-btn" id="np-1" onclick="numpadPress('1')">1</button>
+        <button class="np-btn" id="np-2" onclick="numpadPress('2')">2</button>
+        <button class="np-btn" id="np-3" onclick="numpadPress('3')">3</button>
+        <button class="np-btn undo-btn" id="np-U" onclick="numpadPress('U')">&#x232B;</button>
+        <button class="np-btn miss-btn" id="np-M" onclick="numpadPress('M')">Miss</button>
+        <button class="np-btn enter-btn" id="np-E" onclick="numpadPress('E')">&#x2713;</button>
+      </div>
+      <!-- Pot reference below numpad -->
+      <div style="margin-top:18px;">
+        <div class="pot-ref-label">🫙 Dice in the Pot</div>
+        <div class="pot-ref" id="np-pot-ref"></div>
+      </div>
+    </div>
+
+    <!-- STOCKPILES -->
+    <div class="card" id="stock-section" style="width:100%; display:none;">
+      <div class="section-title">📦 Stockpiles</div>
+      <div class="stockpiles" id="stockpiles"></div>
+      <div style="margin-top:16px; text-align:center;" id="stock-actions">
+        <div class="info-box" id="stock-info">Select a player name above, then click their dice in the stockpile to
+          score them.</div>
+      </div>
+    </div>
+
+    <!-- Active player picker for scoring -->
+    <div class="card" id="score-picker-section" style="width:100%; display:none;">
+      <div class="section-title">Who's taking their turn?</div>
+      <div class="player-picker" id="score-player-picker"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+     SCREEN 3 — TIEBREAKER
+══════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-tiebreaker">
+    <div>
+      <div class="logo">🎯 Tie<span>breaker</span></div>
+      <div class="subtitle" id="tb-round-label">Round 1</div>
+    </div>
+    <!-- Target number -->
+    <div class="card" style="width:100%;text-align:center;">
+      <div class="section-title">Target Number</div>
+      <div id="tb-target" style="font-size:5rem;font-weight:900;color:var(--accent2);line-height:1;">—</div>
+      <div style="color:var(--text-dim);font-size:.9rem;margin-top:6px;">Hit this number as many times as you can! Max:
+        9 hits (3 triples)</div>
+    </div>
+    <!-- Active player + throw buttons -->
+    <div class="card" style="width:100%;text-align:center;" id="tb-turn-card">
+      <div id="tb-player-name" style="font-size:1.2rem;font-weight:700;margin-bottom:8px;"></div>
+      <div id="tb-darts" style="font-size:1.5rem;letter-spacing:4px;margin-bottom:16px;"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="np-btn mod-btn" style="height:70px;flex:1;min-width:60px;font-size:1.3rem;"
+          onclick="tbThrow('T')">T</button>
+        <button class="np-btn mod-btn" style="height:70px;flex:1;min-width:60px;font-size:1.3rem;"
+          onclick="tbThrow('D')">D</button>
+        <button class="np-btn" style="height:70px;flex:1;min-width:60px;font-size:1.5rem;"
+          onclick="tbThrow('S')">●</button>
+        <button class="np-btn miss-btn" style="height:70px;flex:1;min-width:60px;" onclick="tbThrow('M')">Miss</button>
+      </div>
+    </div>
+    <!-- Running hit totals -->
+    <div class="card" style="width:100%;" id="tb-scores-card">
+      <div class="section-title">Hits This Round</div>
+      <div id="tb-scores"></div>
+    </div>
+    <div class="info-box" id="tb-info" style="width:100%;"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+     SCREEN 4 — WIN
+══════════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-win">
+    <div class="win-trophy">🏆</div>
+    <div class="win-name" id="win-name">Player</div>
+    <div class="win-subtitle" id="win-subtitle">wins with the most points!</div>
+    <div class="tiebreaker-result" id="tiebreaker-result"></div>
+    <div class="final-scores" id="final-scores"></div>
+    <button class="btn btn-primary" id="btn-play-again" style="margin-top:8px;">Play Again</button>
+  </div>
+
+  <script>
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  STATE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const G = {
+      players: [],       // [{name, score, stockpile:[dieObj,...]}]
+      pot: [],           // [{id, value, selected}]
+      phase: 'setup',    // 'setup' | 'rolling' | 'claiming' | 'scoring' | 'end'
+      scoringPlayer: null,
+      nextDieId: 0,
+      turnOrder: [],     // player indices in order starting from random player
+      turnIdx: 0,        // current index into turnOrder
+      scoringActionsLeft: 9,
+      scoringUndoStack: [],  // [{type,playerIdx/fromIdx/toIdx,die,actionsLeft,turnIdx}]
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  UTILS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const d20 = () => Math.floor(Math.random() * 20) + 1;
+    const el = id => document.getElementById(id);
+    const cloneEl = id => el(id).cloneNode(true);
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      el(id).classList.add('active');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  SETUP SCREEN
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let playerCount = 2;
+    const MIN_P = 2, MAX_P = 8;
+
+    function renderPlayerInputs() {
+      const list = el('players-list');
+      list.innerHTML = '';
+      for (let i = 0; i < playerCount; i++) {
+        const existing = list.querySelector(`[data-idx="${i}"]`);
+        const row = document.createElement('div');
+        row.className = 'player-input-row';
+        row.innerHTML = `
+      <span class="player-label">Player ${i + 1}</span>
+      <input type="text" data-idx="${i}" placeholder="Enter name…" maxlength="18"
+             value="${existing ? existing.value : ''}" />
+    `;
+        list.appendChild(row);
+      }
+    }
+
+    el('btn-dec').onclick = () => { if (playerCount > MIN_P) { playerCount--; el('player-count-display').textContent = playerCount; renderPlayerInputs(); } };
+    el('btn-inc').onclick = () => { if (playerCount < MAX_P) { playerCount++; el('player-count-display').textContent = playerCount; renderPlayerInputs(); } };
+
+    el('btn-start').onclick = () => {
+      const inputs = document.querySelectorAll('#players-list input');
+      G.players = [];
+      let valid = true;
+      inputs.forEach((inp, i) => {
+        const name = inp.value.trim() || `Player ${i + 1}`;
+        G.players.push({ name, score: 0, stockpile: [] });
+      });
+      if (!valid) return;
+      startGame();
+    };
+
+    renderPlayerInputs();
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  GAME START
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function startGame() {
+      G.pot = [];
+      G.players.forEach(p => { p.score = 0; p.stockpile = []; });
+      G.scoringPlayer = null;
+      G.phase = 'rolling';
+      G.nextDieId = 0;
+      G.turnOrder = [];
+      G.turnIdx = 0;
+      showScreen('screen-game');
+      renderScoreboard();
+      setPhase('rolling');
+      el('pot-section').style.display = 'block';
+      renderPot();
+      el('turn-banner').style.display = 'none';
+      el('numpad-section').style.display = 'none';
+      el('stock-section').style.display = 'none';
+      el('score-picker-section').style.display = 'none';
+      G.scoringActionsLeft = 9;
+      G.scoringUndoStack = [];
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  PHASE LABELS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function setPhase(phase) {
+      G.phase = phase;
+      const label = el('phase-label');
+      const title = el('phase-title');
+      const sub = el('phase-sub');
+      const info = el('info-box');
+      if (phase === 'rolling') {
+        label.textContent = 'The Pot';
+        title.textContent = 'Roll the Pot';
+        sub.textContent = 'Press the button to roll 3 d20 dice per player into the shared pot.';
+        info.innerHTML = `<strong>${G.players.length * 3}</strong> dice will be rolled — 3 per player.`;
+      } else if (phase === 'claiming') {
+        const current = G.players[G.turnOrder[G.turnIdx]];
+        label.textContent = 'Claim';
+        title.textContent = `${current.name}'s Turn`;
+        sub.textContent = 'Enter the dice you scored on the numpad, then press ✓.';
+        info.innerHTML = `<strong>${current.name}</strong> — type your score (e.g. <strong>T20</strong>, <strong>D16</strong>, <strong>5</strong>) and press ✓.`;
+        renderTurnBanner();
+      } else if (phase === 'scoring') {
+        const current = G.players[G.turnOrder[G.turnIdx % G.turnOrder.length]];
+        label.textContent = 'Score';
+        title.textContent = `${current.name}'s Turn`;
+        sub.textContent = 'Tap your dice to score them, or tap an opponent’s dice to steal!';
+        info.innerHTML = `<strong>${current.name}</strong> — tap your own dice to score (+1 pt), tap rivals' dice to steal them. 9 actions per turn.`;
+        renderTurnBanner();
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  SCOREBOARD
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function renderScoreboard() {
+      const sb = el('scoreboard');
+      sb.innerHTML = '';
+      const activePlayerName = G.phase === 'claiming'
+        ? G.players[G.turnOrder[G.turnIdx]]?.name
+        : G.scoringPlayer?.name;
+      G.players.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'score-card' + (p.name === activePlayerName ? ' active-player' : '');
+        card.innerHTML = `
+      <div class="name">${p.name}</div>
+      <div class="pts">${p.score}</div>
+      <div class="dice-count">${p.stockpile.length} dice in stock</div>
+    `;
+        sb.appendChild(card);
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  ROLL THE POT
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    el('btn-roll-pot').onclick = () => {
+      G.pot = [];
+      G.players.forEach(p => {
+        for (let i = 0; i < 3; i++) {
+          G.pot.push({ id: G.nextDieId++, value: d20(), selected: false });
+        }
+      });
+      // Pick a random starting player and build turn order
+      const startIdx = Math.floor(Math.random() * G.players.length);
+      G.turnOrder = G.players.map((_, i) => (startIdx + i) % G.players.length);
+      G.turnIdx = 0;
+      setPhase('claiming');
+      renderPot();
+      el('turn-banner').style.display = 'block';
+      el('stock-section').style.display = 'none';
+      el('score-picker-section').style.display = 'none';
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TURN BANNER
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function renderTurnBanner() {
+      const current = G.players[G.turnOrder[G.turnIdx % G.turnOrder.length]];
+      const remaining = G.phase === 'scoring' ? G.scoringActionsLeft : G.turnOrder.length - G.turnIdx;
+      const isScoring = G.phase === 'scoring';
+      el('turn-banner').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:.78rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;">${isScoring ? 'Scoring Turn' : 'Current Turn'}</div>
+        <div style="font-size:1.3rem;font-weight:700;margin-top:2px;">🎯 ${current.name}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.78rem;color:var(--text-dim);">${isScoring ? 'Actions remaining' : 'Players remaining'}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--accent2);">${isScoring ? remaining + ' / 9' : remaining + ' / ' + G.turnOrder.length}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      ${G.turnOrder.map((pi, ti) => {
+        const p = G.players[pi];
+        const done = isScoring ? false : ti < G.turnIdx;
+        const active = isScoring ? (ti === G.turnIdx % G.turnOrder.length) : ti === G.turnIdx;
+        return `<span style="padding:4px 12px;border-radius:99px;font-size:.82rem;font-weight:600;
+          background:${active ? 'var(--accent)' : done ? 'rgba(74,222,128,.12)' : 'var(--surface3)'};
+          color:${active ? '#fff' : done ? 'var(--green)' : 'var(--text-dim)'};
+          border:1.5px solid ${active ? 'var(--accent)' : done ? 'var(--green)' : 'transparent'};">
+          ${done ? '✓ ' : active ? '→ ' : ''}${p.name}
+        </span>`;
+      }).join('')}
+    </div>
+    ${isScoring ? `<div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-gold" onclick="scoringPassTurn()">Pass Turn →</button>
+      <button class="btn" style="background:var(--surface3);" onclick="undoScoringAction()" ${G.scoringUndoStack.length === 0 ? 'disabled' : ''}>⌫ Undo</button>
+    </div>` : ''}
+  `;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  POT RENDER (rolling phase only)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function renderPot() {
+      const pool = el('pot-pool');
+      const actions = el('pot-actions');
+      pool.innerHTML = '';
+      if (G.phase === 'rolling') {
+        pool.innerHTML = `<span style="color:var(--text-dim);font-size:.9rem;align-self:center;">Click the button to roll!</span>`;
+        actions.innerHTML = `<button class="btn btn-primary" id="btn-roll-pot">🎲 Roll the Pot</button>`;
+        document.querySelector('#pot-actions .btn-primary').onclick = () => {
+          G.pot = [];
+          G.players.forEach(p => {
+            for (let i = 0; i < 3; i++) {
+              G.pot.push({ id: G.nextDieId++, value: d20() });
+            }
+          });
+          const startIdx = Math.floor(Math.random() * G.players.length);
+          G.turnOrder = G.players.map((_, i) => (startIdx + i) % G.players.length);
+          G.turnIdx = 0;
+          setPhase('claiming');
+          el('pot-section').style.display = 'none';
+          el('turn-banner').style.display = 'block';
+          el('numpad-section').style.display = 'block';
+          NP.input = [];
+          NP.dartsLeft = 3;
+          renderNumpad();
+          renderTurnBanner();
+          renderScoreboard();
+        };
+        actions.style.display = 'flex';
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  NUMPAD STATE MACHINE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const NP = { input: [], dartsLeft: 3 }; // up to 3 chars: [mod?, digit1, digit2]
+
+    // Parse input array regardless of modifier position
+    function npParse(inp) {
+      const mod = inp.find(k => k === 'T' || k === 'D') || null;
+      const digits = inp.filter(k => k !== 'T' && k !== 'D');
+      const val = digits.length ? parseInt(digits.join(''), 10) : NaN;
+      const valid = digits.length > 0 && val >= 1 && val <= 20;
+      return { mod, digits, val, valid };
+    }
+
+    function npEnabled(inp) {
+      const en = new Set();
+      const { mod, digits, val, valid } = npParse(inp);
+
+      if (inp.length > 0) en.add('U');
+      if (!mod) { en.add('T'); en.add('D'); } // only one modifier allowed
+
+      if (digits.length === 0) {
+        for (let i = 1; i <= 9; i++) en.add(String(i));
+      } else if (digits.length === 1) {
+        const d = digits[0];
+        if (d === '1') for (let i = 0; i <= 9; i++) en.add(String(i));
+        else if (d === '2') en.add('0');
+        // 3-9: no valid two-digit extension in 1-20
+      }
+      // digits.length === 2: no more digits
+
+      if (valid) en.add('E');
+      return en;
+    }
+
+    function renderNumpad() {
+      const inp = NP.input;
+      const en = npEnabled(inp);
+      const ALL_KEYS = ['T', 'D', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'U', 'E'];
+      ALL_KEYS.forEach(k => {
+        const btn = el('np-' + k);
+        if (btn) btn.disabled = !en.has(k);
+      });
+
+      // Normalise display order: modifier first, then digits (as entered)
+      const { mod, digits, val, valid } = npParse(inp);
+      const display = [...(mod ? [mod] : []), ...digits];
+
+      for (let i = 0; i < 3; i++) {
+        const slot = el('np-slot-' + i);
+        const ch = display[i];
+        slot.textContent = ch || '';
+        const isMod = ch === 'T' || ch === 'D';
+        slot.className = 'numpad-slot' + (ch ? ' ' + (isMod ? 'modifier' : valid ? 'ready' : 'filled') : '');
+      }
+
+      // Dart counter
+      const dartEl = el('np-darts');
+      if (dartEl) dartEl.innerHTML = '🎯'.repeat(NP.dartsLeft) + '<span style="opacity:.25">🎯</span>'.repeat(3 - NP.dartsLeft);
+
+      // Pot reference
+      const ref = el('np-pot-ref');
+      ref.innerHTML = '';
+      if (G.pot.length === 0) {
+        ref.innerHTML = '<span style="color:var(--text-dim);font-size:.85rem;">Pot is empty</span>';
+        return;
+      }
+      const targetVal = valid ? val : null;
+      G.pot.slice().sort((a, b) => a.value - b.value).forEach(die => {
+        const chip = document.createElement('span');
+        chip.className = 'pot-die' + (targetVal === die.value ? ' match' : '');
+        chip.textContent = die.value;
+        ref.appendChild(chip);
+      });
+    }
+
+    function numpadPress(key) {
+      if (key === 'U') {
+        NP.input.pop();
+        renderNumpad();
+        return;
+      }
+      if (key === 'M') {
+        // Miss: burn a dart, claim nothing
+        const currentPlayer = G.players[G.turnOrder[G.turnIdx]];
+        NP.input = [];
+        NP.dartsLeft--;
+        renderScoreboard();
+        if (NP.dartsLeft === 0 || G.pot.length === 0) {
+          NP.dartsLeft = 3;
+          G.turnIdx++;
+          if (G.turnIdx >= G.turnOrder.length && G.pot.length > 0) G.turnIdx = 0;
+        }
+        if (G.pot.length === 0) {
+          el('numpad-section').style.display = 'none';
+          G.scoringActionsLeft = 9;
+          setPhase('scoring');
+          renderStockpiles();
+          el('stock-section').style.display = 'block';
+          el('score-picker-section').style.display = 'none';
+        } else {
+          setPhase('claiming');
+          renderNumpad();
+        }
+        return;
+      }
+      if (key === 'E') {
+        numpadEnter();
+        return;
+      }
+      if (NP.input.length < 3) {
+        NP.input.push(key);
+        renderNumpad();
+      }
+    }
+
+    function numpadEnter() {
+      const { mod, digits, val, valid } = npParse(NP.input);
+      if (!valid) return;
+
+      const count = mod === 'T' ? 3 : mod === 'D' ? 2 : 1;
+      const player = G.players[G.turnOrder[G.turnIdx]];
+
+      // Move up to `count` dice with this value from pot to player stockpile
+      let taken = 0;
+      const remaining = [];
+      for (const die of G.pot) {
+        if (die.value === val && taken < count) {
+          player.stockpile.push({ id: die.id, value: die.value });
+          taken++;
+        } else {
+          remaining.push(die);
+        }
+      }
+      G.pot = remaining;
+      NP.input = [];
+      NP.dartsLeft--;
+
+      const currentPlayer = G.players[G.turnOrder[G.turnIdx]];
+      renderScoreboard();
+
+      if (G.pot.length === 0 || NP.dartsLeft === 0) {
+        NP.dartsLeft = 3;
+        G.turnIdx++;
+        if (G.turnIdx >= G.turnOrder.length && G.pot.length > 0) G.turnIdx = 0;
+      }
+
+      if (G.pot.length === 0) {
+        el('numpad-section').style.display = 'none';
+        G.scoringActionsLeft = 9;
+        setPhase('scoring');
+        renderStockpiles();
+        el('stock-section').style.display = 'block';
+        el('score-picker-section').style.display = 'none';
+      } else {
+        setPhase('claiming');
+        renderNumpad();
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  STOCKPILES
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function renderStockpiles() {
+      const container = el('stockpiles');
+      container.innerHTML = '';
+      const activePlayer = G.phase === 'scoring'
+        ? G.players[G.turnOrder[G.turnIdx % G.turnOrder.length]]
+        : G.scoringPlayer;
+
+      G.players.forEach((p, pi) => {
+        const isActive = activePlayer && p.name === activePlayer.name;
+        const row = document.createElement('div');
+        row.className = 'stockpile-row' + (isActive ? ' active-stockpile' : '');
+
+        const diceHtml = p.stockpile.length === 0
+          ? '<span class="stockpile-empty">Empty</span>'
+          : p.stockpile.map(die => {
+            if (G.phase === 'scoring') {
+              const isOwn = isActive; // this die belongs to the active player
+              const cls = isOwn ? 'die glow-green' : 'die glow-purple';
+              const title = isOwn ? 'Score this die (+1 pt)' : `Steal from ${p.name}`;
+              return `<div class="${cls}" onclick="tapScoringDie(${pi}, ${die.id})" title="${title}">${die.value}</div>`;
+            } else {
+              const isClickable = activePlayer && activePlayer.name === p.name;
+              return `<div class="die${isClickable ? ' glow-green' : ''}" onclick="${isClickable ? `tapScoringDie(${pi}, ${die.id})` : ''}" title="${die.value}">${die.value}</div>`;
+            }
+          }).join('');
+
+        row.innerHTML = `
+          <div class="stockpile-header">
+            <span class="stockpile-name">${p.name}</span>
+            <span class="stockpile-score">⭐ ${p.score} pts</span>
+          </div>
+          <div class="stockpile-dice">${diceHtml}</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TAP DIE IN SCORING
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function tapScoringDie(ownerIdx, dieId) {
+      if (G.phase !== 'scoring' || G.scoringActionsLeft <= 0) return;
+      const activePlayerIdx = G.turnOrder[G.turnIdx % G.turnOrder.length];
+      const activePlayer = G.players[activePlayerIdx];
+      const owner = G.players[ownerIdx];
+      const dieIdx = owner.stockpile.findIndex(d => d.id === dieId);
+      if (dieIdx === -1) return;
+      const die = owner.stockpile[dieIdx];
+
+      // Record snapshot for undo
+      if (owner === activePlayer) {
+        G.scoringUndoStack.push({ type: 'score', playerIdx: ownerIdx, die: { ...die }, actionsLeft: G.scoringActionsLeft, turnIdx: G.turnIdx });
+        owner.stockpile.splice(dieIdx, 1);
+        activePlayer.score += 1;
+      } else {
+        G.scoringUndoStack.push({ type: 'steal', fromIdx: ownerIdx, toIdx: activePlayerIdx, die: { ...die }, actionsLeft: G.scoringActionsLeft, turnIdx: G.turnIdx });
+        owner.stockpile.splice(dieIdx, 1);
+        activePlayer.stockpile.push(die);
+      }
+
+      G.scoringActionsLeft--;
+      renderScoreboard();
+      renderStockpiles();
+      renderTurnBanner();
+
+      // Check if all dice are gone
+      const totalDice = G.players.reduce((acc, p) => acc + p.stockpile.length, 0);
+      if (totalDice === 0) { endGame(); return; }
+
+      // Advance turn if actions exhausted
+      if (G.scoringActionsLeft <= 0) scoringAdvanceTurn();
+    }
+
+    function scoringPassTurn() {
+      scoringAdvanceTurn();
+    }
+
+    function undoScoringAction() {
+      if (G.scoringUndoStack.length === 0) return;
+      const action = G.scoringUndoStack.pop();
+      if (action.type === 'score') {
+        G.players[action.playerIdx].stockpile.push(action.die);
+        G.players[action.playerIdx].score--;
+      } else { // steal
+        const toPlayer = G.players[action.toIdx];
+        const idx = toPlayer.stockpile.findIndex(d => d.id === action.die.id);
+        if (idx !== -1) toPlayer.stockpile.splice(idx, 1);
+        G.players[action.fromIdx].stockpile.push(action.die);
+      }
+      G.scoringActionsLeft = action.actionsLeft;
+      G.turnIdx = action.turnIdx;
+      setPhase('scoring');
+      renderStockpiles();
+      renderScoreboard();
+    }
+
+    function scoringAdvanceTurn() {
+      G.turnIdx++;
+      G.scoringActionsLeft = 9;
+      setPhase('scoring');
+      renderStockpiles();
+      renderScoreboard();
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  END GAME CHECK
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function checkEndGame() {
+      const totalDice = G.players.reduce((acc, p) => acc + p.stockpile.length, 0);
+      if (totalDice > 0) return;
+      endGame();
+    }
+
+    function endGame() {
+      G.phase = 'end';
+      const maxScore = Math.max(...G.players.map(p => p.score));
+      const winners = G.players.filter(p => p.score === maxScore);
+
+      if (winners.length === 1) {
+        showWinScreen(winners[0].name, maxScore, []);
+      } else {
+        // Launch interactive tiebreaker
+        startTiebreaker(winners, maxScore);
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  TIEBREAKER
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const TB = {
+      players: [],     // [{name, hits}] — subset of tied players
+      target: 0,
+      round: 1,
+      currentIdx: 0,   // which player is throwing
+      dartsLeft: 3,
+      finalScore: 0,
+      history: [],
+    };
+
+    function startTiebreaker(tiedPlayers, tiedScore) {
+      TB.players = tiedPlayers.map(p => ({ name: p.name, hits: 0 }));
+      TB.target = d20();
+      TB.round = 1;
+      TB.currentIdx = 0;
+      TB.dartsLeft = 3;
+      TB.finalScore = tiedScore;
+      TB.history = [];
+      showScreen('screen-tiebreaker');
+      renderTiebreaker();
+    }
+
+    function renderTiebreaker() {
+      el('tb-round-label').textContent = `Round ${TB.round}`;
+      el('tb-target').textContent = TB.target;
+      el('tb-info').textContent = TB.history.length ? TB.history[TB.history.length - 1] : '';
+
+      const current = TB.players[TB.currentIdx];
+      el('tb-player-name').textContent = `${current ? current.name + '\'s Turn' : 'Done'}`;
+      const dartEl = el('tb-darts');
+      if (dartEl) dartEl.innerHTML = '🎯'.repeat(TB.dartsLeft) + '<span style="opacity:.25">🎯</span>'.repeat(3 - TB.dartsLeft);
+
+      const scores = el('tb-scores');
+      scores.innerHTML = '';
+      TB.players.forEach((p, i) => {
+        const isActive = i === TB.currentIdx;
+        const isDone = i < TB.currentIdx;
+        const div = document.createElement('div');
+        div.style.cssText = `display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface3);`;
+        div.innerHTML = `
+          <span style="font-weight:${isActive ? 700 : 400};color:${isActive ? 'var(--accent)' : 'var(--text)'}">
+            ${isActive ? '→ ' : isDone ? '✓ ' : ''}${p.name}
+          </span>
+          <span style="font-size:1.1rem;font-weight:700;color:${isDone ? 'var(--green)' : isActive ? 'var(--accent2)' : 'var(--text-dim)'}">
+            ${p.hits} / 9 hits
+          </span>`;
+        scores.appendChild(div);
+      });
+    }
+
+    function tbThrow(type) {
+      const hits = type === 'T' ? 3 : type === 'D' ? 2 : type === 'S' ? 1 : 0;
+      TB.players[TB.currentIdx].hits += hits;
+      TB.dartsLeft--;
+
+      if (TB.dartsLeft === 0) {
+        TB.currentIdx++;
+        TB.dartsLeft = 3;
+        if (TB.currentIdx >= TB.players.length) {
+          tbEvaluateRound();
+          return;
+        }
+      }
+      renderTiebreaker();
+    }
+
+    function tbEvaluateRound() {
+      const maxHits = Math.max(...TB.players.map(p => p.hits));
+      const roundWinners = TB.players.filter(p => p.hits === maxHits);
+
+      const summary = `Round ${TB.round} — Target: ${TB.target} | ` +
+        TB.players.map(p => `${p.name}: ${p.hits} hit${p.hits !== 1 ? 's' : ''}`).join(' · ');
+      TB.history.push(summary);
+
+      if (roundWinners.length === 1) {
+        const winner = G.players.find(p => p.name === roundWinners[0].name);
+        if (winner) winner.score++;
+        showWinScreen(roundWinners[0].name, winner ? winner.score : TB.finalScore + 1, TB.history);
+      } else {
+        TB.players = roundWinners.map(p => ({ name: p.name, hits: 0 }));
+        TB.target = d20();
+        TB.round++;
+        TB.currentIdx = 0;
+        TB.dartsLeft = 3;
+        TB.history.push(`Still tied! New round ${TB.round} begins…`);
+        renderTiebreaker();
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  WIN SCREEN
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function showWinScreen(winnerName, maxScore, tbHistory) {
+      showScreen('screen-win');
+      el('win-name').textContent = winnerName;
+      el('win-subtitle').textContent = `wins with ${maxScore} point${maxScore !== 1 ? 's' : ''}!`;
+      el('tiebreaker-result').innerHTML = tbHistory.length
+        ? tbHistory.map(h => `<div style="margin-bottom:4px;">${h}</div>`).join('')
+        : '';
+
+      const fs = el('final-scores');
+      fs.innerHTML = '';
+      G.players.slice().sort((a, b) => b.score - a.score).forEach(p => {
+        const c = document.createElement('div');
+        c.className = 'final-score-card' + (p.name === winnerName ? ' winner' : '');
+        c.innerHTML = `<div class="f-name">${p.name}</div><div class="f-pts" style="color:${p.name === winnerName ? 'var(--accent2)' : 'var(--text)'}">${p.score}</div>`;
+        fs.appendChild(c);
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  PLAY AGAIN
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    el('btn-play-again').onclick = () => {
+      showScreen('screen-setup');
+      renderPlayerInputs();
+    };
+  </script>
+</body>
+
+</html>

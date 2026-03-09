@@ -1,0 +1,197 @@
+{
+  "abilities": {
+    "Cease & Desist": {
+      "description": "Counter target Stockpile placement or Reaction on the Stack.",
+      "console_description": "Counter target Stack/Stock.",
+      "tags": [
+        "React",
+        "Burn"
+      ],
+      "target_requirements": [
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "COUNTER_SPELL",
+          "target": "chosen_target_card"
+        },
+        {
+          "type": "DRAW_CARDS",
+          "target": "SELF",
+          "count": 1
+        }
+      ]
+    },
+    "Earnings": {
+      "description": "Draw 1 card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [],
+      "effects": [
+        {
+          "type": "DRAW_CARDS",
+          "target": "self",
+          "amount": 1
+        }
+      ]
+    },
+    "Diversify": {
+      "description": "Every opponent pitches 1. You put one of the pitched cards into your hand.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [],
+      "effects": [
+        {
+          "type": "SNATCH_DISCARD",
+          "target": "opponents",
+          "amount": 1
+        }
+      ]
+    },
+    "Call": {
+      "description": "Target opponent pitches 1 card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "PLAYER"
+      ],
+      "effects": [
+        {
+          "type": "FORCE_DISCARD",
+          "target": "chosen_target",
+          "amount": 1
+        }
+      ]
+    },
+    "Liquidate": {
+      "description": "Return target Stockpile card to its owner's hand.",
+      "console_description": "Bounce target Stockpile card.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [
+        "ANY_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "BOUNCE_CARD",
+          "target": "chosen_target_card",
+          "destination": "hand"
+        }
+      ]
+    },
+    "Invest": {
+      "description": "Copy a target Stockpile card from ANY player's Stockpile.",
+      "console_description": "Copy ANY Stockpile card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "ANY_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "COPY_ABILITY",
+          "target": "chosen_target_card"
+        }
+      ]
+    },
+    "Delist": {
+      "description": "Put target Graveyard card or active spell in the Pot on top of the deck.",
+      "console_description": "Top card from GY/Pot to deck.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [
+        "GRAVEYARD",
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "MOVE_CARD",
+          "target": "chosen_target_card",
+          "destination": "deck_top"
+        }
+      ]
+    },
+    "Recoup": {
+      "description": "Put target Graveyard card into your hand.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "GRAVEYARD"
+      ],
+      "effects": [
+        {
+          "type": "MOVE_CARD",
+          "target": "chosen_target_card",
+          "destination": "hand"
+        }
+      ]
+    },
+    "Undercut": {
+      "description": "Steal target opponent's Stockpile card. Its Stockpile ability triggers for you.",
+      "console_description": "Steal & Trigger enemy card.",
+      "tags": [
+        "React",
+        "Pitch"
+      ],
+      "target_requirements": [
+        "OPPONENT_STOCK",
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "STEAL_CARD",
+          "target": "chosen_target_card"
+        }
+      ]
+    },
+    "Crash": {
+      "description": "Destroy target opponent's Stockpile card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "OPPONENT_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "DESTROY_CARD",
+          "target": "chosen_target_card"
+        }
+      ]
+    }
+  },
+  "roster": [
+    {
+      "react_name": "Cease & Desist",
+      "stock_name": "Earnings",
+      "count": 14
+    },
+    {
+      "react_name": "Diversify",
+      "stock_name": "Call",
+      "count": 14
+    },
+    {
+      "react_name": "Liquidate",
+      "stock_name": "Invest",
+      "count": 14
+    },
+    {
+      "react_name": "Delist",
+      "stock_name": "Recoup",
+      "count": 14
+    },
+    {
+      "react_name": "Undercut",
+      "stock_name": "Crash",
+      "count": 14
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+    "games": 10000,
+    "ability_resolutions": {
+        "Snatch": 64160,
+        "Check": 67622,
+        "Crush": 51942,
+        "Redact": 35041,
+        "Repeat": 44324,
+        "Return": 49577,
+        "Reprise": 51961,
+        "Hush": 38095,
+        "Betray": 52016,
+        "Money": 69363
+    },
+    "ability_win_presence": {
+        "Repeat": 8453,
+        "Redact": 886,
+        "Crush": 7706,
+        "Money": 8723,
+        "Betray": 923,
+        "Snatch": 2056,
+        "Check": 8714,
+        "Return": 8415,
+        "Hush": 1462,
+        "Reprise": 1387
+    },
+    "ability_counter_attempts": {
+        "Snatch": 38562,
+        "Betray": 60100,
+        "Redact": 40949,
+        "Hush": 44768,
+        "Reprise": 58027
+    },
+    "wins_by_playstyle": {
+        "Combo": 3524,
+        "Ruthless": 2888,
+        "Defensive": 2157,
+        "Aggressive": 1431
+    },
+    "win_reasons": {
+        "4 Identical": 4584,
+        "1 of Each 5": 5416
+    },
+    "winner_stockpile_counts": {
+        "Repeat": 13912,
+        "Money": 15575,
+        "Crush": 10438,
+        "Check": 13535,
+        "Return": 13436
+    },
+    "targeting_data": {
+        "Check": {
+            "Player": 84405
+        },
+        "Redact": {
+            "Crush": 6022,
+            "Return": 6353,
+            "Money": 10481,
+            "Check": 11683,
+            "Repeat": 502
+        },
+        "Repeat": {
+            "Crush": 7772,
+            "Return": 8369,
+            "Check": 16783,
+            "Money": 10974,
+            "Repeat": 426
+        },
+        "Return": {
+            "Check": 9470,
+            "Crush": 11037,
+            "Money": 9751,
+            "Repeat": 9232,
+            "Return": 10087
+        },
+        "Reprise": {
+            "Check": 11681,
+            "Return": 10292,
+            "Money": 11675,
+            "Crush": 10786,
+            "Repeat": 7527
+        },
+        "Hush": {
+            "Betray": 8274,
+            "Hush": 6890,
+            "Snatch": 11461,
+            "Redact": 5383,
+            "Reprise": 6087
+        }
+    }
+}

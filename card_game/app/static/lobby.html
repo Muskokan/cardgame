@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby | Windfall</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="room-info">
+            <div>
+                <h1 style="margin:0;">LOBBY</h1>
+                <p class="text-secondary">Waiting for players to take their seats...</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 5px;">ROOM CODE</div>
+                <div id="room-code-display" class="code-display">----</div>
+            </div>
+        </div>
+
+        <div id="seats-container" class="seats-grid">
+            <!-- 4 Seats will be rendered here -->
+            <div class="seat glass-panel empty" onclick="claimSeat(0)">
+                <h3>Seat 1</h3><span>EMPTY</span>
+            </div>
+            <div class="seat glass-panel empty" onclick="claimSeat(1)">
+                <h3>Seat 2</h3><span>EMPTY</span>
+            </div>
+            <div class="seat glass-panel empty" onclick="claimSeat(2)">
+                <h3>Seat 3</h3><span>EMPTY</span>
+            </div>
+            <div class="seat glass-panel empty" onclick="claimSeat(3)">
+                <h3>Seat 4</h3><span>EMPTY</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <p id="status-hint" class="text-secondary" style="margin-bottom: 1rem;">Choose a seat to begin.</p>
+            <button id="start-game-btn" class="btn btn-primary"
+                style="display: none; padding: 1rem 3rem; font-size: 1.2rem;">START MISSION</button>
+        </div>
+    </div>
+
+    <!-- Bot Assignment Modal (Host Only) -->
+    <div id="bot-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h2>Assign AI Bot</h2>
+            <p class="text-secondary" style="margin-bottom: 1.5rem;">Select a bot personality for this seat.</p>
+            <div style="display: grid; gap: 10px;">
+                <button class="btn" onclick="assignBot('Aggressive')">Aggressive (Gene)</button>
+                <button class="btn" onclick="assignBot('Defensive')">Defensive (Tina)</button>
+                <button class="btn" onclick="assignBot('Ruthless')">Ruthless (Louise)</button>
+                <button class="btn" onclick="assignBot('Combo')">Combo (Teddy)</button>
+                <button class="btn" onclick="assignBot('Chaotic')">Chaotic</button>
+                <button class="btn" style="margin-top: 10px; border-color: var(--error);"
+                    onclick="closeBotModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Entry Modal -->
+    <div id="name-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h2>Enter Your Name</h2>
+            <p class="text-secondary" style="margin-bottom: 1.5rem;">This name will be displayed to other players.</p>
+            <input type="text" id="modal-player-name" list="stored-names" autocomplete="off" placeholder="ENTER NAME"
+                maxlength="15" style="text-align: center; margin-bottom: 1rem;">
+            <datalist id="stored-names"></datalist>
+            <div style="display: grid; gap: 10px;">
+                <button class="btn btn-primary" onclick="confirmName()">Confirm</button>
+                <button class="btn" style="border-color: var(--error);" onclick="closeNameModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const token = localStorage.getItem('windfall_token');
+        let name = localStorage.getItem('windfall_name');
+
+        if (!code || !token) window.location.href = '/static/index.html';
+
+        document.getElementById('room-code-display').innerText = code.toUpperCase();
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/${code}/${token}`);
+
+        let currentSeats = [];
+        let isHost = false;
+        let selectedSeatForBot = -1;
+        let pendingSeatIdx = -1;
+
+        function populateStoredNames() {
+            const dl = document.getElementById('stored-names');
+            dl.innerHTML = '';
+            let storedNames = JSON.parse(localStorage.getItem('windfall_stored_names') || '[]');
+            storedNames.forEach(storedName => {
+                let opt = document.createElement('option');
+                opt.value = storedName;
+                dl.appendChild(opt);
+            });
+        }
+        populateStoredNames();
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'LOBBY_UPDATE') {
+                renderLobby(data.seats, data.host_player_id);
+            } else if (data.type === 'STATE_UPDATE') {
+                // Game started!
+                window.location.href = `/static/game.html?code=${code}`;
+            }
+        };
+
+        function renderLobby(seats, hostId) {
+            currentSeats = seats;
+            isHost = (token === hostId);
+            const container = document.getElementById('seats-container');
+            container.innerHTML = '';
+
+            let filledCount = 0;
+            let userSeated = false;
+
+            seats.forEach((seat, idx) => {
+                const seatDiv = document.createElement('div');
+                seatDiv.className = `seat glass-panel ${seat ? 'occupied' : 'empty'}`;
+
+                if (seat) {
+                    filledCount++;
+                    if (seat.player_id === token) {
+                        userSeated = true;
+                        name = seat.name; // Keep local name in sync
+                        localStorage.setItem('windfall_name', name);
+                    }
+
+                    let html = `<h3>${seat.name}</h3>`;
+                    if (seat.is_bot) html += `<span class="bot-tag">BOT</span>`;
+                    if (seat.player_id === hostId) html += `<span class="host-tag">HOST</span>`;
+
+                    if (isHost && seat.is_bot) {
+                        html += `<button class="btn" style="font-size: 0.6rem; padding: 2px 5px; margin-top: 10px;" onclick="removeBot(event, ${idx})">REMOVE</button>`;
+                    }
+
+                    seatDiv.innerHTML = html;
+                } else {
+                    seatDiv.innerHTML = `<h3>Seat ${idx + 1}</h3><span>Click to Join</span>`;
+                    if (!userSeated) {
+                        seatDiv.onclick = () => tryClaimSeat(idx);
+                    } else if (isHost) {
+                        seatDiv.innerHTML = `<h3>Seat ${idx + 1}</h3><button class="btn btn-sm" onclick="openBotModal(event, ${idx})">+ ADD BOT</button>`;
+                    }
+                }
+                container.appendChild(seatDiv);
+            });
+
+            const startBtn = document.getElementById('start-game-btn');
+            if (isHost) {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = (filledCount < 2);
+                startBtn.onclick = () => ws.send(JSON.stringify({ action: 'START_GAME' }));
+                document.getElementById('status-hint').innerText = filledCount < 2 ? "Need at least 2 players/bots to start." : "Ready to begin the mission.";
+            } else {
+                startBtn.style.display = 'none';
+                document.getElementById('status-hint').innerText = userSeated ? "Waiting for host to start..." : "Please choose a seat.";
+            }
+        }
+
+        function tryClaimSeat(idx) {
+            if (!name) {
+                pendingSeatIdx = idx;
+                document.getElementById('name-modal').style.display = 'flex';
+                document.getElementById('modal-player-name').focus();
+            } else {
+                claimSeat(idx, name);
+            }
+        }
+
+        function confirmName() {
+            const inputName = document.getElementById('modal-player-name').value.trim();
+            if (!inputName) return;
+            name = inputName;
+            localStorage.setItem('windfall_name', name);
+
+            // Store in list of names
+            let storedNames = JSON.parse(localStorage.getItem('windfall_stored_names') || '[]');
+            if (!storedNames.includes(name)) {
+                storedNames.push(name);
+                localStorage.setItem('windfall_stored_names', JSON.stringify(storedNames));
+            }
+            populateStoredNames();
+
+            closeNameModal();
+            if (pendingSeatIdx !== -1) {
+                claimSeat(pendingSeatIdx, name);
+                pendingSeatIdx = -1;
+            }
+        }
+
+        function closeNameModal() {
+            document.getElementById('name-modal').style.display = 'none';
+        }
+
+        function claimSeat(idx, playerName) {
+            ws.send(JSON.stringify({ action: 'CLAIM_SEAT', seat_idx: idx, name: playerName }));
+        }
+
+        function openBotModal(e, idx) {
+            e.stopPropagation();
+            selectedSeatForBot = idx;
+            document.getElementById('bot-modal').style.display = 'flex';
+        }
+
+        function closeBotModal() {
+            document.getElementById('bot-modal').style.display = 'none';
+        }
+
+        function assignBot(profile) {
+            ws.send(JSON.stringify({ action: 'ASSIGN_BOT', seat_idx: selectedSeatForBot, profile: profile }));
+            closeBotModal();
+        }
+
+        function removeBot(e, idx) {
+            e.stopPropagation();
+            ws.send(JSON.stringify({ action: 'ASSIGN_BOT', seat_idx: idx, profile: null }));
+        }
+    </script>
+</body>
+
+</html>

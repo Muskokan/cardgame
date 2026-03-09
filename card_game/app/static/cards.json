@@ -1,0 +1,197 @@
+{
+  "abilities": {
+    "Hush": {
+      "description": "Counter target Stockpile placement or Reaction on the Stack.",
+      "console_description": "Counter target Stack/Stock.",
+      "tags": [
+        "React",
+        "Burn"
+      ],
+      "target_requirements": [
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "COUNTER_SPELL",
+          "target": "chosen_target_card"
+        },
+        {
+          "type": "DRAW_CARDS",
+          "target": "SELF",
+          "count": 1
+        }
+      ]
+    },
+    "Money": {
+      "description": "Draw 1 card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [],
+      "effects": [
+        {
+          "type": "DRAW_CARDS",
+          "target": "self",
+          "amount": 1
+        }
+      ]
+    },
+    "Snatch": {
+      "description": "Every opponent pitches 1. You put one of the pitched cards into your hand.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [],
+      "effects": [
+        {
+          "type": "SNATCH_DISCARD",
+          "target": "opponents",
+          "amount": 1
+        }
+      ]
+    },
+    "Check": {
+      "description": "Target opponent pitches 1 card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "PLAYER"
+      ],
+      "effects": [
+        {
+          "type": "FORCE_DISCARD",
+          "target": "chosen_target",
+          "amount": 1
+        }
+      ]
+    },
+    "Redact": {
+      "description": "Return target Stockpile card to its owner's hand.",
+      "console_description": "Bounce target Stockpile card.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [
+        "ANY_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "BOUNCE_CARD",
+          "target": "chosen_target_card",
+          "destination": "hand"
+        }
+      ]
+    },
+    "Repeat": {
+      "description": "Copy a target Stockpile card from ANY player's Stockpile.",
+      "console_description": "Copy ANY Stockpile card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "ANY_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "COPY_ABILITY",
+          "target": "chosen_target_card"
+        }
+      ]
+    },
+    "Reprise": {
+      "description": "Put target Graveyard card or active spell in the Pot on top of the deck.",
+      "console_description": "Top card from GY/Pot to deck.",
+      "tags": [
+        "React"
+      ],
+      "target_requirements": [
+        "GRAVEYARD",
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "MOVE_CARD",
+          "target": "chosen_target_card",
+          "destination": "deck_top"
+        }
+      ]
+    },
+    "Return": {
+      "description": "Put target Graveyard card into your hand.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "GRAVEYARD"
+      ],
+      "effects": [
+        {
+          "type": "MOVE_CARD",
+          "target": "chosen_target_card",
+          "destination": "hand"
+        }
+      ]
+    },
+    "Betray": {
+      "description": "Steal target opponent's Stockpile card. Its Stockpile ability triggers for you.",
+      "console_description": "Steal & Trigger enemy card.",
+      "tags": [
+        "React",
+        "Pitch"
+      ],
+      "target_requirements": [
+        "OPPONENT_STOCK",
+        "POT_CARD"
+      ],
+      "effects": [
+        {
+          "type": "STEAL_CARD",
+          "target": "chosen_target_card"
+        }
+      ]
+    },
+    "Crush": {
+      "description": "Destroy target opponent's Stockpile card.",
+      "tags": [
+        "Stock"
+      ],
+      "target_requirements": [
+        "OPPONENT_STOCK"
+      ],
+      "effects": [
+        {
+          "type": "DESTROY_CARD",
+          "target": "chosen_target_card"
+        }
+      ]
+    }
+  },
+  "roster": [
+    {
+      "react_name": "Hush",
+      "stock_name": "Money",
+      "count": 14
+    },
+    {
+      "react_name": "Snatch",
+      "stock_name": "Check",
+      "count": 14
+    },
+    {
+      "react_name": "Redact",
+      "stock_name": "Repeat",
+      "count": 14
+    },
+    {
+      "react_name": "Reprise",
+      "stock_name": "Return",
+      "count": 14
+    },
+    {
+      "react_name": "Betray",
+      "stock_name": "Crush",
+      "count": 14
+    }
+  ]
+}
