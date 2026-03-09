@@ -310,10 +310,9 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 c.owner = action.source_player
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stole {c.name} from {tp.name}'s Nexus!"})
                 
-                from models import Action as _ActCls
-                stolen_action = _ActCls(action.source_player, c, "sequence", triggered=True)
-                # Note: stolen_action is NOT put in state.nexus because it's ALREADY there.
-                state.stack.insert(-1, stolen_action)
+                # Mark as sequenced directly since we are NOT triggering an ability.
+                action.source_player.sequence.append(c)
+                state.nexus.remove(c)
             elif tp.sequence:
                 target_to_steal = c if c in tp.sequence else random.choice(tp.sequence)
                 state.log_event("EFFECT_RESULT", {"message": f"  [SUCCESS] {ability.name} activates. Stealing {target_to_steal.name} from {tp.name}."})
@@ -321,13 +320,8 @@ def resolve_effects(ability: "Ability", state: "GameState", action: "Action", vi
                 tp.sequence.remove(target_to_steal)
                 target_to_steal.owner = action.source_player
                 
-                # Move to Nexus so the engine's cleanup logic (resolve_stack) 
-                # naturally moves it to our Sequence at the end.
-                state.nexus.append(target_to_steal)
-                
-                state.log_event("EFFECT_RESULT", {"message": f"  [TRIGGER] The stolen {target_to_steal.name} now activates for {action.source_player.name}!"})
-                from models import Action as _ActCls
-                state.stack.insert(-1, _ActCls(action.source_player, target_to_steal, "sequence", triggered=True))
+                # Place directly into sequence since we are NOT triggering an ability.
+                action.source_player.sequence.append(target_to_steal)
             else:
                 state.log_event("EFFECT_RESULT", {"message": f"  [FIZZLE] {ability.name}: {tp.name} has no cards to steal."})
 

@@ -134,8 +134,8 @@
       ]
     },
     "Assimilation": {
-      "description": "Steal target opponent's Sequence card. Its Sequence ability triggers for you.",
-      "console_description": "Steal & Trigger enemy card.",
+      "description": "Steal target opponent's Sequence card.",
+      "console_description": "Steal enemy card.",
       "tags": [
         "React",
         "Entropy"

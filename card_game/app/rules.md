@@ -79,5 +79,5 @@ Abilities on the Stack resolve in **Last-In, First-Out (LIFO)** order. The *last
 - **Echo (Sequence):** Put target Graveyard card into your hand.
 
 ### 5. Assimilation/Erosion
-- **Assimilation (React):** **[Entropy]** Steal target opponent's Sequence card. Its Sequence ability triggers for you.
+- **Assimilation (React):** **[Entropy]** Steal target opponent's Sequence card. 
 - **Erosion (Sequence):** Destroy target opponent's Sequence card.
