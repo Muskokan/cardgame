@@ -17,7 +17,8 @@
         <div class="join-box glass-panel">
             <button id="create-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Create Private
                 Table</button>
-            <button id="tutorial-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 2rem;">How to Play</button>
+            <button id="tutorial-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 2rem;">How to
+                Play</button>
 
             <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 2px;">OR
                 JOIN BY CODE</div>
@@ -31,82 +32,51 @@
 
     <!-- Tutorial Modal -->
     <div id="tutorial-modal" class="modal-overlay">
-        <div class="modal-content glass-panel">
+        <div class="modal-content glass-panel" style="max-height: 90vh; overflow-y: auto;">
             <button class="close-modal" onclick="closeTutorial()">&times;</button>
             
-            <div class="step-indicator">
-                <div class="dot active"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
+            <h2 style="text-align: center; color: var(--accent-color); margin-bottom: 2rem;">HOW TO PLAY</h2>
 
-            <!-- Step 1: Welcome -->
-            <div class="tutorial-step active" data-step="0">
-                <h2>Welcome to Cause & Effect</h2>
-                <p>A technical 2-4 player card game where every action can be met with a reaction. Timing is everything.</p>
-                <div class="tutorial-image">
-                    <span style="color: var(--accent-color); font-weight: 800; font-size: 2rem;">CAUSE & EFFECT</span>
-                </div>
-                <p class="text-secondary">Master the Stack, manipulate your Sequence, and outsmart your opponents.</p>
-            </div>
-
-            <!-- Step 2: Goal -->
-            <div class="tutorial-step" data-step="1">
-                <h2>How to Win</h2>
-                <p>Your goal is to build a specific <b>Sequence</b> of cards on your board. You win if you achieve:</p>
-                <div class="win-cond-grid">
-                    <div class="win-cond-box">
-                        <h4>4 of a Kind</h4>
-                        <p>Have 4 copies of the exact same card type in your sequence.</p>
+            <div class="tutorial-scroll-content">
+                <section style="margin-bottom: 2.5rem;">
+                    <h3 style="color: var(--text-primary); border-left: 3px solid var(--accent-color); padding-left: 10px; margin-bottom: 1rem;">THE GOAL</h3>
+                    <p style="margin-bottom: 1rem;">Build a <b>Sequence</b> of cards on your board. You win if you achieve:</p>
+                    <div class="win-cond-grid">
+                        <div class="win-cond-box">
+                            <h4>4 OF A KIND</h4>
+                            <p>4 copies of the exact same card type in your sequence.</p>
+                        </div>
+                        <div class="win-cond-box">
+                            <h4>THE FULL SET</h4>
+                            <p>Exactly 1 copy of all 5 different card types.</p>
+                        </div>
                     </div>
-                    <div class="win-cond-box">
-                        <h4>The Full Set</h4>
-                        <p>Have exactly 1 copy of all 5 different card types.</p>
+                </section>
+
+                <section style="margin-bottom: 2.5rem;">
+                    <h3 style="color: var(--text-primary); border-left: 3px solid var(--accent-color); padding-left: 10px; margin-bottom: 1rem;">TURN PHASES</h3>
+                    <ul style="text-align: left; color: var(--text-secondary); line-height: 1.8; list-style: none;">
+                        <li><b style="color: var(--text-primary);">1. DRAW:</b> Pick up one card.</li>
+                        <li><b style="color: var(--text-primary);">2. CAUSE:</b> Play 1 card into your Sequence.</li>
+                        <li><b style="color: var(--text-primary);">3. REACT:</b> Opponents may respond from hand by discarding.</li>
+                        <li><b style="color: var(--text-primary);">4. RESOLVE:</b> The Stack resolves in <b>Last-In, First-Out</b> order.</li>
+                    </ul>
+                </section>
+
+                <section style="margin-bottom: 2rem;">
+                    <h3 style="color: var(--text-primary); border-left: 3px solid var(--accent-color); padding-left: 10px; margin-bottom: 1rem;">CARD TYPES</h3>
+                    <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div><b style="color: var(--accent-color)">STAGNATION:</b> Draw / Counter placement</div>
+                        <div><b style="color: var(--accent-color)">VACUUM:</b> Multi-pitch / Steal from hand</div>
+                        <div><b style="color: var(--accent-color)">REFLECTION:</b> Return card to owner's hand</div>
+                        <div><b style="color: var(--accent-color)">STASIS:</b> Put card on top of deck</div>
+                        <div><b style="color: var(--accent-color)">ASSIMILATION:</b> Destroy or Steal card</div>
                     </div>
-                </div>
-                <p style="margin-top: 1rem; font-size: 0.8rem;" class="text-secondary"><i>Pro-tip: If you try to draw from an empty deck, you also win!</i></p>
+                </section>
             </div>
 
-            <!-- Step 3: Turn Structure -->
-            <div class="tutorial-step" data-step="2">
-                <h2>Turn Phases</h2>
-                <p>Each turn follows a strict 4-phase cycle:</p>
-                <ul style="text-align: left; margin: 1rem 2rem; color: var(--text-secondary);">
-                    <li><b style="color: var(--text-primary)">1. Draw:</b> Pick up one card.</li>
-                    <li><b style="color: var(--text-primary)">2. Cause:</b> Play 1 card into your Sequence.</li>
-                    <li><b style="color: var(--text-primary)">3. React:</b> Opponents may respond from their hand.</li>
-                    <li><b style="color: var(--text-primary)">4. Resolve:</b> Actions on the Stack take effect.</li>
-                </ul>
-            </div>
-
-            <!-- Step 4: The Stack -->
-            <div class="tutorial-step" data-step="3">
-                <h2>The Stack (LIFO)</h2>
-                <p>When you play a card, it doesn't happen immediately! It goes on <b>The Stack</b>.</p>
-                <p class="text-secondary">Opponents can "React" by discarding cards from their hand to add their own effects on top.</p>
-                <div class="win-cond-box" style="margin-top: 1rem; border-color: var(--warning);">
-                    <p><b>Last-In, First-Out:</b> The last reaction played is the first one to resolve. Use this to counter or steal cards before they resolve!</p>
-                </div>
-            </div>
-
-            <!-- Step 5: Master the Cards -->
-            <div class="tutorial-step" data-step="4">
-                <h2>The 5 Card Types</h2>
-                <p>Every card has a <b>Sequence</b> ability (when played) and a <b>React</b> ability (when responding).</p>
-                <div style="font-size: 0.8rem; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem;">
-                    <div><b style="color: var(--accent-color)">Stagnation:</b> Draw or Counter.</div>
-                    <div><b style="color: var(--accent-color)">Vacuum:</b> Pressure opponent's hand.</div>
-                    <div><b style="color: var(--accent-color)">Reflection:</b> Return cards to hand.</div>
-                    <div><b style="color: var(--accent-color)">Stasis:</b> Manipulate the deck/stack.</div>
-                    <div><b style="color: var(--accent-color)">Assimilation:</b> Destroy or Steal cards.</div>
-                </div>
-            </div>
-
-            <div class="tutorial-nav">
-                <button class="btn" id="prev-step" onclick="changeStep(-1)" disabled>Previous</button>
-                <button class="btn btn-primary" id="next-step" onclick="changeStep(1)">Next Step</button>
+            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+                <button class="btn btn-primary" style="width: 100%; font-size: 1.1rem; letter-spacing: 2px;" onclick="closeTutorial()">I'M READY TO PLAY</button>
             </div>
         </div>
     </div>
@@ -156,16 +126,9 @@
         // Tutorial Logic
         const tutorialModal = document.getElementById('tutorial-modal');
         const tutorialBtn = document.getElementById('tutorial-btn');
-        const steps = document.querySelectorAll('.tutorial-step');
-        const dots = document.querySelectorAll('.dot');
-        const prevBtn = document.getElementById('prev-step');
-        const nextBtn = document.getElementById('next-step');
-        let currentStep = 0;
 
         tutorialBtn.addEventListener('click', () => {
             tutorialModal.style.display = 'flex';
-            currentStep = 0;
-            updateTutorialUI();
         });
 
         function closeTutorial() {
@@ -176,28 +139,6 @@
             if (event.target == tutorialModal) {
                 closeTutorial();
             }
-        }
-
-        function changeStep(n) {
-            currentStep += n;
-            if (currentStep < 0) currentStep = 0;
-            if (currentStep >= steps.length) {
-                closeTutorial();
-                return;
-            }
-            updateTutorialUI();
-        }
-
-        function updateTutorialUI() {
-            steps.forEach((step, i) => {
-                step.classList.toggle('active', i === currentStep);
-            });
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentStep);
-            });
-
-            prevBtn.disabled = currentStep === 0;
-            nextBtn.innerText = currentStep === steps.length - 1 ? "Got it!" : "Next Step";
         }
     </script>
 </body>
